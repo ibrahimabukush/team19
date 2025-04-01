@@ -39,6 +39,7 @@
                   {{ user.username }}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUserDropdown">
+                  <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
                   <form method="POST" action="{% url 'logout' %}" class="dropdown-item p-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link btn-block text-left dropdown-item">Logout</button>
