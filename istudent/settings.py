@@ -81,7 +81,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'team19',
-        'HOST': 'IBRAHIMABUKUSH\\SQLEXPRESS',
+        'HOST': 'localhost',
         'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
