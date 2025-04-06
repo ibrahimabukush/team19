@@ -1,21 +1,776 @@
 {% extends "blog/base.html" %}
-{% load crispy_forms_tags %}
+{% load static %}
+
+{% block additional_css %}
+<style>
+    /* Enhanced Profile Styles */
+    .profile-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #4a6d8c, #31475e);
+        border-radius: 12px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('{% static "blog/img/pattern.png" %}') repeat;
+        opacity: 0.1;
+        z-index: 0;
+    }
+    
+    .profile-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-avatar {
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        border: 5px solid white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        object-fit: cover;
+    }
+    
+    .profile-info {
+        margin-left: 30px;
+        color: white;
+    }
+    
+    .profile-name {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+    
+    .profile-role {
+        font-size: 1.1rem;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-bottom: 15px;
+    }
+    
+    .profile-meta {
+        display: flex;
+        gap: 20px;
+    }
+    
+    .profile-meta-item {
+        display: flex;
+        align-items: center;
+    }
+    
+    .profile-meta-item i {
+        margin-right: 8px;
+    }
+    
+    .profile-actions {
+        margin-left: auto;
+    }
+    
+    .btn-edit-profile {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px 20px;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-edit-profile:hover {
+        background-color: white;
+        color: #31475e;
+    }
+    
+    /* Profile Content */
+    .profile-content-wrapper {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        gap: 25px;
+    }
+    
+    .profile-content {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .profile-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .profile-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .profile-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .profile-card-header {
+        padding: 20px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .profile-card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #31475e;
+        margin: 0;
+    }
+    
+    .profile-card-body {
+        padding: 20px;
+    }
+    
+    /* Form Styling */
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #31475e;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e1e5eb;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #4a6d8c;
+        box-shadow: 0 0 0 3px rgba(74, 109, 140, 0.1);
+    }
+    
+    /* Stats Card */
+    .stats-card {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stat-item {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #31475e;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    /* Progress Bars */
+    .progress-wrapper {
+        margin-bottom: 15px;
+    }
+    
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .progress-name {
+        font-weight: 500;
+        color: #31475e;
+    }
+    
+    .progress-value {
+        color: #6c757d;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #e9ecef;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(to right, #4a6d8c, #31475e);
+    }
+    
+    /* Activity Feed */
+    .activity-feed {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .activity-item {
+        position: relative;
+        padding-left: 40px;
+        padding-bottom: 20px;
+        border-left: 2px solid #e9ecef;
+        margin-left: 20px;
+    }
+    
+    .activity-item:last-child {
+        padding-bottom: 0;
+        border-left: none;
+    }
+    
+    .activity-icon {
+        position: absolute;
+        left: -20px;
+        top: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #4a6d8c;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .activity-content {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+    }
+    
+    .activity-title {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .activity-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    /* Badges */
+    .badges-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .badge-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 80px;
+    }
+    
+    .badge-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 8px;
+        color: #31475e;
+    }
+    
+    .badge-name {
+        font-size: 0.8rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    
+    /* Contact Info */
+    .contact-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .contact-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 15px;
+        color: #4a6d8c;
+    }
+    
+    .contact-info {
+        flex: 1;
+    }
+    
+    .contact-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 3px;
+    }
+    
+    .contact-value {
+        font-weight: 500;
+        color: #31475e;
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+        .profile-content-wrapper {
+            grid-template-columns: 1fr;
+        }
+        
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .profile-info {
+            margin-left: 0;
+            margin-top: 20px;
+        }
+        
+        .profile-meta {
+            justify-content: center;
+        }
+        
+        .profile-actions {
+            margin-left: 0;
+            margin-top: 20px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stats-card {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock additional_css %}
+
 {% block content %}
-    <div class="content-section">
-        <form method="POST">
-            {% csrf_token %}
-            <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Join Today</legend>
-                {{ form|crispy }}
-            </fieldset>
-            <div class="form-group">
-                <button class="btn btn-outline-info" type="submit">Sign Up</button>
+<div class="profile-container">
+    <!-- Profile Header -->
+    <section class="profile-header">
+        <div class="profile-header-content">
+            <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="profile-avatar">
+            
+            <div class="profile-info">
+                <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+                <p class="profile-role">{{ user.profile.major }} Student</p>
+                
+                <div class="profile-meta">
+                    <div class="profile-meta-item">
+                        <i class="fas fa-id-badge"></i>
+                        <span>ID: {{ user.profile.student_id }}</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <i class="fas fa-graduation-cap"></i>
+                        <span>{{ user.profile.year_of_study }}{{ user.profile.year_suffix }} Year</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <i class="fas fa-university"></i>
+                        <span>{{ user.profile.faculty }}</span>
+                    </div>
+                </div>
             </div>
-        </form>
-        <div class="border-top pt-3">
-            <small class="text-muted">
-                Already Have An Account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
-            </small>
+            
+            <div class="profile-actions">
+                <a href="{% url 'profile_edit' %}" class="btn btn-edit-profile">
+                    <i class="fas fa-pencil-alt mr-2"></i> Edit Profile
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Profile Content -->
+    <div class="profile-content-wrapper">
+        <div class="profile-content">
+            <!-- Personal Information -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Personal Information</h3>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                </div>
+                <div class="profile-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" value="{{ user.first_name }} {{ user.last_name }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ user.username }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" value="{{ user.email }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" value="{{ user.profile.phone }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="text" class="form-control" value="{{ user.profile.date_of_birth }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <input type="text" class="form-control" value="{{ user.profile.gender }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Academic Information -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Academic Information</h3>
+                </div>
+                <div class="profile-card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Student ID</label>
+                                <input type="text" class="form-control" value="{{ user.profile.student_id }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Faculty</label>
+                                <input type="text" class="form-control" value="{{ user.profile.faculty }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Major</label>
+                                <input type="text" class="form-control" value="{{ user.profile.major }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Academic Year</label>
+                                <input type="text" class="form-control" value="{{ user.profile.year_of_study }}{{ user.profile.year_suffix }} Year" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Enrollment Date</label>
+                                <input type="text" class="form-control" value="{{ user.profile.enrollment_date }}" readonly>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Expected Graduation</label>
+                                <input type="text" class="form-control" value="{{ user.profile.expected_graduation }}" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Recent Activity</h3>
+                </div>
+                <div class="profile-card-body">
+                    <ul class="activity-feed">
+                        {% if activities %}
+                            {% for activity in activities %}
+                                <li class="activity-item">
+                                    <div class="activity-icon">
+                                        <i class="{{ activity.icon }}"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">{{ activity.title }}</div>
+                                        <div class="activity-description">{{ activity.description }}</div>
+                                        <div class="activity-time">{{ activity.time }}</div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <!-- Sample activities if none are provided -->
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Submitted Course Extension Request</div>
+                                    <div class="activity-description">Your request for an extension on MATH301 has been submitted.</div>
+                                    <div class="activity-time">2 hours ago</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Academic Appeal Approved</div>
+                                    <div class="activity-description">Your appeal for grade reconsideration in CS401 has been approved.</div>
+                                    <div class="activity-time">Yesterday</div>
+                                </div>
+                            </li>
+                            <li class="activity-item">
+                                <div class="activity-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Class Schedule Updated</div>
+                                    <div class="activity-description">Your request to change PHYS202 from Section A to Section B has been processed.</div>
+                                    <div class="activity-time">3 days ago</div>
+                                </div>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="profile-sidebar">
+            <!-- Statistics -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Statistics</h3>
+                </div>
+                <div class="profile-card-body">
+                    <div class="stats-card">
+                        <div class="stat-item">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Total Requests</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">9</div>
+                            <div class="stat-label">Approved</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Rejected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Tracking -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Academic Progress</h3>
+                </div>
+                <div class="profile-card-body">
+                    <div class="progress-wrapper">
+                        <div class="progress-label">
+                            <span class="progress-name">Program Completion</span>
+                            <span class="progress-value">75%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-wrapper">
+                        <div class="progress-label">
+                            <span class="progress-name">Current Semester</span>
+                            <span class="progress-value">60%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-wrapper">
+                        <div class="progress-label">
+                            <span class="progress-name">Credit Hours</span>
+                            <span class="progress-value">89/120</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 74%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievements & Badges -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Achievements</h3>
+                </div>
+                <div class="profile-card-body">
+                    <div class="badges-container">
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-award fa-lg"></i>
+                            </div>
+                            <div class="badge-name">Dean's List</div>
+                        </div>
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-user-graduate fa-lg"></i>
+                            </div>
+                            <div class="badge-name">Honor Roll</div>
+                        </div>
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-book fa-lg"></i>
+                            </div>
+                            <div class="badge-name">Perfect Attendance</div>
+                        </div>
+                        <div class="badge-item">
+                            <div class="badge-icon">
+                                <i class="fas fa-trophy fa-lg"></i>
+                            </div>
+                            <div class="badge-name">Leadership</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="profile-card">
+                <div class="profile-card-header">
+                    <h3 class="profile-card-title">Contact Information</h3>
+                </div>
+                <div class="profile-card-body">
+                    <ul class="contact-list">
+                        <li class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Email</div>
+                                <div class="contact-value">{{ user.email }}</div>
+                            </div>
+                        </li>
+                        <li class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Phone</div>
+                                <div class="contact-value">{{ user.profile.phone }}</div>
+                            </div>
+                        </li>
+                        <li class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-info">
+                                <div class="contact-label">Address</div>
+                                <div class="contact-value">{{ user.profile.address }}</div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock content %}
+
+{% block additional_js %}
+<script>
+    // JavaScript for profile page interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation for activity feed items
+        const activityItems = document.querySelectorAll('.activity-item');
+        activityItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(-20px)';
+                item.style.transition = 'all 0.3s ease';
+                
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateX(0)';
+                }, 50);
+            }, index * 100);
+        });
+        
+        // Toggle edit mode for personal information
+        const editButtons = document.querySelectorAll('.btn-outline-secondary');
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const cardBody = this.closest('.profile-card-header').nextElementSibling;
+                const inputs = cardBody.querySelectorAll('input');
+                
+                inputs.forEach(input => {
+                    if (input.hasAttribute('readonly')) {
+                        input.removeAttribute('readonly');
+                        this.innerHTML = '<i class="fas fa-save"></i>';
+                        input.style.backgroundColor = '#fff';
+                        input.style.borderColor = '#4a6d8c';
+                    } else {
+                        input.setAttribute('readonly', true);
+                        this.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                        input.style.backgroundColor = '';
+                        input.style.borderColor = '';
+                        
+                        // Here you would typically save the data via AJAX
+                        console.log('Saving:', input.name, input.value);
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock additional_js %}
