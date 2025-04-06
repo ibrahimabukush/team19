@@ -1,93 +1,448 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
 
     {% if title %}
-        <title>Django Blog - {{ title }}</title>
+        <title>ISEND - {{ title }}</title>
     {% else %}
-        <title>Django Blog</title>
+        <title>ISEND - Student Experience Platform</title>
     {% endif %}
+
+    <style>
+      body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+        
+        .bg-isend {
+            background: linear-gradient(to right, #4a6d8c, #31475e);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+        
+        .site-header .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .site-header .navbar-nav .nav-link:hover {
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        
+        .content-section {
+            background: #ffffff;
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .btn-isend {
+            background-color: #3c5974;
+            color: white;
+            border-radius: 30px;
+            padding: 8px 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-isend:hover {
+            background-color: #3c5974;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(126, 87, 194, 0.3);
+        }
+        
+        /* Footer */
+        .footer {
+            background: #31475e;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .footer a:hover {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        /* Add top margin to content to account for fixed navbar */
+        main.container {
+            margin-top: 80px;
+        }
+        /* Chatbot styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+        }
+        
+        .chatbot-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #3c5974;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 500px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chatbot-header {
+            background-color: #3c5974;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chatbot-header h4 {
+            margin: 0;
+            font-size: 18px;
+            color: white;
+
+        }
+        
+        .close-chat {
+            cursor: pointer;
+            font-size: 24px;
+        }
+        
+        .chatbot-body {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .chat-messages {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 15px;
+            line-height: 1.4;
+        }
+        
+        .message.bot {
+            background-color: #f1f0f0;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message.user {
+            background-color: #3c5974;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .chatbot-footer {
+            display: flex;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .chat-input {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+            outline: none;
+        }
+        
+        .chat-input:focus {
+            border-color: #3c5974;
+        }
+        
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            background-color: #3c5974;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .send-btn:hover {
+            background-color: #3c5974;
+            transform: scale(1.05);
+        }
+    </style>
+    
+    {% block additional_css %}{% endblock %}
 </head>
 <body>
     <header class="site-header">
-      <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
-        <div class="container">
-          <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">Django Blog</a>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarToggle">
-            <div class="navbar-nav mr-auto">
-              <a class="nav-item nav-link" href="{% url 'blog-home' %}">Home</a>
-              <a class="nav-item nav-link" href="{% url 'blog-about' %}">About</a>
-            </div>
-            <!-- Navbar Right Side -->
-            <div class="navbar-nav">
-              {% if user.is_authenticated %}
-              <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {{ user.username }}
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUserDropdown">
-                  <a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
-                  <form method="POST" action="{% url 'logout' %}" class="dropdown-item p-0">
+        <nav class="navbar navbar-expand-md navbar-dark bg-isend fixed-top">
+            <div class="container">
+                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">ISEND</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarToggle">
+                    <div class="navbar-nav mr-auto">
+                        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+                            <i class="fas fa-home fa-sm mr-1"></i> Home
+                        </a>
+                        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
+                            <i class="fas fa-info-circle fa-sm mr-1"></i> About
+                        </a>
+                        <a class="nav-item nav-link" href="#">
+                            <i class="fas fa-cogs fa-sm mr-1"></i> Services
+                        </a>
+                        <a class="nav-item nav-link" href="#">
+                            <i class="fas fa-envelope fa-sm mr-1"></i> Contact
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a class="nav-item nav-link" href="{% url 'chat_history' %}">
+                          <i class="fas fa-history fa-sm mr-1"></i> Chat History
+                      </a>
+                      {% endif %}
+
+                    </div>
+                <!-- Navbar Right Side -->
+<div class="navbar-nav">
+    {% if user.is_authenticated %}
+        <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-user fa-sm mr-1"></i> {{ user.username }}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUserDropdown">
+               
+                <div class="dropdown-divider"></div>
+                <form method="POST" action="{% url 'logout' %}" class="dropdown-item p-0">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-link btn-block text-left dropdown-item">Logout</button>
-                  </form>
-                </div>
-              </div>
-            {% else %}
-              <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
-              <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
-            {% endif %}
-            
+                </form>
             </div>
-          </div>
         </div>
-      </nav>
+    {% else %}
+        <a class="nav-item nav-link" href="{% url 'login' %}">
+            <i class="fas fa-sign-in-alt fa-sm mr-1"></i> Login
+        </a>
+        <a class="nav-item nav-link" href="{% url 'register' %}">
+            <i class="fas fa-user-plus fa-sm mr-1"></i> Register
+        </a>
+    {% endif %}
+</div>
+                </div>
+            </div>
+        </nav>
     </header>
-    <main role="main" class="container">
-      <div class="row">
-        <div class="col-md-8">
-          {% if messages %}
-            {% for message in messages %}
-              <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          {% endif %}
-          {% block content %}{% endblock %}
-        </div>
-        <div class="col-md-4">
-          <div class="content-section">
-            <h3>Our Sidebar</h3>
-            <p class='text-muted'>You can put any information here you'd like.
-              <ul class="list-group">
-                <li class="list-group-item list-group-item-light">Latest Posts</li>
-                <li class="list-group-item list-group-item-light">Announcements</li>
-                <li class="list-group-item list-group-item-light">Calendars</li>
-                <li class="list-group-item list-group-item-light">etc</li>
-              </ul>
-            </p>
-          </div>
-        </div>
-      </div>
-    </main>
 
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <!-- Full width content block for homepage hero section -->
+    {% block full_width_content %}{% endblock %}
+    
+    <!-- Main content container for regular pages -->
+    <main role="main" class="container {% if has_full_width %}mt-0{% else %}mt-5{% endif %}">
+        <div class="row">
+            <div class="col-md-12">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+  
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-12">
+                    <p class="mb-2">© {% now "Y" %} ISEND. All rights reserved.</p>
+                    <div>
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    
+    {% block additional_js %}{% endblock %}
+    <!-- Chatbot JavaScript -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const chatbotContainer = document.createElement('div');
+          chatbotContainer.className = 'chatbot-container';
+      
+          const chatbotIcon = document.createElement('div');
+          chatbotIcon.className = 'chatbot-icon';
+          chatbotIcon.innerHTML = '<i class="fas fa-comment-dots"></i>';
+      
+          const chatbotWindow = document.createElement('div');
+          chatbotWindow.className = 'chatbot-window';
+          chatbotWindow.style.display = 'none';
+      
+          const chatbotHeader = document.createElement('div');
+          chatbotHeader.className = 'chatbot-header';
+          chatbotHeader.innerHTML = '<h4>ISEND Assistant</h4><span class="close-chat">&times;</span>';
+      
+          const chatbotBody = document.createElement('div');
+          chatbotBody.className = 'chatbot-body';
+          chatbotBody.innerHTML = '<div class="chat-messages"><div class="message bot">Hi there! How can I help you with your student requests today?</div></div>';
+      
+          const chatbotFooter = document.createElement('div');
+          chatbotFooter.className = 'chatbot-footer';
+          chatbotFooter.innerHTML = '<input type="text" class="chat-input" placeholder="Type your message here..."><button class="send-btn"><i class="fas fa-paper-plane"></i></button>';
+      
+          chatbotWindow.appendChild(chatbotHeader);
+          chatbotWindow.appendChild(chatbotBody);
+          chatbotWindow.appendChild(chatbotFooter);
+      
+          chatbotContainer.appendChild(chatbotWindow);
+          chatbotContainer.appendChild(chatbotIcon);
+      
+          document.body.appendChild(chatbotContainer);
+      
+          chatbotIcon.addEventListener('click', function() {
+              chatbotWindow.style.display = 'flex';
+              chatbotIcon.style.display = 'none';
+          });
+      
+          const closeBtn = chatbotHeader.querySelector('.close-chat');
+          closeBtn.addEventListener('click', function() {
+              chatbotWindow.style.display = 'none';
+              chatbotIcon.style.display = 'flex';
+          });
+      
+          const sendBtn = chatbotFooter.querySelector('.send-btn');
+          const chatInput = chatbotFooter.querySelector('.chat-input');
+          const chatMessages = chatbotBody.querySelector('.chat-messages');
+      
+          function sendMessage() {
+              const message = chatInput.value.trim();
+              if (message) {
+                  const userMessageDiv = document.createElement('div');
+                  userMessageDiv.className = 'message user';
+                  userMessageDiv.textContent = message;
+                  chatMessages.appendChild(userMessageDiv);
+                  chatInput.value = '';
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+      
+                  // ⬇️ REAL BACKEND CALL
+                  fetch('/chatbot/', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded',
+                          'X-CSRFToken': getCookie('csrftoken')
+                      },
+                      body: 'message=' + encodeURIComponent(message)
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                      const botMessageDiv = document.createElement('div');
+                      botMessageDiv.className = 'message bot';
+                      botMessageDiv.textContent = data.reply;
+                      chatMessages.appendChild(botMessageDiv);
+                      chatMessages.scrollTop = chatMessages.scrollHeight;
+                  })
+                  .catch(() => {
+                      const errorMessage = document.createElement('div');
+                      errorMessage.className = 'message bot';
+                      errorMessage.textContent = "Oops! Something went wrong.";
+                      chatMessages.appendChild(errorMessage);
+                  });
+              }
+          }
+      
+          sendBtn.addEventListener('click', sendMessage);
+          chatInput.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') sendMessage();
+          });
+      
+          function getCookie(name) {
+              let cookieValue = null;
+              if (document.cookie && document.cookie !== '') {
+                  const cookies = document.cookie.split(';');
+                  for (let cookie of cookies) {
+                      cookie = cookie.trim();
+                      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                          break;
+                      }
+                  }
+              }
+              return cookieValue;
+          }
+      });
+      </script>
+      
+  
 </body>
 </html>

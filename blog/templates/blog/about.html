@@ -1,4 +1,316 @@
-{% extends "blog/base.html" %}
+{% extends 'blog/base.html' %}
+
 {% block content %}
-    <h1>About Page</h1>
-{% endblock content %}
+<style>
+  .about-container {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Poppins', sans-serif;
+    color: #2c3e50;
+    line-height: 1.7;
+}
+
+/* Header styling */
+.about-container h1 {
+    color: #004488;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    font-size: 2.4rem;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.about-container h1:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background-color: #0066cc;
+}
+
+.about-container h2 {
+    color: #004488;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 35px 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Intro paragraph */
+.about-container p.intro {
+    font-size: 1.1rem;
+    text-align: center;
+    color: #445566;
+    max-width: 800px;
+    margin: 0 auto 30px;
+    line-height: 1.8;
+}
+
+.about-container p,
+.about-container ul {
+    font-size: 1rem;
+    color: #445566;
+    margin-bottom: 20px;
+}
+
+/* Features list styling */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.feature-item {
+    background-color: #f8faff;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid #0066cc;
+    display: flex;
+    align-items: flex-start;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.feature-item i {
+    color: #0066cc;
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+/* Team section */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.member-card {
+    background-color: #f8faff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.member-card h3 {
+    margin-bottom: 8px;
+    color: #003366;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.member-card p {
+    font-size: 0.9rem;
+    color: #445566;
+    margin-bottom: 0;
+}
+
+/* Tech stack section */
+.tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.tech-item {
+    background-color: #f0f5ff;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    color: #004488;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+/* Contact section */
+.contact-section {
+    text-align: center;
+    background-color: #f8faff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 35px;
+}
+
+.contact-section a {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.contact-section a:hover {
+    color: #004488;
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .about-container {
+        padding: 30px 20px;
+        margin: 30px 15px;
+    }
+    
+    .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.member-card {
+    background-color: #f8faff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s ease;
+}
+
+.member-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.member-card h3 {
+    margin-bottom: 8px;
+    color: #003366;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.member-card p {
+    font-size: 0.9rem;
+    color: #445566;
+    margin-bottom: 0;
+}
+
+.team-grid .member-card:nth-child(1) {
+    order: 1; 
+}
+
+.team-grid .member-card:nth-child(4) {
+    order: 2; 
+}
+
+.team-grid .member-card:nth-child(2) {
+    order: 3; 
+}
+
+.team-grid .member-card:nth-child(3) {
+    order: 4; 
+}
+
+@media (max-width: 768px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+}
+}
+
+/* Utility classes for organizing lists */
+.clean-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.clean-list li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+}
+
+.clean-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0066cc;
+    font-weight: bold;
+}
+
+/* Additional CSS for the emoji/icons in headings */
+h2 img.icon,
+h2 i.icon {
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+    </style>
+    
+<div class="about-container">
+    
+  <h1>About ISEND</h1>
+  <p class="intro">
+    We are a passionate team of software engineering students from <strong>Sami Shamoon College of Engineering (SCE)</strong>,
+    on a mission to simplify the academic request process and make student services smarter and easier to use.
+  </p>
+
+  <h2>💡 What Is ISEND?</h2>
+  <p>
+    ISEND (Intelligent Student Request Navigator & Dashboard) is a web platform that:
+    <ul>
+      <li>✅ Helps students submit requests (appeals, documents, reviews...)</li>
+      <li>✅ Tracks request statuses (Pending, Needs Update, Approved)</li>
+      <li>✅ Provides step-by-step help with an AI Chatbot</li>
+      <li>✅ Allows uploading files securely</li>
+      <li>✅ Makes communication with the university simple and clear</li>
+    </ul>
+  </p>
+
+  <h2>🚀 Our Vision</h2>
+  <p>
+    To build a seamless, helpful, and student-centered platform that bridges the gap between students and academic offices.
+  </p>
+
+  <h2>🧑‍💻 Our Team</h2>
+  <div class="team-grid">
+    <div class="member-card">
+      <h3>Maysa Abu Sharab</h3>
+      <p>AI Integration, Backend & Frontend Developer</p>
+    </div>
+    <div class="member-card">
+      <h3>Yazed Alasad</h3>
+      <p>UI/UX Design, Frontend Developer</p>
+    </div>
+    <div class="member-card">
+      <h3>Ahmad Alddah</h3>
+      <p>Backend Developer & Feature Support</p>
+    </div>
+    <div class="member-card">
+      <h3>Ibrahim Abukush</h3>
+      <p>Project Lead, Backend Developer & System Architecture</p>
+    </div>
+  </div>
+
+  <h2>⚙️ Technologies We Use</h2>
+  <ul>
+    <li>Django (Python) – Backend</li>
+    <li>HTML, CSS, JavaScript – Frontend</li>
+    <li>OpenAI API – Chatbot</li>
+    <li>SQLite/PostgreSQL – Database</li>
+    <li>Bootstrap & FontAwesome – Styling</li>
+  </ul>
+
+  <h2>📬 Contact Us</h2>
+  <p>Email: <a href="mailto:isend.project.team@gmail.com">isend.project.team@gmail.com</a></p>
+</div>
+{% endblock %}
