@@ -11,4 +11,5 @@ urlpatterns = [
     path('contact/', views.contact, name='blog-contact'),
      path('chatbot/', chatbot_response, name='chatbot_response'),
     path('chat_history/', chat_history, name='chat_history'),
+
 ]
