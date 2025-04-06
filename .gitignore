@@ -1,0 +1,25 @@
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment files
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Django files
+db.sqlite3
+db.sqlite3-journal
+*.log
+local_settings.py
+
+# IDE files
+.vscode/
+.idea/
+
+# Frontend
+node_modules/
