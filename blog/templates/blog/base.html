@@ -446,6 +446,36 @@
       });
       </script>
       
-  
+     
+  <script>
+    (function(d){
+      var s = d.createElement("script");
+      s.setAttribute("data-account", "abc123xyz");
+      s.setAttribute("src", "https://cdn.userway.org/widget.js");
+      (d.body || d.head).appendChild(s);
+    })(document)
+  </script>
+
+
+  <script>
+    function speakText(text) {
+      const msg = new SpeechSynthesisUtterance();
+      msg.text = text;
+      msg.lang = 'en-US';
+      msg.rate = 1;
+      speechSynthesis.speak(msg);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const readableElements = document.querySelectorAll('[data-read]');
+      readableElements.forEach(el => {
+        el.style.cursor = "pointer";
+        el.addEventListener('click', () => {
+          speakText(el.innerText);
+        });
+      });
+    });
+  </script>
 </body>
+
 </html>
