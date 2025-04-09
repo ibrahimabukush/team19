@@ -6,6 +6,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
+    body {
+        direction: rtl;
+        text-align: right;
+    }
+    
     .request-form-container {
         max-width: 800px;
         margin: 0 auto;
@@ -51,7 +56,8 @@
         padding: 25px;
         margin-bottom: 25px;
         transition: all 0.3s ease;
-        border-left: 4px solid #3c5974;
+        border-right: 4px solid #3c5974;
+        border-left: none;
     }
 
     .form-section.active {
@@ -72,6 +78,7 @@
         border-radius: 8px;
         transition: all 0.3s;
         font-size: 1rem;
+        text-align: right;
     }
 
     .form-select:focus, .form-control:focus {
@@ -82,7 +89,7 @@
     .textarea-counter {
         font-size: 0.85rem;
         color: #666;
-        text-align: right;
+        text-align: left;
         margin-top: 5px;
     }
 
@@ -187,7 +194,8 @@
     .ai-icon {
         font-size: 1.5rem;
         color: #3c5974;
-        margin-right: 10px;
+        margin-left: 10px;
+        margin-right: 0;
     }
 
     .ai-title {
@@ -200,7 +208,8 @@
         background: white;
         border-radius: 8px;
         padding: 15px;
-        border-left: 3px solid #3c5974;
+        border-right: 3px solid #3c5974;
+        border-left: none;
         margin-bottom: 10px;
     }
 
@@ -223,7 +232,8 @@
         background-color: #e0e0e0;
         position: absolute;
         top: 15px;
-        left: 50%;
+        right: 50%;
+        left: auto;
         z-index: 1;
     }
 
@@ -299,6 +309,34 @@
     .animated-fade-in {
         animation: fadeIn 0.5s ease forwards;
     }
+    
+    .me-2 {
+        margin-left: 0.5rem !important;
+        margin-right: 0 !important;
+    }
+    
+    .ms-2 {
+        margin-right: 0.5rem !important;
+        margin-left: 0 !important;
+    }
+    
+    .ps-3 {
+        padding-right: 1rem !important;
+        padding-left: 0 !important;
+    }
+    
+    .me-3 {
+        margin-left: 1rem !important;
+        margin-right: 0 !important;
+    }
+    
+    .fa-arrow-left {
+        transform: rotate(180deg);
+    }
+    
+    .fa-arrow-right {
+        transform: rotate(180deg);
+    }
 </style>
 {% endblock %}
 
@@ -306,8 +344,8 @@
 <div class="container mt-5 mb-5">
     <div class="request-form-container">
         <div class="request-header">
-            <h2>Academic Request</h2>
-            <p>Submit your request for academic assistance. We'll process your request as soon as possible.</p>
+            <h2>בקשות אקדמיות</h2>
+            <p>הגש את בקשתך לסיוע אקדמי. אנו נטפל בבקשתך בהקדם האפשרי.</p>
         </div>
 
         <form id="academic-request-form" enctype="multipart/form-data">
@@ -315,29 +353,29 @@
             <div class="progress-indicator">
                 <div class="progress-step active">
                     <div class="step-icon">1</div>
-                    <div class="step-label">Select Type</div>
+                    <div class="step-label">בחר סוג</div>
                 </div>
                 <div class="progress-step">
                     <div class="step-icon">2</div>
-                    <div class="step-label">Details</div>
+                    <div class="step-label">פרטים</div>
                 </div>
                 <div class="progress-step">
                     <div class="step-icon">3</div>
-                    <div class="step-label">Submit</div>
+                    <div class="step-label">הגשה</div>
                 </div>
             </div>
 
             <!-- Step 1: Request Type Selection -->
             <div class="form-section active" id="step-1">
-                <label for="request_type" class="form-label">What kind of academic assistance do you need?</label>
+                <label for="request_type" class="form-label">איזה סוג של סיוע אקדמי אתה צריך?</label>
                 <select class="form-select" id="request_type" name="request_type">
-                    <option value="">Please select an option</option>
-                    <option value="Get enrollment or grade confirmations">Get enrollment or grade confirmations</option>
-                    <option value="Submit academic appeals">Submit academic appeals</option>
-                    <option value="Request exam reviews">Request exam reviews</option>
+                    <option value="">אנא בחר אפשרות</option>
+                    <option value="אישורי רישום או ציונים">קבל אישורי רישום או ציונים</option>
+                    <option value="ערעורים אקדמיים">הגש ערעורים אקדמיים</option>
+                    <option value="בקשות לבדיקת מבחנים">בקש בדיקת מבחנים</option>
                 </select>
-                <div class="mt-4 text-end">
-                    <button type="button" class="btn btn-primary" id="next-step-1" disabled>Continue</button>
+                <div class="mt-4 text-start">
+                    <button type="button" class="btn btn-primary" id="next-step-1" disabled>המשך</button>
                 </div>
             </div>
 
@@ -350,102 +388,98 @@
                             <div class="me-3 text-primary fs-4">
                                 <i class="fas fa-file-pdf"></i>
                             </div>
-                            <h5 class="m-0">Quick Enrollment Confirmation PDF</h5>
+                            <h5 class="m-0">יצירה מהירה של PDF לאישור רישום</h5>
                         </div>
                         
-                        <p class="text-muted mb-3">Complete the form below to instantly generate your enrollment confirmation document.</p>
+                        <p class="text-muted mb-3">מלא את הטופס למטה כדי ליצור מיד את מסמך אישור הרישום שלך.</p>
                         
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label for="student_id" class="form-label">Student ID</label>
-                                <input type="text" class="form-control" id="student_id" placeholder="Enter your student ID">
+                                <label for="student_id" class="form-label">מספר סטודנט</label>
+                                <input type="text" class="form-control" id="student_id" placeholder="הזן את מספר הסטודנט שלך">
                             </div>
                             <div class="col-md-6">
-                                <label for="student_name" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="student_name" placeholder="Enter your full name">
+                                <label for="student_name" class="form-label">שם מלא</label>
+                                <input type="text" class="form-control" id="student_name" placeholder="הזן את שמך המלא">
                             </div>
                         </div>
                         
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="enrollment_semester" class="form-label">Semester</label>
+                                <label for="enrollment_semester" class="form-label">סמסטר</label>
                                 <select class="form-select" id="enrollment_semester">
-                                    <option value="">Select semester</option>
-                                    <option value="Spring 2025">Spring 2025</option>
-                                    <option value="Fall 2024">Fall 2024</option>
-                                    <option value="Summer 2024">Summer 2024</option>
-                                    <option value="Spring 2024">Spring 2024</option>
+                                    <option value="">בחר סמסטר</option>
+                                    <option value="אביב 2025">אביב 2025</option>
+                                    <option value="סתיו 2024">סתיו 2024</option>
+                                    <option value="קיץ 2024">קיץ 2024</option>
+                                    <option value="אביב 2024">אביב 2024</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="enrollment_program" class="form-label">Program</label>
+                                <label for="enrollment_program" class="form-label">תכנית לימודים</label>
                                 <select class="form-select" id="enrollment_program">
-                                    <option value="">Select program</option>
-                                 
-                                 
-                                    <option value="Engineering"> Software Engineering</option>
-                                    
-                                   
+                                    <option value="">בחר תכנית</option>
+                                    <option value="הנדסת תוכנה">הנדסת תוכנה</option>
                                 </select>
                             </div>
                         </div>
                         
                         <div class="mt-4">
                             <button type="button" class="btn btn-primary" id="generate-pdf-btn" onclick="generateEnrollmentPDF()">
-                                <i class="fas fa-file-download me-2"></i>Generate & Download PDF
+                                <i class="fas fa-file-download me-2"></i>צור והורד PDF
                             </button>
                             <div class="form-check mt-3">
                                 <input class="form-check-input" type="checkbox" id="save_to_profile" checked>
                                 <label class="form-check-label" for="save_to_profile">
-                                    Save a copy to my profile for future reference
+                                    שמור עותק בפרופיל שלי לשימוש עתידי
                                 </label>
                             </div>
                         </div>
                     </div>
                     
                     <div class="text-center mb-4">
-                        <p class="mb-2">- OR -</p>
-                        <p class="text-muted">If you need a customized enrollment confirmation, please fill out the form below</p>
+                        <p class="mb-2">- או -</p>
+                        <p class="text-muted">אם אתה צריך אישור רישום מותאם אישית, אנא מלא את הטופס למטה</p>
                     </div>
                 </div>
                 
-                <label for="request_text" class="form-label">Please describe your request in detail</label>
+                <label for="request_text" class="form-label">אנא תאר את בקשתך בפירוט</label>
                 
                 <!-- AI Helper Section -->
                 <div id="ai-helper">
                     <div class="ai-suggestion-container">
                         <div class="ai-header">
                             <div class="ai-icon"><i class="fas fa-robot"></i></div>
-                            <h5 class="ai-title">AI Writing Assistant</h5>
+                            <h5 class="ai-title">עוזר כתיבה חכם</h5>
                         </div>
-                        <p>Need help writing your request? Let our AI generate a template for you.</p>
+                        <p>צריך עזרה בכתיבת הבקשה? תן לבינה המלאכותית שלנו ליצור תבנית עבורך.</p>
                         <button type="button" class="btn btn-primary" onclick="generateAiSuggestion()">
-                            <i class="fas fa-magic me-2"></i>Generate Template
+                            <i class="fas fa-magic me-2"></i>צור תבנית
                         </button>
                         
                         <div id="ai-suggestion-box" class="ai-suggestion-box mt-3 d-none">
                             <p id="ai-suggestion-text"></p>
                             <button type="button" class="btn btn-secondary" onclick="useAiSuggestion()">
-                                <i class="fas fa-check me-2"></i>Use This Template
+                                <i class="fas fa-check me-2"></i>השתמש בתבנית זו
                             </button>
                         </div>
                     </div>
                 </div>
                 
                 <textarea class="form-control mt-3" id="request_text" name="request_text" rows="5" 
-                    placeholder="Please be specific and include any relevant information..."
+                    placeholder="אנא היה ספציפי וכלול מידע רלוונטי..."
                     maxlength="1000"></textarea>
                 <div class="textarea-counter">
-                    <span id="char-count">0</span>/1000 characters
+                    <span id="char-count">0</span>/1000 תווים
                 </div>
                 
                 <!-- File Upload Section -->
                 <div class="mt-4">
-                    <label class="form-label">Supporting Documents (if applicable)</label>
+                    <label class="form-label">מסמכים תומכים (אם רלוונטי)</label>
                     <div class="file-upload-wrapper">
                         <div class="file-upload-label">
                             <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                            <div class="file-upload-text">Drag & drop files here or click to browse</div>
+                            <div class="file-upload-text">גרור ושחרר קבצים כאן או לחץ כדי לעיין</div>
                         </div>
                         <input type="file" class="form-control" id="attachment" name="attachment">
                     </div>
@@ -453,40 +487,40 @@
                 </div>
                 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" id="prev-step-2">
-                        <i class="fas fa-arrow-left me-2"></i>Back
-                    </button>
                     <button type="button" class="btn btn-primary" id="next-step-2" disabled>
-                        Review & Submit<i class="fas fa-arrow-right ms-2"></i>
+                        סקירה והגשה<i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="prev-step-2">
+                        <i class="fas fa-arrow-left me-2"></i>חזרה
                     </button>
                 </div>
             </div>
 
             <!-- Step 3: Review & Submit -->
             <div class="form-section" id="step-3" style="display: none;">
-                <h4 class="mb-4">Review Your Request</h4>
+                <h4 class="mb-4">סקירת הבקשה שלך</h4>
                 
                 <div class="mb-4">
-                    <h6>Request Type:</h6>
+                    <h6>סוג בקשה:</h6>
                     <p id="review-type" class="ps-3"></p>
                 </div>
                 
                 <div class="mb-4">
-                    <h6>Request Details:</h6>
+                    <h6>פרטי הבקשה:</h6>
                     <p id="review-details" class="ps-3"></p>
                 </div>
                 
                 <div class="mb-4" id="review-attachment-section">
-                    <h6>Attached Document:</h6>
+                    <h6>מסמך מצורף:</h6>
                     <p id="review-attachment" class="ps-3"></p>
                 </div>
                 
                 <div class="mt-4 d-flex justify-content-between">
-                    <button type="button" class="btn btn-secondary" id="prev-step-3">
-                        <i class="fas fa-arrow-left me-2"></i>Edit Request
-                    </button>
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-paper-plane me-2"></i>Submit Request
+                        <i class="fas fa-paper-plane me-2"></i>הגש בקשה
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="prev-step-3">
+                        <i class="fas fa-arrow-left me-2"></i>ערוך בקשה
                     </button>
                 </div>
             </div>
@@ -494,10 +528,10 @@
             <!-- Success Message -->
             <div class="submit-success" id="success-message">
                 <div class="success-icon"><i class="fas fa-check-circle"></i></div>
-                <h4 class="success-message">Your request has been submitted successfully!</h4>
-                <p class="success-details">We'll process your request and get back to you as soon as possible.</p>
+                <h4 class="success-message">בקשתך הוגשה בהצלחה!</h4>
+                <p class="success-details">אנו נטפל בבקשתך ונחזור אליך בהקדם האפשרי.</p>
                 <button type="button" class="btn btn-primary mt-3" onclick="resetForm()">
-                    Submit Another Request
+                    הגש בקשה נוספת
                 </button>
             </div>
         </form>
@@ -506,15 +540,15 @@
 
 <script>
     const academicTypesWithAI = [
-        "Get enrollment or grade confirmations",
-        "Submit academic appeals",
-        "Request exam reviews"
+        "אישורי רישום או ציונים",
+        "ערעורים אקדמיים",
+        "בקשות לבדיקת מבחנים"
     ];
 
     const suggestions = {
-        "Get enrollment or grade confirmations": "I am requesting confirmation of my enrollment and/or grades for [Course Name] during the [Semester/Year]. This document is needed for [reason - e.g., scholarship, employer, visa, etc.].",
-        "Submit academic appeals": "I am writing to appeal my grade in [Course Name] taught by Professor [Name] during the [Semester/Year]. I believe my grade of [Grade] does not accurately reflect my performance because [specific reason]. I completed all assignments, attended all classes, and my overall coursework demonstrates a higher level of achievement. I have attached [relevant documents] to support my appeal.",
-        "Request exam reviews": "I would like to request a review of my exam for [Course Name] taken on [Date]. I believe there may have been an error in the grading of questions [specify question numbers if possible]. My answer to question [number] addressed all the key points including [briefly explain]."
+        "אישורי רישום או ציונים": "אני מבקש אישור רישום ו/או ציונים עבור [שם הקורס] במהלך [סמסטר/שנה]. מסמך זה נדרש ל[סיבה - למשל, מלגה, מעסיק, ויזה וכו'].",
+        "ערעורים אקדמיים": "אני כותב כדי לערער על הציון שלי בקורס [שם הקורס] שנלמד על ידי פרופסור [שם] במהלך [סמסטר/שנה]. אני מאמין שהציון שלי [ציון] אינו משקף באופן מדויק את הביצועים שלי בגלל [סיבה ספציפית]. השלמתי את כל המטלות, השתתפתי בכל השיעורים, והעבודה הכוללת שלי מדגימה רמת הישג גבוהה יותר. צירפתי [מסמכים רלוונטיים] לתמיכה בערעור שלי.",
+        "בקשות לבדיקת מבחנים": "אני מבקש לבדוק מחדש את המבחן שלי בקורס [שם הקורס] שנערך בתאריך [תאריך]. אני מאמין שייתכן שהייתה טעות בניקוד של שאלות [ציין מספרי שאלות אם אפשר]. התשובה שלי לשאלה [מספר] התייחסה לכל הנקודות המרכזיות כולל [הסבר בקצרה]."
     };
 
     // DOM Elements
@@ -545,7 +579,7 @@
         
         // Show/hide PDF generator for enrollment confirmations
         const pdfGeneratorSection = document.getElementById("pdf-generator-section");
-        if (selected === "Get enrollment or grade confirmations") {
+        if (selected === "אישורי רישום או ציונים") {
             pdfGeneratorSection.style.display = "block";
         } else {
             pdfGeneratorSection.style.display = "none";
@@ -625,7 +659,7 @@
     // AI Template functions
     function generateAiSuggestion() {
         const type = requestTypeSelect.value;
-        aiText.innerText = suggestions[type] || "Start by clearly stating your request and provide any relevant details.";
+        aiText.innerText = suggestions[type] || "התחל בהצהרה ברורה על בקשתך וספק פרטים רלוונטיים.";
         aiBox.classList.remove("d-none");
         aiBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -640,7 +674,7 @@
         requestText.focus();
     }
 
-        function resetForm() {
+    function resetForm() {
         document.getElementById("academic-request-form").reset();
         step1.style.display = "block";
         step2.style.display = "none";
@@ -666,13 +700,13 @@
         const program = document.getElementById("enrollment_program").value;
         
         if (!studentId || !studentName || !semester || !program) {
-            alert("Please fill in all required fields to generate your enrollment confirmation.");
+            alert("אנא מלא את כל השדות הנדרשים כדי ליצור את אישור הרישום שלך.");
             return;
         }
         
         // Get current date
         const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('en-US', { 
+        const formattedDate = currentDate.toLocaleDateString('he-IL', { 
             year: 'numeric', 
             month: 'long', 
             day: 'numeric' 
@@ -687,7 +721,7 @@
         doc.rect(15, 10, 50, 20, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(16);
-        doc.text("UNIVERSITY", 20, 22);
+        doc.text("אוניברסיטה", 65, 22);
         
         // Set text color back to black for the rest of the document
         doc.setTextColor(0, 0, 0);
@@ -695,7 +729,7 @@
         // Add heading
         doc.setFontSize(22);
         doc.setFont(undefined, 'bold');
-        doc.text("ENROLLMENT CONFIRMATION", 105, 45, { align: 'center' });
+        doc.text("אישור רישום", 105, 45, { align: 'center' });
         
         // Add horizontal line
         doc.setDrawColor(60, 89, 116);
@@ -705,46 +739,47 @@
         // Add document reference number
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
-        doc.text(`Ref: EC-${studentId}-${currentDate.getFullYear()}${currentDate.getMonth()+1}${currentDate.getDate()}`, 15, 60);
-        doc.text(`Issue Date: ${formattedDate}`, 15, 65);
+        doc.text(`מס' אסמכתא: EC-${studentId}-${currentDate.getFullYear()}${currentDate.getMonth()+1}${currentDate.getDate()}`, 195, 60, { align: 'right' });
+        doc.text(`תאריך הנפקה: ${formattedDate}`, 195, 65, { align: 'right' });
         
         // Add main content
         doc.setFontSize(12);
-        doc.text("TO WHOM IT MAY CONCERN:", 15, 80);
+        doc.text("לכל מאן דבעי:", 195, 80, { align: 'right' });
         
         doc.setFontSize(11);
         const mainText = [
-            `This letter confirms that ${studentName} (Student ID: ${studentId}) is currently enrolled as a full-time student`,
-            `in the ${program} program for the ${semester} semester at our University.`,
+            `מכתב זה מאשר כי ${studentName} (מספר סטודנט: ${studentId}) רשום/ה כסטודנט/ית במשרה מלאה`,
+            `בתכנית ${program} לסמסטר ${semester} באוניברסיטה שלנו.`,
             "",
-            `The student is in good academic standing and is expected to complete the current semester`,
-            `on ${semester === 'Spring 2025' ? 'May 15, 2025' : semester === 'Fall 2024' ? 'December 20, 2024' : 'the scheduled end date'}.`,
+            `הסטודנט/ית נמצא/ת במצב אקדמי תקין וצפוי/ה להשלים את הסמסטר הנוכחי`,
+            `ב-${semester === 'אביב 2025' ? '15 במאי 2025' : semester === 'סתיו 2024' ? '20 בדצמבר 2024' : 'תאריך הסיום המתוכנן'}.`,
             "",
-            "This confirmation is issued at the student's request for official purposes.",
+            "אישור זה מונפק לבקשת הסטודנט/ית למטרות רשמיות.",
             "",
-            "If you require any additional information, please contact the Office of the Registrar at",
-            "registrar@university.edu or +1 (555) 123-4567."
+            "אם דרוש לך מידע נוסף, אנא צור קשר עם משרד הרשם בכתובת",
+            "registrar@university.edu או בטלפון 4567-123 (555) 1+."
         ];
         
-        doc.text(mainText, 15, 90);
+        // Right-align text for Hebrew
+        doc.text(mainText, 195, 90, { align: 'right' });
         
         // Add signature section
-        doc.text("Sincerely,", 15, 160);
+        doc.text("בכבוד רב,", 195, 160, { align: 'right' });
         
         // Signature placeholder
         doc.setDrawColor(100, 100, 100);
         doc.setLineWidth(0.2);
-        doc.line(15, 180, 80, 180);
+        doc.line(125, 180, 195, 180);
         
         doc.setFontSize(11);
-        doc.text("Dr. Jane Smith", 15, 185);
-        doc.text("University Registrar", 15, 190);
-        doc.text("Office of the Registrar", 15, 195);
+        doc.text("דר' יעל כהן", 195, 185, { align: 'right' });
+        doc.text("רשמת האוניברסיטה", 195, 190, { align: 'right' });
+        doc.text("משרד הרשם", 195, 195, { align: 'right' });
         
         // Add footer
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
-        doc.text("This document is electronically generated and valid without a physical signature.", 105, 280, { align: 'center' });
+        doc.text("מסמך זה נוצר באופן אלקטרוני ותקף ללא חתימה פיזית.", 105, 280, { align: 'center' });
         
         // Save to profile if checkbox is checked
         const saveToProfile = document.getElementById("save_to_profile").checked;
@@ -752,38 +787,20 @@
         if (saveToProfile) {
             // This would be an API call to save the PDF to the user's profile
             // In a real implementation, you would send the PDF data to your backend
-            console.log("Saving PDF to student profile...");
+            console.log("שומר PDF לפרופיל הסטודנט...");
             
-            // Here you would make a fetch call to your backend API
-            // For example:
-            /*
-            fetch("{% url 'save_pdf_to_profile' %}", {
-                method: "POST",
-                body: JSON.stringify({
-                    studentId: studentId,
-                    studentName: studentName,
-                    pdfData: doc.output('datauristring'),
-                    documentType: "enrollment_confirmation",
-                    semester: semester
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            });
-            */
-            
+          
             // Show success message for saving to profile
             const requestText = document.getElementById("request_text");
             if (!requestText.value) {
-                requestText.value = `Enrollment confirmation document for ${semester} has been generated and saved to my profile.`;
+                requestText.value = `מסמך אישור רישום עבור ${semester} נוצר ונשמר בפרופיל שלי.`;
                 charCount.textContent = requestText.value.length;
                 nextStep2.disabled = false;
             }
         }
         
         // Download the PDF
-        doc.save(`Enrollment_Confirmation_${studentName.replace(/\s+/g, '_')}.pdf`);
+        doc.save(`אישור_רישום_${studentName.replace(/\s+/g, '_')}.pdf`);
     }
 
     // Form submission
@@ -814,8 +831,8 @@
             });
             
         } catch (error) {
-            console.error("Error submitting form:", error);
-            alert("There was an error submitting your request. Please try again.");
+            console.error("שגיאה בהגשת הטופס:", error);
+            alert("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.");
         }
     });
 </script>

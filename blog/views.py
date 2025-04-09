@@ -20,6 +20,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 def submit_request(request):
+    
     if request.method == 'POST':
         user = request.user.username if request.user.is_authenticated else 'Anonymous'
         request_type = request.POST.get("request_type", "")
@@ -43,61 +44,61 @@ def submit_request(request):
 
 
 
-@require_POST
-@csrf_exempt  # For testing only; use proper CSRF protection in production
-def save_pdf_to_profile(request):
-    """
-    Save a generated PDF to the user's profile.
-    Expects a JSON payload with studentId, studentName, pdfData, documentType, and semester.
-    """
-    try:
-        data = json.loads(request.body)
-        student_id = data.get('studentId')
-        student_name = data.get('studentName')
-        pdf_data = data.get('pdfData')
-        document_type = data.get('documentType')
-        semester = data.get('semester')
+# @require_POST
+# @csrf_exempt  # For testing only; use proper CSRF protection in production
+# def save_pdf_to_profile(request):
+#     """
+#     Save a generated PDF to the user's profile.
+#     Expects a JSON payload with studentId, studentName, pdfData, documentType, and semester.
+#     """
+#     try:
+#         data = json.loads(request.body)
+#         student_id = data.get('studentId')
+#         student_name = data.get('studentName')
+#         pdf_data = data.get('pdfData')
+#         document_type = data.get('documentType')
+#         semester = data.get('semester')
         
-        # Validate required fields
-        if not all([student_id, student_name, pdf_data, document_type, semester]):
-            return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+#         # Validate required fields
+#         if not all([student_id, student_name, pdf_data, document_type, semester]):
+#             return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
         
-        # Extract base64 data from data URI
-        pdf_base64 = pdf_data.split(',')[1] if ',' in pdf_data else pdf_data
-        pdf_bytes = base64.b64decode(pdf_base64)
+#         # Extract base64 data from data URI
+#         pdf_base64 = pdf_data.split(',')[1] if ',' in pdf_data else pdf_data
+#         pdf_bytes = base64.b64decode(pdf_base64)
         
-        # Create directory for user if it doesn't exist
-        user_directory = os.path.join(settings.MEDIA_ROOT, 'user_documents', f'user_{request.user.id}')
-        os.makedirs(user_directory, exist_ok=True)
+#         # Create directory for user if it doesn't exist
+#         user_directory = os.path.join(settings.MEDIA_ROOT, 'user_documents', f'user_{request.user.id}')
+#         os.makedirs(user_directory, exist_ok=True)
         
-        # Create filename
-        filename = f"{document_type}_{student_id}_{semester.replace(' ', '_')}.pdf"
-        file_path = os.path.join(user_directory, filename)
+#         # Create filename
+#         filename = f"{document_type}_{student_id}_{semester.replace(' ', '_')}.pdf"
+#         file_path = os.path.join(user_directory, filename)
         
-        # Save the file
-        with open(file_path, 'wb') as f:
-            f.write(pdf_bytes)
+#         # Save the file
+#         with open(file_path, 'wb') as f:
+#             f.write(pdf_bytes)
         
-        # Save reference to database
-        # In a real implementation, you would create a model instance here
-        # Example:
-        # UserDocument.objects.create(
-        #     user=request.user,
-        #     document_type=document_type,
-        #     semester=semester,
-        #     file_path=file_path,
-        #     filename=filename
-        # )
+#         # Save reference to database
+#         # In a real implementation, you would create a model instance here
+#         # Example:
+#         # UserDocument.objects.create(
+#         #     user=request.user,
+#         #     document_type=document_type,
+#         #     semester=semester,
+#         #     file_path=file_path,
+#         #     filename=filename
+#         # )
         
-        return JsonResponse({
-            'status': 'success',
-            'message': 'Document saved successfully',
-            'file_path': file_path,
-            'filename': filename
-        })
+#         return JsonResponse({
+#             'status': 'success',
+#             'message': 'Document saved successfully',
+#             'file_path': file_path,
+#             'filename': filename
+#         })
         
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+#     except Exception as e:
+#         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
  
 @login_required
 def chat_history(request):
@@ -269,3 +270,8 @@ Your goal is to understand what the student means and guide them step-by-step.
 @login_required
 def academic_request(request):
     return render(request, 'blog/academic_request.html')
+
+@login_required
+def schedule_request(request):
+    return render(request, 'blog/schedule_requests.html')
+

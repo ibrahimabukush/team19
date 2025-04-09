@@ -8,21 +8,21 @@ class ChatHistoryAdmin(admin.ModelAdmin):
     list_filter = ('timestamp',)
 
 
-from django.contrib import admin
-from .models import UserDocument
+# from django.contrib import admin
+# from .models import UserDocument
 
-class UserDocumentAdmin(admin.ModelAdmin):
-    # Change this:
-    # list_display = ['username', 'document_type', 'created_at']
+# # class UserDocumentAdmin(admin.ModelAdmin):
+#     # Change this:
+#     # list_display = ['username', 'document_type', 'created_at']
     
-    # To this:
-    list_display = ['get_username', 'document_type', 'created_at']
+#     # To this:
+#     list_display = ['get_username', 'document_type', 'created_at']
     
-    def get_username(self, obj):
-        return obj.user.username
-    get_username.short_description = 'Username'
+#     def get_username(self, obj):
+#         return obj.user.username
+#     get_username.short_description = 'Username'
 
-admin.site.register(UserDocument, UserDocumentAdmin)
+# admin.site.register(UserDocument, UserDocumentAdmin)
 
 @admin.register(StudentRequest)
 class StudentRequestAdmin(admin.ModelAdmin):

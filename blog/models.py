@@ -23,14 +23,14 @@ def __str__(self):
 from django.db import models
 from django.conf import settings
 
-class UserDocument(models.Model):
-    """Model to track documents saved to user profiles."""
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    document_type = models.CharField(max_length=100)
-    semester = models.CharField(max_length=50)
-    filename = models.CharField(max_length=255)
-    file_path = models.CharField(max_length=500)
-    created_at = models.DateTimeField(auto_now_add=True)
+# class UserDocument(models.Model):
+#     """Model to track documents saved to user profiles."""
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     document_type = models.CharField(max_length=100)
+#     semester = models.CharField(max_length=50)
+#     filename = models.CharField(max_length=255)
+#     file_path = models.CharField(max_length=500)
+#     created_at = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self):
-        return f"{self.document_type} - {self.user.username} - {self.semester}"
+#     def __str__(self):
+#         return f"{self.document_type} - {self.user.username} - {self.semester}"

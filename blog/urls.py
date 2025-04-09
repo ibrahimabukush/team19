@@ -13,6 +13,6 @@ urlpatterns = [
     path('chat_history/', chat_history, name='chat_history'),
     path("api/submit-request", views.submit_request, name="submit_request"),
     path('academic-request/', views.academic_request, name='academic-request'),
-    path('api/save-pdf-to-profile/', views.save_pdf_to_profile, name='save_pdf_to_profile'),
+    path('schedule-request/', views.schedule_request, name='schedule_request'),
 
 ]
