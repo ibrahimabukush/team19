@@ -8,6 +8,9 @@ class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)  # ✅ New field
+    verification_code = models.CharField(max_length=6, blank=True, null=True)
+    
     
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

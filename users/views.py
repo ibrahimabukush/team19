@@ -8,7 +8,13 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.mail import send_mail
+import random
+from django.contrib.auth import get_user_model
 
+User = get_user_model()
+
+def generate_code():
+    return str(random.randint(100000, 999999))
 def register(request):
     msg = None
     if request.method == 'POST':
@@ -17,37 +23,43 @@ def register(request):
             user = form.save(commit=False)
             if user.is_student:
                 user.is_approved = True
-            user.save()
-
-            # Send welcome email
-            send_mail(
-                subject='🎉 Welcome to iStudent!',
-                message=f'Hi {user.username}, welcome to iStudent!',
-                from_email=None,
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
-
-            if user.is_student:
+                user.is_verified = False
+                user.verification_code = generate_code()
+                user.save()
                 login(request, user)
-                return redirect('blog-home')
+
+                # Send verification email to student
+                send_mail(
+                    subject='🔐 Verify Your iStudent Account',
+                    message=f'Hi {user.username},\n\nYour verification code is: {user.verification_code}',
+                    from_email=None,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                return redirect('verify_account')
+            
+            # Handle lecturer registration
             elif user.is_lecturer:
+                user.save()  # Save the lecturer user before returning
                 msg = "Lecturer account created and waiting approval"
                 return redirect('login')
     else:
         form = UserRegisterForm()
-    return render(request, 'users/register.html', {'form': form})
+
+    return render(request, 'users/register.html', {'form': form, 'msg': msg})
+
 
 
 def login_view(request):
-    msg = None
     form = AuthenticationForm(request, data=request.POST or None)
 
     if request.method == 'POST':
         if form.is_valid():
             user = form.get_user()
-            if user.is_lecturer and not user.is_approved:
-                msg = "Lecturer account is awaiting admin approval."
+            if user.is_student and not user.is_verified:
+                messages.error(request, "Please verify your account first. Check your email for the code.")
+            elif user.is_lecturer and not user.is_approved:
+                messages.error(request, "Lecturer account is awaiting admin approval.")
             else:
                 login(request, user)
 
@@ -64,12 +76,8 @@ def login_view(request):
                     return redirect('blog-home')
                 elif user.is_lecturer:
                     return redirect('lecturer_dashboard')
-                elif user.is_superuser:
-                    return redirect('adminpage')
-        else:
-            msg = "Invalid username or password."
-    return render(request, 'users/login.html', {'form': form, 'msg': msg})
-
+                
+    return render(request, 'users/login.html', {'form': form})
 
 
 
@@ -110,3 +118,22 @@ def lecturer_dashboard(request):
 @requires_csrf_token
 def csrf_failure(request, reason=""):
     return render(request, 'users/csrf_failure.html', status=403, context={'reason': reason})
+
+
+@login_required
+def verify_account(request):
+    if not request.user.is_student:
+        return redirect('blog-home')
+
+    if request.method == 'POST':
+        code_entered = request.POST.get('code')
+        if code_entered == request.user.verification_code:
+            request.user.is_verified = True
+            request.user.verification_code = ''
+            request.user.save()
+            messages.success(request, "✅ Account verified!")
+            return redirect('blog-home')
+        else:
+            messages.error(request, "❌ Incorrect code. Please try again.")
+
+    return render(request, 'users/verify_account.html')

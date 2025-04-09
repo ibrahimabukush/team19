@@ -19,6 +19,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.core.mail import send_mail
 def submit_request(request):
     if request.method == 'POST':
         user = request.user.username if request.user.is_authenticated else 'Anonymous'
@@ -26,19 +27,35 @@ def submit_request(request):
         text = request.POST.get("request_text", "")
         attachment = request.FILES.get("attachment")
 
+        # Save the request
         StudentRequest.objects.create(
             username=user,
-            category="Academic",  # or dynamic if you're using other forms too
+            category="Academic",  # You can change this dynamically if needed
             request_type=request_type,
             text=text,
             attachment=attachment
         )
 
+        # Send email notification
+        if request.user.is_authenticated:
+            subject = "ISEND: Your request has been received"
+            message = f"""
+Hello {request.user.username},
+
+We have received your request regarding: {request_type}.
+
+Our team will review it and notify you once it's processed.
+
+Thank you,
+The ISEND Team
+"""
+            recipient_list = [request.user.email]
+
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+
         return JsonResponse({"message": "Request submitted successfully!"})
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
-
 
 
 
