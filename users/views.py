@@ -7,7 +7,7 @@ from .forms import UserRegisterForm
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import requires_csrf_token
-
+from django.core.mail import send_mail
 
 def register(request):
     msg = None
@@ -16,9 +16,18 @@ def register(request):
         if form.is_valid():
             user = form.save(commit=False)
             if user.is_student:
-                user.is_approved = True  
+                user.is_approved = True
             user.save()
-            msg = "Account created"
+
+            # Send welcome email
+            send_mail(
+                subject='🎉 Welcome to iStudent!',
+                message=f'Hi {user.username}, welcome to iStudent!',
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+
             if user.is_student:
                 login(request, user)
                 return redirect('blog-home')
@@ -37,23 +46,30 @@ def login_view(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.get_user()
-
             if user.is_lecturer and not user.is_approved:
                 msg = "Lecturer account is awaiting admin approval."
             else:
                 login(request, user)
 
-                # Redirect based on role
+                # Send login email
+                send_mail(
+                    subject='🔐 New Login Detected',
+                    message=f'Hi {user.username}, you have just logged into your iStudent account.',
+                    from_email=None,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+
                 if user.is_student:
                     return redirect('blog-home')
                 elif user.is_lecturer:
                     return redirect('lecturer_dashboard')
-               
-
+                elif user.is_superuser:
+                    return redirect('adminpage')
         else:
             msg = "Invalid username or password."
-
     return render(request, 'users/login.html', {'form': form, 'msg': msg})
+
 
 
 

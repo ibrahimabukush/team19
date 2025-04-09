@@ -32,6 +32,7 @@ urlpatterns = [
     path('', include('blog.urls')),
     path('lecturer/dashboard/', views.lecturer_dashboard, name='lecturer_dashboard'),
     
+    
 ]
 
 
