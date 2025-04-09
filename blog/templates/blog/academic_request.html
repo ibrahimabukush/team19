@@ -381,11 +381,11 @@
                                 <label for="enrollment_program" class="form-label">Program</label>
                                 <select class="form-select" id="enrollment_program">
                                     <option value="">Select program</option>
-                                    <option value="Computer Science">Computer Science</option>
-                                    <option value="Business Administration">Business Administration</option>
-                                    <option value="Engineering">Engineering</option>
-                                    <option value="Liberal Arts">Liberal Arts</option>
-                                    <option value="Medicine">Medicine</option>
+                                 
+                                 
+                                    <option value="Engineering"> Software Engineering</option>
+                                    
+                                   
                                 </select>
                             </div>
                         </div>
@@ -551,12 +551,10 @@
             pdfGeneratorSection.style.display = "none";
         }
         
-        // Show/hide AI helper based on selected request type
         aiHelper.style.display = academicTypesWithAI.includes(selected) ? "block" : "none";
         aiBox.classList.add("d-none");
     });
 
-    // Character counter for textarea
     requestText.addEventListener("input", () => {
         const count = requestText.value.length;
         charCount.textContent = count;
@@ -684,7 +682,6 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
-        // Add university logo placeholder
         doc.setDrawColor(60, 89, 116); // #3c5974
         doc.setFillColor(60, 89, 116);
         doc.rect(15, 10, 50, 20, 'F');
