@@ -1,8 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
+from django.contrib.auth.models import AbstractUser
+from django.db import models
 
-
+class User(AbstractUser):
+    is_student = models.BooleanField(default=False)
+    is_lecturer = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)  # ✅ New field
+    verification_code = models.CharField(max_length=6, blank=True, null=True)
+    
+    
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='profile_pics', null=True, blank=True)

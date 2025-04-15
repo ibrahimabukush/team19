@@ -6,16 +6,123 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 import traceback
-
 from django.contrib.auth.decorators import login_required
 from .models import ChatHistory
+from .models import StudentRequest
+import os
+import json
+import base64
+import os
+from django.conf import settings
+from django.http import JsonResponse
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.core.mail import send_mail
+def submit_request(request):
+    if request.method == 'POST':
+        user = request.user.username if request.user.is_authenticated else 'Anonymous'
+        request_type = request.POST.get("request_type", "")
+        text = request.POST.get("request_text", "")
+        attachment = request.FILES.get("attachment")
+
+        # Save the request
+        StudentRequest.objects.create(
+            username=user,
+            category="Academic",  # You can change this dynamically if needed
+            request_type=request_type,
+            text=text,
+            attachment=attachment
+        )
+
+        # Send email notification
+        if request.user.is_authenticated:
+            subject = "ISEND: Your request has been received"
+            message = f"""
+Hello {request.user.username},
+
+We have received your request regarding: {request_type}.
+
+Our team will review it and notify you once it's processed.
+
+Thank you,
+The ISEND Team
+"""
+            recipient_list = [request.user.email]
+
+            send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, recipient_list)
+
+        return JsonResponse({"message": "Request submitted successfully!"})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+
+
+@require_POST
+@csrf_exempt  # For testing only; use proper CSRF protection in production
+def save_pdf_to_profile(request):
+    """
+    Save a generated PDF to the user's profile.
+    Expects a JSON payload with studentId, studentName, pdfData, documentType, and semester.
+    """
+    try:
+        data = json.loads(request.body)
+        student_id = data.get('studentId')
+        student_name = data.get('studentName')
+        pdf_data = data.get('pdfData')
+        document_type = data.get('documentType')
+        semester = data.get('semester')
+        
+        # Validate required fields
+        if not all([student_id, student_name, pdf_data, document_type, semester]):
+            return JsonResponse({'status': 'error', 'message': 'Missing required fields'}, status=400)
+        
+        # Extract base64 data from data URI
+        pdf_base64 = pdf_data.split(',')[1] if ',' in pdf_data else pdf_data
+        pdf_bytes = base64.b64decode(pdf_base64)
+        
+        # Create directory for user if it doesn't exist
+        user_directory = os.path.join(settings.MEDIA_ROOT, 'user_documents', f'user_{request.user.id}')
+        os.makedirs(user_directory, exist_ok=True)
+        
+        # Create filename
+        filename = f"{document_type}_{student_id}_{semester.replace(' ', '_')}.pdf"
+        file_path = os.path.join(user_directory, filename)
+        
+        # Save the file
+        with open(file_path, 'wb') as f:
+            f.write(pdf_bytes)
+        
+        # Save reference to database
+        # In a real implementation, you would create a model instance here
+        # Example:
+        # UserDocument.objects.create(
+        #     user=request.user,
+        #     document_type=document_type,
+        #     semester=semester,
+        #     file_path=file_path,
+        #     filename=filename
+        # )
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Document saved successfully',
+            'file_path': file_path,
+            'filename': filename
+        })
+        
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+ 
 @login_required
 def chat_history(request):
     history = ChatHistory.objects.filter(username=request.user.username).order_by('-timestamp')
     return render(request, 'blog/chat_history.html', {'history': history})
 
-load_dotenv(dotenv_path=r"C:\Users\al\OneDrive\Documents\GitHub\GROUP19\team19\.env")
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
@@ -175,3 +282,8 @@ Your goal is to understand what the student means and guide them step-by-step.
          return JsonResponse({"reply": f"Oops! Something went wrong on our end. Error: {type(e).__name__}"})
 
     return JsonResponse({"reply": "Invalid request method."})
+
+
+@login_required
+def academic_request(request):
+    return render(request, 'blog/academic_request.html')
