@@ -15,7 +15,7 @@ def chat_history(request):
     history = ChatHistory.objects.filter(username=request.user.username).order_by('-timestamp')
     return render(request, 'blog/chat_history.html', {'history': history})
 
-load_dotenv(dotenv_path=r"C:\Users\al\OneDrive\Documents\GitHub\GROUP19\team19\.env")
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
