@@ -1,1 +1,42 @@
 
+pipeline {
+    agent any
+
+    stages {
+        stage('Clone Project') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r requirements.txt'
+            }
+        }
+
+        stage('Apply Migrations') {
+            steps {
+                sh 'python manage.py makemigrations'
+                sh 'python manage.py migrate'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'python manage.py test'
+            }
+        }
+    }
+}
+    
+    
+        post {
+            success {
+                echo 'Build succeeded!'
+            }
+            failure {
+                echo 'Build failed!'
+            }
+        }
+    
