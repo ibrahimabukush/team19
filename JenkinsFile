@@ -1,6 +1,14 @@
 pipeline {
     agent any
-    
+    stage('Create .env File') {
+    steps {
+        sh '''
+            echo "EMAIL_HOST_USER=your@email.com" > .env
+            echo "EMAIL_HOST_PASSWORD=your-password" >> .env
+        '''
+    }
+}
+
     stages {
         stage('Check Python Availability') {
             steps {
