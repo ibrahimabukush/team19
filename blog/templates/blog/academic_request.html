@@ -442,7 +442,22 @@
                         <p class="text-muted">אם אתה צריך אישור רישום מותאם אישית, אנא מלא את הטופס למטה</p>
                     </div>
                 </div>
-                
+                <!-- ADDITION: Subject and Lecturer -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <select class="form-select" id="subject" name="subject" required>
+            <option value="">בחר קורס</option>
+            {% for subject in subjects %}
+                <option value="{{ subject }}">{{ subject }}</option>
+            {% endfor %}
+        </select>
+        
+    </div>
+    <div class="col-md-6" id="lecturer-info" style="display: none;">
+        <label class="form-label">שם המרצה</label>
+        <p id="lecturer-name" class="ps-3 text-primary fw-bold m-0"></p>
+    </div>
+</div>
                 <label for="request_text" class="form-label">אנא תאר את בקשתך בפירוט</label>
                 
                 <!-- AI Helper Section -->
@@ -539,6 +554,7 @@
 </div>
 
 <script>
+    
     const academicTypesWithAI = [
         "אישורי רישום או ציונים",
         "ערעורים אקדמיים",
@@ -568,7 +584,37 @@
     const prevStep2 = document.getElementById("prev-step-2");
     const prevStep3 = document.getElementById("prev-step-3");
     const successMessage = document.getElementById("success-message");
-    
+    const subjectSelect = document.getElementById("subject");
+const lecturerInfo = document.getElementById("lecturer-info");
+const lecturerName = document.getElementById("lecturer-name");
+let selectedLecturerName = "";
+
+subjectSelect.addEventListener("change", async function () {
+    const subject = this.value;
+    if (!subject) {
+        lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
+        return;
+    }
+
+    try {
+        const response = await fetch(`/users/get-lecturer/?subject=${encodeURIComponent(subject)}`);
+        const data = await response.json();
+
+        if (data.lecturer_name) {
+            selectedLecturerName = data.lecturer_name;
+            lecturerName.textContent = selectedLecturerName;
+            lecturerInfo.style.display = "block";
+        } else {
+            lecturerInfo.style.display = "none";
+            selectedLecturerName = "";
+        }
+    } catch (err) {
+        console.error("Failed to fetch lecturer:", err);
+        lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
+    }
+});
     // Progress steps
     const progressSteps = document.querySelectorAll(".progress-step");
 
@@ -834,6 +880,8 @@
             console.error("שגיאה בהגשת הטופס:", error);
             alert("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.");
         }
+        
     });
+    
 </script>
 {% endblock %}

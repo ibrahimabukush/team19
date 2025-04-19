@@ -1,14 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.rtl.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700;900&family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
@@ -16,25 +16,39 @@
     {% if title %}
         <title>ISEND - {{ title }}</title>
     {% else %}
-        <title>ISEND - Student Experience Platform</title>
+        <title>ISEND - פלטפורמת חווית סטודנטים</title>
     {% endif %}
 
     <style>
-      body {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-family: 'Rubik', 'Assistant', sans-serif;
+            direction: rtl;
+            text-align: right;
+            overflow-x: hidden;
+            background-color: #f9fafc;
+        }
         
         .bg-isend {
-            background: linear-gradient(to right, #4a6d8c, #31475e);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
         }
         
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
+            font-weight: 800;
+            font-size: 1.7rem;
             letter-spacing: 1px;
+            background: linear-gradient(45deg, #ffffff, #f0f0f0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover {
+            transform: scale(1.05);
         }
         
         .site-header .navbar-nav .nav-link {
@@ -42,6 +56,19 @@
             margin: 0 10px;
             font-weight: 500;
             transition: all 0.3s ease;
+            position: relative;
+            padding: 5px 0;
+        }
+        
+        .site-header .navbar-nav .nav-link:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            transition: width 0.3s ease;
         }
         
         .site-header .navbar-nav .nav-link:hover {
@@ -49,99 +76,117 @@
             transform: translateY(-2px);
         }
         
-        .content-section {
-            background: #ffffff;
-            padding: 20px 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+        .site-header .navbar-nav .nav-link:hover:after,
+        .site-header .navbar-nav .nav-link.active:after {
+            width: 100%;
         }
         
-        .btn-isend {
-            background-color: #3c5974;
-            color: white;
-            border-radius: 30px;
-            padding: 8px 25px;
-            font-weight: 500;
+        .content-section {
+            background: #ffffff;
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 25px;
             transition: all 0.3s ease;
         }
         
-        .btn-isend:hover {
-            background-color: #3c5974;
+        .content-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-isend {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(126, 87, 194, 0.3);
+            border-radius: 30px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-isend:hover {
+            background: linear-gradient(45deg, #5b0cb0, #1a65e6);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(106, 17, 203, 0.3);
         }
         
         /* Footer */
         .footer {
-            background: #31475e;
+            background: linear-gradient(45deg, #2d3748, #4a5568);
             color: rgba(255, 255, 255, 0.8);
-            padding: 20px 0;
-            margin-top: 30px;
+            padding: 30px 0;
+            margin-top: auto;
         }
         
         .footer a {
             color: rgba(255, 255, 255, 0.8);
             margin: 0 10px;
             transition: all 0.3s ease;
+            font-size: 1.2rem;
         }
         
         .footer a:hover {
             color: #fff;
             text-decoration: none;
+            transform: translateY(-3px);
         }
 
         /* Add top margin to content to account for fixed navbar */
         main.container {
             margin-top: 80px;
+            flex: 1;
         }
+        
         /* Chatbot styles */
         .chatbot-container {
             position: fixed;
             bottom: 30px;
-            right: 30px;
+            left: 30px; /* Changed from right to left for RTL */
             z-index: 1000;
         }
         
         .chatbot-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #3c5974;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
         .chatbot-icon:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
         }
         
         .chatbot-window {
             position: absolute;
             bottom: 80px;
-            right: 0;
+            left: 0; /* Changed from right to left for RTL */
             width: 350px;
             height: 500px;
             background-color: white;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: all 0.3s ease;
+            direction: rtl;
         }
         
         .chatbot-header {
-            background-color: #3c5974;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
-            padding: 15px;
+            padding: 18px 20px;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
@@ -152,18 +197,24 @@
             margin: 0;
             font-size: 18px;
             color: white;
-
+            font-weight: 700;
         }
         
         .close-chat {
             cursor: pointer;
             font-size: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .close-chat:hover {
+            transform: rotate(90deg);
         }
         
         .chatbot-body {
             flex-grow: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
+            background-color: #f8f9fd;
         }
         
         .chat-messages {
@@ -172,51 +223,61 @@
         }
         
         .message {
-            max-width: 70%;
-            padding: 10px 15px;
-            margin-bottom: 10px;
-            border-radius: 15px;
-            line-height: 1.4;
+            max-width: 75%;
+            padding: 12px 18px;
+            margin-bottom: 15px;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .message.bot {
             background-color: #f1f0f0;
             color: #333;
             align-self: flex-start;
-            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px; /* Changed from left to right for RTL */
         }
         
         .message.user {
-            background-color: #3c5974;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px; /* Changed from right to left for RTL */
         }
         
         .chatbot-footer {
             display: flex;
             padding: 15px;
-            background-color: #f8f9fa;
+            background-color: white;
             border-top: 1px solid #e9ecef;
         }
         
         .chat-input {
             flex-grow: 1;
-            padding: 10px 15px;
+            padding: 12px 18px;
             border: 1px solid #ddd;
-            border-radius: 20px;
-            margin-right: 10px;
+            border-radius: 25px;
+            margin-left: 10px; /* Changed from right to left for RTL */
             outline: none;
+            transition: all 0.3s ease;
+            font-family: 'Rubik', 'Assistant', sans-serif;
         }
         
         .chat-input:focus {
-            border-color: #3c5974;
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
         }
         
         .send-btn {
-            width: 40px;
-            height: 40px;
-            background-color: #3c5974;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
             color: white;
             border: none;
             border-radius: 50%;
@@ -225,11 +286,104 @@
             align-items: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(106, 17, 203, 0.2);
         }
         
         .send-btn:hover {
-            background-color: #3c5974;
-            transform: scale(1.05);
+            background: linear-gradient(45deg, #5b0cb0, #1a65e6);
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        /* Alert styles */
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Dropdown styles */
+        .dropdown-menu {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(-5px);
+        }
+        
+        /* Floating elements animation */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+            filter: blur(20px);
+            z-index: -1;
+            animation: float 15s infinite alternate ease-in-out;
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(100px, 50px) rotate(180deg); }
+        }
+        
+        /* Animations for accessibility widget and other elements */
+        .userway-widget {
+            transition: all 0.3s ease;
+        }
+        
+        .userway-widget:hover {
+            transform: scale(1.1);
+        }
+        
+        [data-read] {
+            position: relative;
+        }
+        
+        [data-read]::after {
+            content: '🔊';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        [data-read]:hover::after {
+            opacity: 0.7;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.4rem;
+            }
+            
+            .chatbot-window {
+                width: 300px;
+            }
+            
+            .footer {
+                padding: 20px 0;
+            }
         }
     </style>
     
@@ -239,59 +393,105 @@
     <header class="site-header">
         <nav class="navbar navbar-expand-md navbar-dark bg-isend fixed-top">
             <div class="container">
-                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">ISEND</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand me-4" href="{% url 'blog-home' %}">ISEND</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarToggle">
-                    <div class="navbar-nav mr-auto">
-                        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
-                            <i class="fas fa-home fa-sm mr-1"></i> Home
-                        </a>
-                        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
-                            <i class="fas fa-info-circle fa-sm mr-1"></i> About
-                        </a>
-                        <a class="nav-item nav-link" href="#">
-                            <i class="fas fa-cogs fa-sm mr-1"></i> Services
-                        </a>
-                        <a class="nav-item nav-link" href="#">
-                            <i class="fas fa-envelope fa-sm mr-1"></i> Contact
-                        </a>
-                        {% if user.is_authenticated %}
-                        <a class="nav-item nav-link" href="{% url 'chat_history' %}">
-                          <i class="fas fa-history fa-sm mr-1"></i> Chat History
-                      </a>
-                      <a class="nav-item nav-link" href="{% url 'profile' %}">
-                        <i class="fas fa-profile fa-sm mr-1"></i> profile
-                    </a>
-                      {% endif %}
-
+                    <!-- Primary Navigation - changes based on user role -->
+                    <div class="navbar-nav ms-auto">
+                        {% if user.is_authenticated and user.lecturerprofile %}
+                            <!-- Lecturer Navigation -->
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'profile' %}">
+                                <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'lecturer_requests' %}">
+                                <i class="fas fa-tasks fa-sm me-1"></i> הבקשות שלי
+                            </a>
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
+                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
+                            </a>
+                        {% elif user.is_authenticated %}
+                            <!-- Student Navigation -->
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'profile' %}">
+                                <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'student_tracking' %}">
+                                <i class="fas fa-eye fa-sm me-1"></i> מעקב בקשות
+                            </a>
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
+                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'chat_history' %}">
+                                <i class="fas fa-history fa-sm me-1"></i> היסטורית צ'אט
+                            </a>
+                        {% else %}
+                            <!-- Guest Navigation -->
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
+                            </a>
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
+                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
+                            </a>
+                            <a class="nav-item nav-link" href="#">
+                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
+                            </a>
+                        {% endif %}
                     </div>
-                <!-- Navbar Right Side -->
-<div class="navbar-nav">
-    {% if user.is_authenticated %}
-        <div class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-user fa-sm mr-1"></i> {{ user.username }}
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarUserDropdown">
-               
-                <div class="dropdown-divider"></div>
-                <form method="POST" action="{% url 'logout' %}" class="dropdown-item p-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link btn-block text-left dropdown-item">Logout</button>
-                </form>
-            </div>
-        </div>
-    {% else %}
-        <a class="nav-item nav-link" href="{% url 'login' %}">
-            <i class="fas fa-sign-in-alt fa-sm mr-1"></i> Login
-        </a>
-        <a class="nav-item nav-link" href="{% url 'register' %}">
-            <i class="fas fa-user-plus fa-sm mr-1"></i> Register
-        </a>
-    {% endif %}
-</div>
+                    
+                    <!-- Authentication Section - Right Side (me-auto in RTL makes it appear on left) -->
+                    <div class="navbar-nav me-auto">
+                        {% if user.is_authenticated %}
+                            <!-- User Menu for all authenticated users -->
+                            <div class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user fa-sm me-1"></i> {{ user.username }}
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarUserDropdown">
+                                    
+                                    <div class="dropdown-divider"></div>
+                                    <li>
+<form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{% url 'blog-home' %}">
+    <button type="submit" class="btn btn-link btn-block text-right dropdown-item">
+        <i class="fas fa-sign-out-alt fa-sm me-1"></i> התנתק
+    </button>
+</form>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% else %}
+                            <!-- Login/Register for guests -->
+                            <a class="nav-item nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt fa-sm me-1"></i> התחברות
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus fa-sm me-1"></i> הרשמה
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </nav>
@@ -320,7 +520,7 @@
         <div class="container text-center">
             <div class="row">
                 <div class="col-md-12">
-                    <p class="mb-2">© {% now "Y" %} ISEND. All rights reserved.</p>
+                    <p class="mb-2">© {% now "Y" %} ISEND. כל הזכויות שמורות.</p>
                     <div>
                         <a href="#"><i class="fab fa-facebook-f"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
@@ -332,10 +532,44 @@
         </div>
     </footer>
 
+    <!-- Add floating elements to the page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addFloatingElements = () => {
+                const sections = [document.body];
+                
+                sections.forEach(section => {
+                    for (let i = 0; i < 5; i++) {
+                        const element = document.createElement('div');
+                        element.classList.add('floating-element');
+                        
+                        // Random size between 100px and 300px
+                        const size = Math.random() * 200 + 100;
+                        element.style.width = `${size}px`;
+                        element.style.height = `${size}px`;
+                        
+                        // Random position
+                        const xPos = Math.random() * 100;
+                        const yPos = Math.random() * 100;
+                        element.style.top = `${yPos}%`;
+                        element.style.right = `${xPos}%`;
+                        
+                        // Random animation delay
+                        element.style.animationDelay = `${Math.random() * 5}s`;
+                        
+                        section.appendChild(element);
+                    }
+                });
+            };
+            
+            addFloatingElements();
+        });
+    </script>
+
     <!-- jQuery, Popper.js, and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
     
     {% block additional_js %}{% endblock %}
     <!-- Chatbot JavaScript -->
@@ -354,15 +588,15 @@
       
           const chatbotHeader = document.createElement('div');
           chatbotHeader.className = 'chatbot-header';
-          chatbotHeader.innerHTML = '<h4>ISEND Assistant</h4><span class="close-chat">&times;</span>';
+          chatbotHeader.innerHTML = '<h4>עוזר ISEND</h4><span class="close-chat">&times;</span>';
       
           const chatbotBody = document.createElement('div');
           chatbotBody.className = 'chatbot-body';
-          chatbotBody.innerHTML = '<div class="chat-messages"><div class="message bot">Hi there! How can I help you with your student requests today?</div></div>';
+          chatbotBody.innerHTML = '<div class="chat-messages"><div class="message bot">שלום! איך אני יכול לעזור לך עם בקשות הסטודנטים שלך היום?</div></div>';
       
           const chatbotFooter = document.createElement('div');
           chatbotFooter.className = 'chatbot-footer';
-          chatbotFooter.innerHTML = '<input type="text" class="chat-input" placeholder="Type your message here..."><button class="send-btn"><i class="fas fa-paper-plane"></i></button>';
+          chatbotFooter.innerHTML = '<input type="text" class="chat-input" placeholder="הקלד את ההודעה שלך כאן..."><button class="send-btn"><i class="fas fa-paper-plane"></i></button>';
       
           chatbotWindow.appendChild(chatbotHeader);
           chatbotWindow.appendChild(chatbotBody);
@@ -418,7 +652,7 @@
                   .catch(() => {
                       const errorMessage = document.createElement('div');
                       errorMessage.className = 'message bot';
-                      errorMessage.textContent = "Oops! Something went wrong.";
+                      errorMessage.textContent = "אופס! משהו השתבש.";
                       chatMessages.appendChild(errorMessage);
                   });
               }
@@ -461,7 +695,7 @@
     function speakText(text) {
       const msg = new SpeechSynthesisUtterance();
       msg.text = text;
-      msg.lang = 'en-US';
+      msg.lang = 'he-IL'; // Changed to Hebrew language
       msg.rate = 1;
       speechSynthesis.speak(msg);
     }

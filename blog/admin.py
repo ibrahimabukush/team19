@@ -6,6 +6,10 @@ class ChatHistoryAdmin(admin.ModelAdmin):
     list_display = ('username', 'message', 'reply', 'timestamp')
     search_fields = ('username', 'message', 'reply')
     list_filter = ('timestamp',)
+from django.contrib import admin
+from .models import AcademicRequest
+
+admin.site.register(AcademicRequest)
 
 
 # from django.contrib import admin

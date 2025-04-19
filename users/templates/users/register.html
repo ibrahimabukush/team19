@@ -1,775 +1,468 @@
 {% extends "blog/base.html" %}
-{% load static %}
-
-{% block additional_css %}
-<style>
-    /* Enhanced Profile Styles */
-    .profile-container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    
-    .profile-header {
-        background: linear-gradient(135deg, #4a6d8c, #31475e);
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .profile-header::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background: url('{% static "blog/img/pattern.png" %}') repeat;
-        opacity: 0.1;
-        z-index: 0;
-    }
-    
-    .profile-header-content {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-    }
-    
-    .profile-avatar {
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        border: 5px solid white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        object-fit: cover;
-    }
-    
-    .profile-info {
-        margin-left: 30px;
-        color: white;
-    }
-    
-    .profile-name {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-    
-    .profile-role {
-        font-size: 1.1rem;
-        font-weight: 500;
-        opacity: 0.9;
-        margin-bottom: 15px;
-    }
-    
-    .profile-meta {
-        display: flex;
-        gap: 20px;
-    }
-    
-    .profile-meta-item {
-        display: flex;
-        align-items: center;
-    }
-    
-    .profile-meta-item i {
-        margin-right: 8px;
-    }
-    
-    .profile-actions {
-        margin-left: auto;
-    }
-    
-    .btn-edit-profile {
-        background-color: rgba(255, 255, 255, 0.15);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 10px 20px;
-        border-radius: 30px;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-edit-profile:hover {
-        background-color: white;
-        color: #31475e;
-    }
-    
-    /* Profile Content */
-    .profile-content-wrapper {
-        display: grid;
-        grid-template-columns: 3fr 1fr;
-        gap: 25px;
-    }
-    
-    .profile-content {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
-    
-    .profile-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
-    
-    .profile-card {
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .profile-card:hover {
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transform: translateY(-5px);
-    }
-    
-    .profile-card-header {
-        padding: 20px;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    .profile-card-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: #31475e;
-        margin: 0;
-    }
-    
-    .profile-card-body {
-        padding: 20px;
-    }
-    
-    /* Form Styling */
-    .form-group {
-        margin-bottom: 20px;
-    }
-    
-    .form-label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: #31475e;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 12px 15px;
-        border: 1px solid #e1e5eb;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .form-control:focus {
-        border-color: #4a6d8c;
-        box-shadow: 0 0 0 3px rgba(74, 109, 140, 0.1);
-    }
-    
-    /* Stats Card */
-    .stats-card {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    .stat-item {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        text-align: center;
-    }
-    
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #31475e;
-        margin-bottom: 5px;
-    }
-    
-    .stat-label {
-        font-size: 0.9rem;
-        color: #6c757d;
-    }
-    
-    /* Progress Bars */
-    .progress-wrapper {
-        margin-bottom: 15px;
-    }
-    
-    .progress-label {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-    
-    .progress-name {
-        font-weight: 500;
-        color: #31475e;
-    }
-    
-    .progress-value {
-        color: #6c757d;
-    }
-    
-    .progress {
-        height: 8px;
-        border-radius: 4px;
-        background-color: #e9ecef;
-    }
-    
-    .progress-bar {
-        height: 100%;
-        border-radius: 4px;
-        background: linear-gradient(to right, #4a6d8c, #31475e);
-    }
-    
-    /* Activity Feed */
-    .activity-feed {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .activity-item {
-        position: relative;
-        padding-left: 40px;
-        padding-bottom: 20px;
-        border-left: 2px solid #e9ecef;
-        margin-left: 20px;
-    }
-    
-    .activity-item:last-child {
-        padding-bottom: 0;
-        border-left: none;
-    }
-    
-    .activity-icon {
-        position: absolute;
-        left: -20px;
-        top: 0;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: #4a6d8c;
-        color: white;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .activity-content {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-    }
-    
-    .activity-title {
-        font-weight: 500;
-        margin-bottom: 5px;
-    }
-    
-    .activity-time {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    /* Badges */
-    .badges-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .badge-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 80px;
-    }
-    
-    .badge-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background-color: #f8f9fa;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-bottom: 8px;
-        color: #31475e;
-    }
-    
-    .badge-name {
-        font-size: 0.8rem;
-        text-align: center;
-        color: #6c757d;
-    }
-    
-    /* Contact Info */
-    .contact-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    
-    .contact-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-    
-    .contact-item:last-child {
-        margin-bottom: 0;
-    }
-    
-    .contact-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background-color: #f8f9fa;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-right: 15px;
-        color: #4a6d8c;
-    }
-    
-    .contact-info {
-        flex: 1;
-    }
-    
-    .contact-label {
-        font-size: 0.85rem;
-        color: #6c757d;
-        margin-bottom: 3px;
-    }
-    
-    .contact-value {
-        font-weight: 500;
-        color: #31475e;
-    }
-    
-    /* Responsive */
-    @media (max-width: 992px) {
-        .profile-content-wrapper {
-            grid-template-columns: 1fr;
-        }
-        
-        .profile-header-content {
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .profile-info {
-            margin-left: 0;
-            margin-top: 20px;
-        }
-        
-        .profile-meta {
-            justify-content: center;
-        }
-        
-        .profile-actions {
-            margin-left: 0;
-            margin-top: 20px;
-        }
-    }
-    
-    @media (max-width: 576px) {
-        .stats-card {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
-{% endblock additional_css %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<div class="profile-container">
-    <!-- Profile Header -->
-    <section class="profile-header">
-        <div class="profile-header-content">
-            <img src="{{ user.profile.image.url }}" alt="{{ user.username }}" class="profile-avatar">
-            
-            <div class="profile-info">
-                <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
-                <p class="profile-role">{{ user.profile.major }} Student</p>
-                
-                <div class="profile-meta">
-                    <div class="profile-meta-item">
-                        <i class="fas fa-id-badge"></i>
-                        <span>ID: {{ user.profile.student_id }}</span>
-                    </div>
-                    <div class="profile-meta-item">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>{{ user.profile.year_of_study }}{{ user.profile.year_suffix }} Year</span>
-                    </div>
-                    <div class="profile-meta-item">
-                        <i class="fas fa-university"></i>
-                        <span>{{ user.profile.faculty }}</span>
-                    </div>
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-section register-form-container">
+            <div class="register-header text-center mb-4">
+                <h2 class="register-title">הרשמה למערכת</h2>
+                <div class="register-divider">
+                    <span class="register-divider-line"></span>
                 </div>
             </div>
             
-            <div class="profile-actions">
-                <a href="{% url 'profile_edit' %}" class="btn btn-edit-profile">
-                    <i class="fas fa-pencil-alt mr-2"></i> Edit Profile
-                </a>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Profile Content -->
-    <div class="profile-content-wrapper">
-        <div class="profile-content">
-            <!-- Personal Information -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Personal Information</h3>
-                    <button class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-pencil-alt"></i>
+            <form method="POST" id="registerForm">
+                {% csrf_token %}
+                
+                <!-- Role Selection -->
+                <div class="role-selector-container mb-4">
+                    <h4 class="role-title text-center mb-3">בחר את התפקיד שלך</h4>
+                    
+                    <div class="role-options">
+                        <label class="role-option">
+                            <input type="radio" name="is_student" id="student-role" value="True">
+                            <div class="role-card" id="student-card">
+                                <div class="role-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h5 class="role-name">סטודנט</h5>
+                                <div class="checkmark">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="role-option">
+                            <input type="radio" name="is_lecturer" id="lecturer-role" value="True">
+                            <div class="role-card" id="lecturer-card">
+                                <div class="role-icon">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                                <h5 class="role-name">מרצה</h5>
+                                <div class="checkmark">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Show error messages -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Form Fields -->
+                <div class="form-group mb-3">
+                    <label for="id_username" class="form-label">שם משתמש</label>
+                    {{ form.username|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="id_email" class="form-label">דואר אלקטרוני</label>
+                    {{ form.email|as_crispy_field }}
+                    <small class="form-text text-muted domain-hint student-hint" style="display:none;">
+                        סטודנטים חייבים להשתמש בכתובת דוא"ל המסתיימת ב-@ac.sce.ac.il
+                    </small>
+                    <small class="form-text text-muted domain-hint lecturer-hint" style="display:none;">
+                        מרצים חייבים להשתמש בכתובת דוא"ל המסתיימת ב-@sce.ac.il
+                    </small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="id_password1" class="form-label">סיסמה</label>
+                    {{ form.password1|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="id_password2" class="form-label">אימות סיסמה</label>
+                    {{ form.password2|as_crispy_field }}
+                </div>
+                
+                <!-- Hidden fields for role selection -->
+                <input type="hidden" name="is_student" id="hidden_is_student" value="False">
+                <input type="hidden" name="is_lecturer" id="hidden_is_lecturer" value="False">
+                
+                <div class="form-group text-center mt-4">
+                    <button class="btn btn-isend register-btn" type="submit">
+                        <i class="fas fa-user-plus me-1"></i> הירשם
                     </button>
                 </div>
-                <div class="profile-card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Full Name</label>
-                                <input type="text" class="form-control" value="{{ user.first_name }} {{ user.last_name }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Username</label>
-                                <input type="text" class="form-control" value="{{ user.username }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" class="form-control" value="{{ user.email }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" value="{{ user.profile.phone }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Date of Birth</label>
-                                <input type="text" class="form-control" value="{{ user.profile.date_of_birth }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Gender</label>
-                                <input type="text" class="form-control" value="{{ user.profile.gender }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </form>
             
-            <!-- Academic Information -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Academic Information</h3>
-                </div>
-                <div class="profile-card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Student ID</label>
-                                <input type="text" class="form-control" value="{{ user.profile.student_id }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Faculty</label>
-                                <input type="text" class="form-control" value="{{ user.profile.faculty }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Major</label>
-                                <input type="text" class="form-control" value="{{ user.profile.major }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Academic Year</label>
-                                <input type="text" class="form-control" value="{{ user.profile.year_of_study }}{{ user.profile.year_suffix }} Year" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Enrollment Date</label>
-                                <input type="text" class="form-control" value="{{ user.profile.enrollment_date }}" readonly>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="form-label">Expected Graduation</label>
-                                <input type="text" class="form-control" value="{{ user.profile.expected_graduation }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Recent Activity -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Recent Activity</h3>
-                </div>
-                <div class="profile-card-body">
-                    <ul class="activity-feed">
-                        {% if activities %}
-                            {% for activity in activities %}
-                                <li class="activity-item">
-                                    <div class="activity-icon">
-                                        <i class="{{ activity.icon }}"></i>
-                                    </div>
-                                    <div class="activity-content">
-                                        <div class="activity-title">{{ activity.title }}</div>
-                                        <div class="activity-description">{{ activity.description }}</div>
-                                        <div class="activity-time">{{ activity.time }}</div>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        {% else %}
-                            <!-- Sample activities if none are provided -->
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Submitted Course Extension Request</div>
-                                    <div class="activity-description">Your request for an extension on MATH301 has been submitted.</div>
-                                    <div class="activity-time">2 hours ago</div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Academic Appeal Approved</div>
-                                    <div class="activity-description">Your appeal for grade reconsideration in CS401 has been approved.</div>
-                                    <div class="activity-time">Yesterday</div>
-                                </div>
-                            </li>
-                            <li class="activity-item">
-                                <div class="activity-icon">
-                                    <i class="fas fa-calendar-alt"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <div class="activity-title">Class Schedule Updated</div>
-                                    <div class="activity-description">Your request to change PHYS202 from Section A to Section B has been processed.</div>
-                                    <div class="activity-time">3 days ago</div>
-                                </div>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="profile-sidebar">
-            <!-- Statistics -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Statistics</h3>
-                </div>
-                <div class="profile-card-body">
-                    <div class="stats-card">
-                        <div class="stat-item">
-                            <div class="stat-value">12</div>
-                            <div class="stat-label">Total Requests</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">9</div>
-                            <div class="stat-label">Approved</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">2</div>
-                            <div class="stat-label">Pending</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">1</div>
-                            <div class="stat-label">Rejected</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Progress Tracking -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Academic Progress</h3>
-                </div>
-                <div class="profile-card-body">
-                    <div class="progress-wrapper">
-                        <div class="progress-label">
-                            <span class="progress-name">Program Completion</span>
-                            <span class="progress-value">75%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" style="width: 75%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-wrapper">
-                        <div class="progress-label">
-                            <span class="progress-name">Current Semester</span>
-                            <span class="progress-value">60%</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" style="width: 60%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-wrapper">
-                        <div class="progress-label">
-                            <span class="progress-name">Credit Hours</span>
-                            <span class="progress-value">89/120</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar" style="width: 74%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Achievements & Badges -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Achievements</h3>
-                </div>
-                <div class="profile-card-body">
-                    <div class="badges-container">
-                        <div class="badge-item">
-                            <div class="badge-icon">
-                                <i class="fas fa-award fa-lg"></i>
-                            </div>
-                            <div class="badge-name">Dean's List</div>
-                        </div>
-                        <div class="badge-item">
-                            <div class="badge-icon">
-                                <i class="fas fa-user-graduate fa-lg"></i>
-                            </div>
-                            <div class="badge-name">Honor Roll</div>
-                        </div>
-                        <div class="badge-item">
-                            <div class="badge-icon">
-                                <i class="fas fa-book fa-lg"></i>
-                            </div>
-                            <div class="badge-name">Perfect Attendance</div>
-                        </div>
-                        <div class="badge-item">
-                            <div class="badge-icon">
-                                <i class="fas fa-trophy fa-lg"></i>
-                            </div>
-                            <div class="badge-name">Leadership</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Contact Information -->
-            <div class="profile-card">
-                <div class="profile-card-header">
-                    <h3 class="profile-card-title">Contact Information</h3>
-                </div>
-                <div class="profile-card-body">
-                    <ul class="contact-list">
-                        <li class="contact-item">
-                            <div class="contact-icon">
-                                <i class="fas fa-envelope"></i>
-                            </div>
-                            <div class="contact-info">
-                                <div class="contact-label">Email</div>
-                                <div class="contact-value">{{ user.email }}</div>
-                            </div>
-                        </li>
-                        <li class="contact-item">
-                            <div class="contact-icon">
-                                <i class="fas fa-phone"></i>
-                            </div>
-                            <div class="contact-info">
-                                <div class="contact-label">Phone</div>
-                                <div class="contact-value">{{ user.profile.phone }}</div>
-                            </div>
-                        </li>
-                        <li class="contact-item">
-                            <div class="contact-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div class="contact-info">
-                                <div class="contact-label">Address</div>
-                                <div class="contact-value">{{ user.profile.address }}</div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+            <div class="login-link text-center mt-4 pt-3 border-top">
+                <p>כבר יש לך חשבון? <a href="{% url 'login' %}" class="login-link-text">התחבר כאן</a></p>
             </div>
         </div>
     </div>
 </div>
 {% endblock content %}
 
+{% block additional_css %}
+<style>
+    /* Register Page Styling */
+    .register-form-container {
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 30px rgba(93, 44, 136, 0.1);
+        padding: 40px 30px;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .register-form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(90deg, #5d2c88, #8843c5);
+    }
+    
+    .register-title {
+        color: #5d2c88;
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .register-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 15px 0 30px;
+    }
+    
+    .register-divider-line {
+        display: block;
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #5d2c88, #8843c5);
+        border-radius: 2px;
+    }
+    
+    /* Role Selector Styling */
+    .role-title {
+        color: #333;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+    
+    .role-options {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+    }
+    
+    .role-option {
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .role-option input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .role-card {
+        width: 160px;
+        height: 160px;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+        border: 2px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .role-icon {
+        font-size: 3rem;
+        color: #5d2c88;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .role-name {
+        font-weight: 600;
+        color: #333;
+        margin: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .checkmark {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 25px;
+        height: 25px;
+        background: #5d2c88;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Effects when selected */
+    .role-option input:checked + .role-card {
+        border-color: #5d2c88;
+        background-color: rgba(93, 44, 136, 0.05);
+        box-shadow: 0 10px 20px rgba(93, 44, 136, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    .role-option input:checked + .role-card .role-icon {
+        transform: scale(1.2);
+    }
+    
+    .role-option input:checked + .role-card .checkmark {
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    /* Animated effects */
+    .role-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .role-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: all 0.6s ease;
+    }
+    
+    .role-card:hover::before {
+        left: 100%;
+    }
+    
+    /* Form styling */
+    .register-form-container label {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+    
+    .register-form-container .form-control {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+    
+    .register-form-container .form-control:focus {
+        border-color: #5d2c88;
+        box-shadow: 0 0 0 3px rgba(93, 44, 136, 0.1);
+        background-color: white;
+    }
+    
+    .register-btn {
+        width: 60%;
+        padding: 12px !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .register-btn:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 10px 20px rgba(93, 44, 136, 0.2) !important;
+    }
+    
+    .login-link-text {
+        color: #5d2c88;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .login-link-text:hover {
+        color: #4a2370;
+        text-decoration: underline;
+    }
+    
+    /* Alert styling */
+    .alert-danger {
+        background-color: #fff5f5;
+        color: #e53e3e;
+        border-color: #fed7d7;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    
+    @keyframes shake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+        40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+    
+    /* Animation */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .register-form-container {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    #student-card .role-icon {
+        animation: pulse 2s infinite;
+        animation-delay: 0.5s;
+    }
+    
+    #lecturer-card .role-icon {
+        animation: pulse 2s infinite;
+        animation-delay: 1s;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .register-form-container {
+            padding: 30px 20px;
+        }
+        
+        .register-title {
+            font-size: 1.7rem;
+        }
+        
+        .register-btn {
+            width: 80%;
+        }
+        
+        .role-options {
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+    }
+</style>
+{% endblock additional_css %}
+
 {% block additional_js %}
 <script>
-    // JavaScript for profile page interactivity
     document.addEventListener('DOMContentLoaded', function() {
-        // Animation for activity feed items
-        const activityItems = document.querySelectorAll('.activity-item');
-        activityItems.forEach((item, index) => {
-            setTimeout(() => {
-                item.style.opacity = '0';
-                item.style.transform = 'translateX(-20px)';
-                item.style.transition = 'all 0.3s ease';
-                
-                setTimeout(() => {
-                    item.style.opacity = '1';
-                    item.style.transform = 'translateX(0)';
-                }, 50);
-            }, index * 100);
-        });
+        // Get the role radio buttons
+        const studentRadio = document.getElementById('student-role');
+        const lecturerRadio = document.getElementById('lecturer-role');
         
-        // Toggle edit mode for personal information
-        const editButtons = document.querySelectorAll('.btn-outline-secondary');
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const cardBody = this.closest('.profile-card-header').nextElementSibling;
-                const inputs = cardBody.querySelectorAll('input');
+        // Get the hidden form fields
+        const hiddenStudentField = document.getElementById('hidden_is_student');
+        const hiddenLecturerField = document.getElementById('hidden_is_lecturer');
+        
+        // Get the domain hint elements
+        const studentHint = document.querySelector('.student-hint');
+        const lecturerHint = document.querySelector('.lecturer-hint');
+        
+        // Function to update the form based on role selection
+        function updateFormByRole() {
+            // Update hidden fields based on selection
+            hiddenStudentField.value = studentRadio.checked ? 'True' : 'False';
+            hiddenLecturerField.value = lecturerRadio.checked ? 'True' : 'False';
+            
+            // Show/hide appropriate hints
+            studentHint.style.display = studentRadio.checked ? 'block' : 'none';
+            lecturerHint.style.display = lecturerRadio.checked ? 'block' : 'none';
+            
+            // Add bounce animation to icon when selected
+            if (studentRadio.checked) {
+                const iconElement = document.querySelector('#student-card .role-icon');
+                iconElement.style.animation = 'none';
+                setTimeout(() => {
+                    iconElement.style.animation = 'bounce 0.5s';
+                }, 10);
+            } else if (lecturerRadio.checked) {
+                const iconElement = document.querySelector('#lecturer-card .role-icon');
+                iconElement.style.animation = 'none';
+                setTimeout(() => {
+                    iconElement.style.animation = 'bounce 0.5s';
+                }, 10);
+            }
+        }
+        
+        // Add event listeners to role radio buttons
+        studentRadio.addEventListener('change', updateFormByRole);
+        lecturerRadio.addEventListener('change', updateFormByRole);
+        
+        // Add bounce animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+                40% {transform: translateY(-20px);}
+                60% {transform: translateY(-10px);}
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Set initial state if there's an error and form reloads
+        updateFormByRole();
+        
+        // Form validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            if (!studentRadio.checked && !lecturerRadio.checked) {
+                e.preventDefault();
                 
-                inputs.forEach(input => {
-                    if (input.hasAttribute('readonly')) {
-                        input.removeAttribute('readonly');
-                        this.innerHTML = '<i class="fas fa-save"></i>';
-                        input.style.backgroundColor = '#fff';
-                        input.style.borderColor = '#4a6d8c';
-                    } else {
-                        input.setAttribute('readonly', true);
-                        this.innerHTML = '<i class="fas fa-pencil-alt"></i>';
-                        input.style.backgroundColor = '';
-                        input.style.borderColor = '';
-                        
-                        // Here you would typically save the data via AJAX
-                        console.log('Saving:', input.name, input.value);
-                    }
-                });
-            });
+                // Create alert for role selection
+                const roleAlert = document.createElement('div');
+                roleAlert.className = 'alert alert-danger';
+                roleAlert.textContent = 'אנא בחר תפקיד אחד (סטודנט או מרצה)';
+                
+                // Add the alert to the form
+                const roleContainer = document.querySelector('.role-selector-container');
+                if (!roleContainer.querySelector('.alert')) {
+                    roleContainer.appendChild(roleAlert);
+                    
+                    // Scroll to the alert
+                    roleAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
         });
     });
 </script>

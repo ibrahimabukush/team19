@@ -14,5 +14,7 @@ urlpatterns = [
     path("api/submit-request", views.submit_request, name="submit_request"),
     path('academic-request/', views.academic_request, name='academic-request'),
     path('schedule-request/', views.schedule_request, name='schedule_request'),
+    path('student/tracking/', views.tracking, name='student_tracking'),
+
 
 ]

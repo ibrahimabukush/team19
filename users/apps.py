@@ -8,3 +8,7 @@ class UsersConfig(AppConfig):
     def ready(self):
         # import users.signals  ← This was causing the error because signals.py no longer exists
         pass
+
+
+def ready(self):
+    import users.signals

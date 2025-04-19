@@ -15,32 +15,45 @@ import base64
 import os
 from django.conf import settings
 from django.http import JsonResponse
-
+import users.views
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from users.models import LecturerProfile
+from django.utils import timezone
+
 def submit_request(request):
-    
-    if request.method == 'POST':
-        user = request.user.username if request.user.is_authenticated else 'Anonymous'
-        request_type = request.POST.get("request_type", "")
-        text = request.POST.get("request_text", "")
-        attachment = request.FILES.get("attachment")
+    if request.method == "POST":
+        subject = request.POST.get('subject')
+        request_type = request.POST.get('request_type')
+        request_text = request.POST.get('request_text')
 
-        StudentRequest.objects.create(
-            username=user,
-            category="Academic",  # or dynamic if you're using other forms too
+        # יצירת הבקשה החדשה
+        new_request = AcademicRequest(
+            student=request.user,  # על פי המודל שלך, אנו משתמשים במשתמש המחובר
+            subject=subject,
             request_type=request_type,
-            text=text,
-            attachment=attachment
+            request_text=request_text
         )
-
+        new_request.save()  ## שמירה של הבקשה במסד הנתונים
         return JsonResponse({"message": "Request submitted successfully!"})
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
+@login_required
+def tracking(request):
+    user_requests = AcademicRequest.objects.filter(student=request.user)
 
+    # Annotate if deadline passed
+    for req in user_requests:
+        req.is_past_deadline = False
+        if req.status == "need_update" and req.update_deadline:
+            req.is_past_deadline = timezone.now() > req.update_deadline
+
+    return render(request, 'blog/tracking.html', {'requests': user_requests})
 
 
 
@@ -269,9 +282,33 @@ Your goal is to understand what the student means and guide them step-by-step.
 
 @login_required
 def academic_request(request):
-    return render(request, 'blog/academic_request.html')
-
+    subjects = LecturerProfile.objects.exclude(subject__isnull=True).exclude(subject__exact='').values_list('subject', flat=True).distinct()
+    return render(request, 'blog/academic_request.html', {
+        'subjects': subjects
+    })
 @login_required
 def schedule_request(request):
     return render(request, 'blog/schedule_requests.html')
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from users.models import LecturerProfile
+from .models import AcademicRequest
+
+@login_required
+def lecturer_requests_view(request):
+    user = request.user
+
+    # Check if user is a lecturer
+    if not user.is_authenticated or not hasattr(user, 'lecturerprofile'):
+        return render(request, 'blog/not_authorized.html')
+
+    subject = user.lecturerprofile.subject
+
+    # Get all requests that match the subject this lecturer teaches
+    requests = AcademicRequest.objects.filter(subject=subject)
+
+    return render(request, 'blog/lecturer_requests.html', {
+        'requests': requests,
+        'subject': subject,
+    })
