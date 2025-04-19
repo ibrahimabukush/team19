@@ -1,4 +1,3 @@
-
 pipeline {
     agent any
 
@@ -9,35 +8,29 @@ pipeline {
             }
         }
 
-      stage('Install Dependencies') {
-    steps {
-        sh 'pip install --user --force-reinstall -r requirements.txt'
-    }
-}
-
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip3 install --user --force-reinstall -r requirements.txt'
+            }
+        }
 
         stage('Apply Migrations') {
             steps {
-                sh 'python manage.py makemigrations'
-                sh 'python manage.py migrate'
+                sh 'python3 manage.py makemigrations'
+                sh 'python3 manage.py migrate'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'python manage.py test'
+                sh 'python3 manage.py test'
+            }
+        }
+
+        stage('Run Server (Optional)') {
+            steps {
+                sh 'nohup python3 manage.py runserver 0.0.0.0:8000 &'
             }
         }
     }
 }
-    
-    
-        post {
-            success {
-                echo 'Build succeeded!'
-            }
-            failure {
-                echo 'Build failed!'
-            }
-        }
-    
