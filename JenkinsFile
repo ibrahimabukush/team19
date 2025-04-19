@@ -1,37 +1,39 @@
 pipeline {
-    stage('Check Python Availability') {
-    steps {
-        sh 'which python3 || echo "python3 not found"'
-        sh 'python3 --version || echo "python3 not installed"'
-    }
-}
-
+    agent any
+    
     stages {
+        stage('Check Python Availability') {
+            steps {
+                sh 'which python3 || echo "python3 not found"'
+                sh 'python3 --version || echo "python3 not installed"'
+            }
+        }
+        
         stage('Clone Project') {
             steps {
                 git branch: 'main', url: 'https://github.com/ibrahimabukush/team19.git'
             }
         }
-
+        
         stage('Install Dependencies') {
             steps {
                 sh 'pip3 install --user --force-reinstall -r requirements.txt'
             }
         }
-
+        
         stage('Apply Migrations') {
             steps {
                 sh 'python3 manage.py makemigrations'
                 sh 'python3 manage.py migrate'
             }
         }
-
+        
         stage('Run Tests') {
             steps {
                 sh 'python3 manage.py test'
             }
         }
-
+        
         stage('Run Server (Optional)') {
             steps {
                 sh 'nohup python3 manage.py runserver 0.0.0.0:8000 &'
@@ -39,4 +41,3 @@ pipeline {
         }
     }
 }
-
