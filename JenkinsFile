@@ -4,8 +4,8 @@ pipeline {
     stages {
         stage('Check Python Availability') {
             steps {
-                sh 'which python3 || echo "python3 not found"'
-                sh 'python3 --version || echo "python3 not installed"'
+                sh 'which python || echo "python not found"'
+                sh 'python --version || echo "python3 not installed"'
             }
         }
         
@@ -17,26 +17,26 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                sh 'pip3 install --user --force-reinstall -r requirements.txt'
+                sh 'pip install --user --force-reinstall -r requirements.txt'
             }
         }
         
         stage('Apply Migrations') {
             steps {
-                sh 'python3 manage.py makemigrations'
-                sh 'python3 manage.py migrate'
+                sh 'python manage.py makemigrations'
+                sh 'python manage.py migrate'
             }
         }
         
         stage('Run Tests') {
             steps {
-                sh 'python3 manage.py test'
+                sh 'python manage.py test'
             }
         }
         
         stage('Run Server (Optional)') {
             steps {
-                sh 'nohup python3 manage.py runserver 0.0.0.0:8000 &'
+                sh 'nohup python manage.py runserver 0.0.0.0:8000 &'
             }
         }
     }
