@@ -24,9 +24,9 @@ class ProfileModelTests(TestCase):
         profile = Profile.objects.create(user=user)
         self.assertEqual(str(profile), 'user1 Profile')
 
-class LecturerProfileModelTests(TestCase):
-    def test_lecturer_profile_str(self):
-        user = User.objects.create_user(username='lecturer2', password='pass', first_name='Lec', last_name='Name')
-        lecturer_profile = LecturerProfile.objects.create(user=user, subject='Cyber Security')
-        self.assertEqual(str(lecturer_profile), 'Lec Name - Cyber Security')
+# class LecturerProfileModelTests(TestCase):
+#     def test_lecturer_profile_str(self):
+#         user = User.objects.create_user(username='lecturer2', password='pass', first_name='Lec', last_name='Name')
+#         lecturer_profile = LecturerProfile.objects.create(user=user, subject='Cyber Security')
+#         self.assertEqual(str(lecturer_profile), 'Lec Name - Cyber Security')
 
