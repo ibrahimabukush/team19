@@ -28,15 +28,15 @@ pipeline {
                 sh 'pip3 install --user --force-reinstall -r requirements.txt'
             }
         }
-        stage('Create .env File') {
+ stage('Create .env File') {
     steps {
         sh '''
             echo "EMAIL_HOST_USER=youremail@example.com" > .env
             echo "EMAIL_HOST_PASSWORD=yourpassword" >> .env
-            mv .env team19/
         '''
     }
 }
+
 
         stage('Apply Migrations') {
             steps {
