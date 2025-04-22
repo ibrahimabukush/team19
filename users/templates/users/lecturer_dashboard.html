@@ -1,8 +1,865 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
+<style>
+    :root {
+        --primary: #4e55c9;
+        --secondary: #6e3ad6;
+        --success: #10a55a;
+        --warning: #f8a826;
+        --danger: #dc3545;
+        --info: #17a2b8;
+        --light-gray: #f8f9fa;
+    }
+
+    /* Clean, modern card design */
+    .stat-card {
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        height: 100px;
+        background-color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card.pending {
+        border-right: 4px solid var(--warning);
+    }
+
+    .stat-card.approved {
+        border-right: 4px solid var(--success);
+    }
+
+    .stat-card.processing {
+        border-right: 4px solid var(--info);
+    }
+
+    .stat-card.rejected {
+        border-right: 4px solid var(--danger);
+    }
+    
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stat-card-title {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .stat-card-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-icon-container {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-card.pending .stat-icon-container {
+        background-color: rgba(248, 168, 38, 0.1);
+    }
+
+    .stat-card.approved .stat-icon-container {
+        background-color: rgba(16, 165, 90, 0.1);
+    }
+
+    .stat-card.processing .stat-icon-container {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+
+    .stat-card.rejected .stat-icon-container {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .stat-card.pending .stat-card-value {
+        color: var(--warning);
+    }
+
+    .stat-card.approved .stat-card-value {
+        color: var(--success);
+    }
+
+    .stat-card.processing .stat-card-value {
+        color: var(--info);
+    }
+
+    .stat-card.rejected .stat-card-value {
+        color: var(--danger);
+    }
+
+    .stat-icon {
+        font-size: 22px;
+    }
+
+    .stat-card.pending .stat-icon {
+        color: var(--warning);
+    }
+
+    .stat-card.approved .stat-icon {
+        color: var(--success);
+    }
+
+    .stat-card.processing .stat-icon {
+        color: var(--info);
+    }
+
+    .stat-card.rejected .stat-icon {
+        color: var(--danger);
+    }
+
+    /* Header styling */
+    .dashboard-header {
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .dashboard-subtitle {
+        opacity: 0.9;
+        font-size: 15px;
+    }
+
+    /* Cards and table styling */
+    .main-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-title {
+        margin-bottom: 0;
+        font-weight: 600;
+        font-size: 18px;
+        color: #333;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        border-top: none;
+        padding: 12px 15px;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 12px 15px;
+    }
+
+    .table tr:hover {
+        background-color: rgba(78, 85, 201, 0.03);
+    }
+
+    /* Status badge styling */
+    .badge {
+        padding: 7px 12px;
+        border-radius: 30px;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    /* Filter buttons */
+    .filter-container {
+        display: flex;
+        gap: 5px;
+    }
+
+    .filter-btn {
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: none !important;
+        transition: all 0.2s;
+    }
+
+    /* Recent requests styling */
+    .request-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .request-item:hover {
+        background-color: rgba(78, 85, 201, 0.03);
+    }
+
+    .request-item:last-child {
+        border-bottom: none;
+    }
+
+    .request-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+    .request-content {
+        flex: 1;
+    }
+
+    .request-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 3px;
+        color: #212529;
+    }
+
+    .request-subtitle {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 3px;
+    }
+
+    .request-status {
+        margin-right: auto;
+        text-align: end;
+    }
+
+    .request-date {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 3px;
+    }
+
+    /* Modal styling */
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 15px 20px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .info-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .info-row {
+        margin-bottom: 15px;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 3px;
+        font-size: 13px;
+    }
+
+    .info-value {
+        color: #212529;
+    }
+
+    .request-content-box {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .empty-state i {
+        font-size: 40px;
+        color: #ddd;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+</style>
+
 <div class="container mt-4">
-    <h2>Welcome, {{ user.username }} (Lecturer)</h2>
-    <p>This is your dashboard. You can manage courses, documents, and student requests here.</p>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="dashboard-title">שלום,  {{ user.username }}</h1>
+                <p class="dashboard-subtitle">זהו לוח הבקרה שלך. כאן תוכל/י לנהל קורסים, מסמכים ובקשות סטודנטים.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if pending_requests.count > 0 %}
+                <div class="alert alert-warning py-2 d-inline-block mb-0">
+                    <i class="fas fa-bell me-2"></i> יש לך {{ pending_requests.count }} בקשות ממתינות חדשות
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card pending">
+                <div class="stat-content">
+                    <div class="stat-card-title">ממתינות</div>
+                    <div class="stat-card-value">{{ pending_requests.count }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card processing">
+                <div class="stat-content">
+                    <div class="stat-card-title">בטיפול</div>
+                    <div class="stat-card-value">{{ in_progress_requests.count }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-sync-alt stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card approved">
+                <div class="stat-content">
+                    <div class="stat-card-title">מאושרות</div>
+                    <div class="stat-card-value">{{ approved_requests.count }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card rejected">
+                <div class="stat-content">
+                    <div class="stat-card-title">נדחו</div>
+                    <div class="stat-card-value">{{ rejected_requests.count }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-times-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Requests Section -->
+    <div class="main-card">
+        <div class="card-header">
+            <h5 class="card-title">בקשות אקדמיות</h5>
+            <div class="filter-container">
+                <button class="btn btn-primary active filter-btn" data-filter="all">הכל</button>
+                <button class="btn btn-outline-warning filter-btn" data-filter="pending">ממתינות</button>
+                <button class="btn btn-outline-info filter-btn" data-filter="in_progress">בטיפול</button>
+                <button class="btn btn-outline-primary filter-btn" data-filter="need_update">דורשות עדכון</button>
+                <button class="btn btn-outline-success filter-btn" data-filter="approved">מאושרות</button>
+                <button class="btn btn-outline-danger filter-btn" data-filter="rejected">נדחו</button>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>סטודנט</th>
+                        <th>נושא</th>
+                        <th>סוג בקשה</th>
+                        <th>תאריך יצירה</th>
+                        <th>סטטוס</th>
+                        <th>דדליין לעדכון</th>
+                        <th>פעולות</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in academic_requests %}
+                    <tr class="request-row" data-status="{{ request.status }}">
+                        <td>{{ request.student.get_full_name }}</td>
+                        <td>{{ request.subject }}</td>
+                        <td>{{ request.request_type }}</td>
+                        <td>{{ request.created_at|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if request.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">ממתין</span>
+                            {% elif request.status == 'in_progress' %}
+                            <span class="badge bg-info">בטיפול</span>
+                            {% elif request.status == 'need_update' %}
+                            <span class="badge bg-primary">דורש עדכון</span>
+                            {% elif request.status == 'approved' %}
+                            <span class="badge bg-success">מאושר</span>
+                            {% else %}
+                            <span class="badge bg-danger">נדחה</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if request.update_deadline %}
+                                {% if request.is_past_deadline %}
+                                <span class="text-danger">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    {{ request.update_deadline|date:"d/m/Y" }}
+                                </span>
+                                {% else %}
+                                <span class="text-warning">
+                                    {{ request.update_deadline|date:"d/m/Y" }}
+                                </span>
+                                {% endif %}
+                            {% else %}
+                            <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-primary btn-sm view-request" data-id="{{ request.id }}" data-bs-toggle="modal" data-bs-target="#requestModal">
+                                <i class="fas fa-eye"></i> צפה
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>אין בקשות להצגה</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if academic_requests.has_other_pages %}
+        <div class="card-footer bg-white">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if academic_requests.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ academic_requests.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in academic_requests.paginator.page_range %}
+                        {% if academic_requests.number == num %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if academic_requests.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ academic_requests.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Recent Requests and Upcoming Deadlines -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="main-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">בקשות אחרונות</h5>
+                </div>
+                <div>
+                    {% for request in recent_requests %}
+                    <a href="#" class="request-item view-request" data-id="{{ request.id }}" data-bs-toggle="modal" data-bs-target="#requestModal">
+                        <div class="request-icon 
+                            {% if request.status == 'pending' %}bg-warning-subtle text-warning
+                            {% elif request.status == 'in_progress' %}bg-info-subtle text-info
+                            {% elif request.status == 'need_update' %}bg-primary-subtle text-primary
+                            {% elif request.status == 'approved' %}bg-success-subtle text-success
+                            {% else %}bg-danger-subtle text-danger{% endif %}">
+                            {% if request.status == 'pending' %}
+                            <i class="fas fa-clock"></i>
+                            {% elif request.status == 'in_progress' %}
+                            <i class="fas fa-sync-alt"></i>
+                            {% elif request.status == 'need_update' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% elif request.status == 'approved' %}
+                            <i class="fas fa-check-circle"></i>
+                            {% else %}
+                            <i class="fas fa-times-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="request-content">
+                            <div class="request-title">{{ request.subject }}</div>
+                            <div class="request-subtitle">{{ request.student.get_full_name }} - {{ request.request_type }}</div>
+                            <div>
+                                {% if request.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">ממתין</span>
+                                {% elif request.status == 'in_progress' %}
+                                <span class="badge bg-info">בטיפול</span>
+                                {% elif request.status == 'need_update' %}
+                                <span class="badge bg-primary">דורש עדכון</span>
+                                {% elif request.status == 'approved' %}
+                                <span class="badge bg-success">מאושר</span>
+                                {% else %}
+                                <span class="badge bg-danger">נדחה</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="request-status">
+                            <div class="request-date">{{ request.created_at|date:"d/m/Y" }}</div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>אין בקשות אחרונות להצגה</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="main-card h-100">
+                <div class="card-header">
+                    <h5 class="card-title">בקשות עם דדליין קרוב</h5>
+                </div>
+                <div>
+                    {% for request in upcoming_deadlines %}
+                    <a href="#" class="request-item view-request" data-id="{{ request.id }}" data-bs-toggle="modal" data-bs-target="#requestModal">
+                        <div class="request-icon {% if request.is_past_deadline %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning{% endif %}">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="request-content">
+                            <div class="request-title">{{ request.subject }}</div>
+                            <div class="request-subtitle">{{ request.student.get_full_name }} - {{ request.request_type }}</div>
+                            <div>
+                                {% if request.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">ממתין</span>
+                                {% elif request.status == 'in_progress' %}
+                                <span class="badge bg-info">בטיפול</span>
+                                {% elif request.status == 'need_update' %}
+                                <span class="badge bg-primary">דורש עדכון</span>
+                                {% elif request.status == 'approved' %}
+                                <span class="badge bg-success">מאושר</span>
+                                {% else %}
+                                <span class="badge bg-danger">נדחה</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="request-status">
+                            <div class="{% if request.is_past_deadline %}text-danger{% else %}text-warning{% endif %}">
+                                {% if request.is_past_deadline %}
+                                <i class="fas fa-exclamation-triangle"></i>
+                                {% endif %}
+                                {{ request.update_deadline|date:"d/m/Y" }}
+                            </div>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>אין בקשות עם דדליין קרוב</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Request Details -->
+    <div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requestModalLabel">פרטי בקשה</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'update_request_status' request_id=0 %}" id="requestForm">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="request_id" id="request_id">
+                        
+                        <div class="info-section">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">סטודנט</div>
+                                        <div class="info-value" id="modalStudent"></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">נושא</div>
+                                        <div class="info-value" id="modalSubject"></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">סוג בקשה</div>
+                                        <div class="info-value" id="modalType"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="info-row">
+                                        <div class="info-label">תאריך יצירה</div>
+                                        <div class="info-value" id="modalCreated"></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">סטטוס</div>
+                                        <div class="info-value" id="modalStatus"></div>
+                                    </div>
+                                    <div class="info-row">
+                                        <div class="info-label">דדליין לעדכון</div>
+                                        <div class="info-value" id="modalDeadline"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">תוכן הבקשה</label>
+                            <div class="request-content-box" id="modalContent"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="lecturer_note" class="form-label">הערות המרצה</label>
+                            <textarea class="form-control" id="lecturer_note" name="lecturer_note" rows="3" placeholder="הוסף הערות לבקשה..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="status" class="form-label">עדכון סטטוס</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="pending">ממתין</option>
+                                <option value="in_progress">בטיפול</option>
+                                <option value="need_update">דורש עדכון</option>
+                                <option value="approved">מאושר</option>
+                                <option value="rejected">נדחה</option>
+                            </select>
+                        </div>
+                        
+                        <div id="deadlineContainer" class="mb-3 d-none">
+                            <label for="update_deadline" class="form-label">דדליין לעדכון</label>
+                            <input type="date" class="form-control" id="update_deadline" name="update_deadline">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">סגור</button>
+                        <button type="submit" class="btn btn-primary">שמור שינויים</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide deadline input based on status selection
+        const statusSelect = document.getElementById('status');
+        const deadlineContainer = document.getElementById('deadlineContainer');
+        
+        statusSelect.addEventListener('change', function() {
+            if (this.value === 'need_update') {
+                deadlineContainer.classList.remove('d-none');
+            } else {
+                deadlineContainer.classList.add('d-none');
+            }
+        });
+        
+        // Filter requests
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const requestRows = document.querySelectorAll('.request-row');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active button
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.classList.remove('btn-primary', 'btn-warning', 'btn-info', 'btn-success', 'btn-danger');
+                    
+                    if (btn.getAttribute('data-filter') === 'all') {
+                        btn.classList.add('btn-outline-primary');
+                    } else if (btn.getAttribute('data-filter') === 'pending') {
+                        btn.classList.add('btn-outline-warning');
+                    } else if (btn.getAttribute('data-filter') === 'in_progress') {
+                        btn.classList.add('btn-outline-info');
+                    } else if (btn.getAttribute('data-filter') === 'need_update') {
+                        btn.classList.add('btn-outline-primary');
+                    } else if (btn.getAttribute('data-filter') === 'approved') {
+                        btn.classList.add('btn-outline-success');
+                    } else if (btn.getAttribute('data-filter') === 'rejected') {
+                        btn.classList.add('btn-outline-danger');
+                    }
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                this.classList.remove('btn-outline-primary', 'btn-outline-warning', 'btn-outline-info', 'btn-outline-success', 'btn-outline-danger');
+                
+                const filter = this.getAttribute('data-filter');
+                if (filter === 'all') {
+                    this.classList.add('btn-primary');
+                } else if (filter === 'pending') {
+                    this.classList.add('btn-warning');
+                } else if (filter === 'in_progress') {
+                    this.classList.add('btn-info');
+                } else if (filter === 'need_update') {
+                    this.classList.add('btn-primary');
+                } else if (filter === 'approved') {
+                    this.classList.add('btn-success');
+                } else if (filter === 'rejected') {
+                    this.classList.add('btn-danger');
+                }
+                
+                // Filter table rows
+                const filterValue = this.getAttribute('data-filter');
+                requestRows.forEach(row => {
+                    if (filterValue === 'all' || row.getAttribute('data-status') === filterValue) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Handle request view
+        const viewButtons = document.querySelectorAll('.view-request');
+        
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-id');
+                
+                // Update the form action with the correct request ID
+                const requestForm = document.getElementById('requestForm');
+                requestForm.action = requestForm.action.replace('/0/', `/${requestId}/`);
+                
+                // Fetch request details via AJAX
+                fetch(`/lecturer/request/${requestId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('request_id').value = data.id;
+                        document.getElementById('modalStudent').textContent = data.student_name;
+                        document.getElementById('modalSubject').textContent = data.subject;
+                        document.getElementById('modalType').textContent = data.request_type;
+                        document.getElementById('modalCreated').textContent = data.created_at;
+                        document.getElementById('modalContent').textContent = data.request_text;
+                        document.getElementById('lecturer_note').value = data.lecturer_note || '';
+                        
+                        // Set status badge
+                        const statusBadge = document.getElementById('modalStatus');
+                        statusBadge.className = 'badge';
+                        if (data.status === 'pending') {
+                            statusBadge.classList.add('bg-warning', 'text-dark');
+                            statusBadge.textContent = 'ממתין';
+                        } else if (data.status === 'in_progress') {
+                            statusBadge.classList.add('bg-info');
+                            statusBadge.textContent = 'בטיפול';
+                        } else if (data.status === 'need_update') {
+                            statusBadge.classList.add('bg-primary');
+                            statusBadge.textContent = 'דורש עדכון';
+                        } else if (data.status === 'approved') {
+                            statusBadge.classList.add('bg-success');
+                            statusBadge.textContent = 'מאושר';
+                        } else {
+                            statusBadge.classList.add('bg-danger');
+                            statusBadge.textContent = 'נדחה';
+                        }
+                        
+                        // Set deadline display
+                        const deadlineDisplay = document.getElementById('modalDeadline');
+                        if (data.update_deadline) {
+                            deadlineDisplay.textContent = data.update_deadline;
+                            if (data.is_past_deadline) {
+                                deadlineDisplay.classList.add('text-danger');
+                                deadlineDisplay.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + data.update_deadline;
+                            } else {
+                                deadlineDisplay.classList.remove('text-danger');
+                            }
+                        } else {
+                            deadlineDisplay.textContent = '-';
+                            deadlineDisplay.classList.remove('text-danger');
+                        }
+                        
+                        // Set status select
+                        document.getElementById('status').value = data.status;
+                        
+                        // Show/hide deadline input based on current status
+                        if (data.status === 'need_update') {
+                            deadlineContainer.classList.remove('d-none');
+                            if (data.update_deadline) {
+                                document.getElementById('update_deadline').value = data.update_deadline_raw;
+                            }
+                        } else {
+                            deadlineContainer.classList.add('d-none');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        });
+    });
+</script>
 {% endblock %}

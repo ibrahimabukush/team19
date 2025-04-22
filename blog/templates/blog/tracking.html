@@ -1,47 +1,332 @@
 {% extends "blog/base.html" %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">מעקב אחרי בקשות</h2>
+<style>
+    /* Request Tracking specific styles matching ISEND theme */
+    .tracking-header {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .tracking-header::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .tracking-header::after {
+        content: '';
+        position: absolute;
+        bottom: -30px;
+        left: -30px;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .tracking-title {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .tracking-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        max-width: 600px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .tracking-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .tracking-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .tracking-table {
+        margin-bottom: 0;
+    }
+
+    .tracking-table th {
+        background: #2d3748;
+        color: white;
+        font-weight: 600;
+        padding: 15px 20px;
+        border: none;
+        text-align: right;
+        vertical-align: middle;
+    }
+
+    .tracking-table td {
+        padding: 15px 20px;
+        vertical-align: middle;
+        border-color: #f0f4f8;
+        font-size: 14px;
+    }
+
+    .tracking-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .tracking-table tbody tr:hover {
+        background-color: rgba(106, 17, 203, 0.05);
+    }
+
+    /* Status badges with ISEND colors */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .status-pending {
+        background-color: rgba(248, 168, 38, 0.15);
+        color: #f8a826;
+    }
+
+    .status-in-progress {
+        background-color: rgba(23, 162, 184, 0.15);
+        color: #17a2b8;
+    }
+
+    .status-approved {
+        background-color: rgba(16, 165, 90, 0.15);
+        color: #10a55a;
+    }
+
+    .status-rejected {
+        background-color: rgba(220, 53, 69, 0.15);
+        color: #dc3545;
+    }
+
+    .status-need-update {
+        background-color: rgba(106, 17, 203, 0.15);
+        color: #6a11cb;
+    }
+
+    /* Deadline styling */
+    .deadline {
+        font-size: 14px;
+    }
+
+    .deadline-passed {
+        color: #dc3545;
+        font-weight: 500;
+        display: block;
+        margin-top: 5px;
+    }
+
+    .deadline-warning {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .deadline-warning i {
+        color: #dc3545;
+    }
+
+    /* Empty state styling */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-state i {
+        font-size: 60px;
+        color: #e2e8f0;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #718096;
+        font-size: 16px;
+        max-width: 500px;
+        margin: 0 auto 20px;
+    }
+
+    .btn-isend {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: white;
+        border-radius: 30px;
+        padding: 10px 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-isend:hover {
+        background: linear-gradient(45deg, #5b0cb0, #1a65e6);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(106, 17, 203, 0.3);
+    }
+
+    .lecturer-note {
+        position: relative;
+    }
+
+    .note-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .empty-note {
+        color: #a0aec0;
+        font-style: italic;
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .tracking-table {
+            min-width: 700px;
+        }
+        
+        .tracking-title {
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div class="container">
+    <!-- Tracking Header -->
+    <div class="tracking-header animate-fade-in">
+        <h1 class="tracking-title">מעקב אחרי בקשות</h1>
+        <p class="tracking-subtitle">צפה בסטטוס הבקשות שלך, הערות המרצים ודדליינים לעדכון.</p>
+    </div>
 
     {% if requests %}
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>קורס</th>
-                    <th>סוג בקשה</th>
-                    <th>סטטוס</th>
-                    <th>הערת מרצה</th>
-                    <th>דדליין לעדכון</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for request in requests %}
+    <div class="tracking-card animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="table-responsive">
+            <table class="tracking-table table">
+                <thead>
+                    <tr>
+                        <th>קורס</th>
+                        <th>סוג בקשה</th>
+                        <th>סטטוס</th>
+                        <th>הערת מרצה</th>
+                        <th>דדליין לעדכון</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
                     <tr {% if request.is_past_deadline and request.status == 'need_update' %}class="table-danger"{% endif %}>
-                        <td>{{ request.subject }}</td>
+                        <td><strong>{{ request.subject }}</strong></td>
                         <td>{{ request.request_type }}</td>
                         <td>
-                            {% if request.status == "pending" %}ממתין
-                            {% elif request.status == "in_progress" %}בטיפול
-                            {% elif request.status == "approved" %}מאושר
-                            {% elif request.status == "rejected" %}נדחה
-                            {% elif request.status == "need_update" %}נדרש עדכון
+                            {% if request.status == "pending" %}
+                            <span class="status-badge status-pending">ממתין</span>
+                            {% elif request.status == "in_progress" %}
+                            <span class="status-badge status-in-progress">בטיפול</span>
+                            {% elif request.status == "approved" %}
+                            <span class="status-badge status-approved">מאושר</span>
+                            {% elif request.status == "rejected" %}
+                            <span class="status-badge status-rejected">נדחה</span>
+                            {% elif request.status == "need_update" %}
+                            <span class="status-badge status-need-update">נדרש עדכון</span>
                             {% endif %}
                         </td>
-                        <td>{{ request.lecturer_note|default:"---" }}</td>
+                        <td class="lecturer-note">
+                            <div class="note-content">
+                                {% if request.lecturer_note %}
+                                {{ request.lecturer_note }}
+                                {% else %}
+                                <span class="empty-note">אין הערות</span>
+                                {% endif %}
+                            </div>
+                        </td>
                         <td>
                             {% if request.update_deadline %}
-                                {{ request.update_deadline|date:"d/m/Y H:i" }}
-                                {% if request.is_past_deadline %}
-                                    <br><span class="text-danger">עבר הדדליין</span>
-                                {% endif %}
-                            {% else %}---{% endif %}
+                            <span class="deadline">{{ request.update_deadline|date:"d/m/Y H:i" }}</span>
+                            {% if request.is_past_deadline %}
+                            <span class="deadline-passed">
+                                <i class="fas fa-exclamation-triangle"></i> עבר הדדליין
+                            </span>
+                            {% endif %}
+                            {% else %}
+                            <span class="empty-note">---</span>
+                            {% endif %}
                         </td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     {% else %}
-        <div class="alert alert-info">אין בקשות שהוגשו.</div>
+    <div class="empty-state animate-fade-in">
+        <i class="fas fa-inbox"></i>
+        <h3>אין בקשות להצגה</h3>
+        <p>נראה שטרם הגשת בקשות אקדמיות במערכת. כאשר תגיש בקשות, תוכל לעקוב אחר הסטטוס שלהן כאן.</p>
+        <a href="#services" class="btn btn-isend">
+            <i class="fas fa-plus me-2"></i> יצירת בקשה חדשה
+        </a>
+    </div>
+    {% endif %}
+
+    {% if requests %}
+    <div class="mt-4 text-center animate-fade-in" style="animation-delay: 0.2s;">
+        <a href="#services" class="btn btn-isend">
+            <i class="fas fa-plus me-2"></i> יצירת בקשה חדשה
+        </a>
+    </div>
     {% endif %}
 </div>
+
+<script>
+    // Add animation to table rows for a staggered entrance effect
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableRows = document.querySelectorAll('.tracking-table tbody tr');
+        tableRows.forEach((row, index) => {
+            row.style.opacity = '0';
+            row.style.transform = 'translateY(10px)';
+            row.style.animation = `fadeIn 0.3s ease forwards ${0.1 + (index * 0.05)}s`;
+        });
+    });
+</script>
 {% endblock %}

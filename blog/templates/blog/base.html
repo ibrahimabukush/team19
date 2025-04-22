@@ -402,7 +402,7 @@
                     <div class="navbar-nav ms-auto">
                         {% if user.is_authenticated and user.lecturerprofile %}
                             <!-- Lecturer Navigation -->
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'lecturer_dashboard' %}active{% endif %}" href="{% url 'lecturer_dashboard' %}">
                                 <i class="fas fa-home fa-sm me-1"></i> דף הבית
                             </a>
                             <a class="nav-item nav-link" href="{% url 'profile' %}">
