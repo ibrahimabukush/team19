@@ -408,9 +408,7 @@
                             <a class="nav-item nav-link" href="{% url 'profile' %}">
                                 <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
                             </a>
-                            <a class="nav-item nav-link" href="{% url 'lecturer_requests' %}">
-                                <i class="fas fa-tasks fa-sm me-1"></i> הבקשות שלי
-                            </a>
+                           
                             <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
                                 <i class="fas fa-info-circle fa-sm me-1"></i> אודות
                             </a>

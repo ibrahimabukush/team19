@@ -2,14 +2,14 @@
 
 {% block content %}
 <style>
-    /* Request Tracking specific styles matching ISEND theme */
+    /* Enhanced Request Tracking specific styles matching ISEND theme */
     .tracking-header {
         background: linear-gradient(45deg, #6a11cb, #2575fc);
         color: white;
         border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 25px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         position: relative;
         overflow: hidden;
     }
@@ -19,9 +19,9 @@
         position: absolute;
         top: -50px;
         right: -50px;
-        width: 150px;
-        height: 150px;
-        background: rgba(255, 255, 255, 0.1);
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 50%;
     }
 
@@ -30,39 +30,61 @@
         position: absolute;
         bottom: -30px;
         left: -30px;
-        width: 100px;
-        height: 100px;
-        background: rgba(255, 255, 255, 0.1);
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 50%;
     }
 
     .tracking-title {
-        font-size: 28px;
+        font-size: 32px;
         font-weight: 700;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         position: relative;
         z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .tracking-logo {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tracking-logo svg {
+        width: 28px;
+        height: 28px;
+        color: #6a11cb;
     }
 
     .tracking-subtitle {
-        font-size: 16px;
-        opacity: 0.9;
+        font-size: 18px;
+        opacity: 0.95;
         max-width: 600px;
         position: relative;
         z-index: 10;
+        line-height: 1.6;
     }
 
     .tracking-card {
         background: white;
-        border-radius: 15px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
+        border: 1px solid rgba(0, 0, 0, 0.03);
     }
 
     .tracking-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 
     .tracking-table {
@@ -73,34 +95,42 @@
         background: #2d3748;
         color: white;
         font-weight: 600;
-        padding: 15px 20px;
+        padding: 18px 20px;
         border: none;
         text-align: right;
         vertical-align: middle;
+        font-size: 15px;
     }
 
     .tracking-table td {
-        padding: 15px 20px;
+        padding: 20px;
         vertical-align: middle;
         border-color: #f0f4f8;
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .tracking-table tbody tr {
-        transition: all 0.2s ease;
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f0f4f8;
+    }
+    
+    .tracking-table tbody tr:last-child {
+        border-bottom: none;
     }
 
     .tracking-table tbody tr:hover {
-        background-color: rgba(106, 17, 203, 0.05);
+        background-color: rgba(106, 17, 203, 0.03);
     }
 
-    /* Status badges with ISEND colors */
+    /* Enhanced Status badges with ISEND colors and icons */
     .status-badge {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 30px;
-        font-size: 13px;
-        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 50px;
+        font-size: 14px;
+        font-weight: 600;
         line-height: 1;
     }
 
@@ -128,17 +158,38 @@
         background-color: rgba(106, 17, 203, 0.15);
         color: #6a11cb;
     }
+    
+    .status-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: currentColor;
+        color: white;
+        font-size: 12px;
+    }
 
     /* Deadline styling */
     .deadline {
         font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .deadline i {
+        color: #718096;
     }
 
     .deadline-passed {
         color: #dc3545;
-        font-weight: 500;
-        display: block;
-        margin-top: 5px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 8px;
     }
 
     .deadline-warning {
@@ -151,59 +202,16 @@
         color: #dc3545;
     }
 
-    /* Empty state styling */
-    .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        background-color: white;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .empty-state i {
-        font-size: 60px;
-        color: #e2e8f0;
-        margin-bottom: 20px;
-    }
-
-    .empty-state h3 {
-        font-size: 20px;
-        font-weight: 600;
-        color: #4a5568;
-        margin-bottom: 10px;
-    }
-
-    .empty-state p {
-        color: #718096;
-        font-size: 16px;
-        max-width: 500px;
-        margin: 0 auto 20px;
-    }
-
-    .btn-isend {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        color: white;
-        border-radius: 30px;
-        padding: 10px 25px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border: none;
-    }
-
-    .btn-isend:hover {
-        background: linear-gradient(45deg, #5b0cb0, #1a65e6);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 15px rgba(106, 17, 203, 0.3);
-    }
-
+    /* Lecturer note styling */
     .lecturer-note {
         position: relative;
+        max-width: 250px;
     }
 
     .note-content {
         position: relative;
         z-index: 1;
+        line-height: 1.5;
     }
 
     .empty-note {
@@ -211,37 +219,134 @@
         font-style: italic;
     }
 
+    /* Empty state styling with illustration */
+    .empty-state {
+        text-align: center;
+        padding: 70px 20px;
+        background-color: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(106, 17, 203, 0.08);
+        border-radius: 50%;
+    }
+
+    .empty-state-icon i {
+        font-size: 55px;
+        color: #6a11cb;
+    }
+
+    .empty-state h3 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        color: #4a5568;
+        font-size: 16px;
+        max-width: 500px;
+        margin: 0 auto 25px;
+        line-height: 1.6;
+    }
+
+    .btn-isend {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-isend:hover {
+        background: linear-gradient(45deg, #5b0cb0, #1a65e6);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+    }
+
     /* Animation keyframes */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(15px); }
         to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes scaleIn {
+        from { transform: scale(0.95); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
     }
 
     .animate-fade-in {
-        animation: fadeIn 0.5s ease forwards;
+        animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .animate-scale-in {
+        animation: scaleIn 0.5s ease forwards;
     }
 
     /* Responsive adjustments */
-    @media (max-width: 768px) {
+    @media (max-width: 992px) {
         .tracking-table {
-            min-width: 700px;
+            min-width: 800px;
         }
         
         .tracking-title {
-            font-size: 24px;
+            font-size: 28px;
+        }
+        
+        .tracking-subtitle {
+            font-size: 16px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .tracking-header {
+            padding: 25px 20px;
+        }
+        
+        .tracking-logo {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .tracking-logo svg {
+            width: 22px;
+            height: 22px;
         }
     }
 </style>
 
 <div class="container">
-    <!-- Tracking Header -->
+    <!-- Tracking Header with Logo -->
     <div class="tracking-header animate-fade-in">
-        <h1 class="tracking-title">מעקב אחרי בקשות</h1>
-        <p class="tracking-subtitle">צפה בסטטוס הבקשות שלך, הערות המרצים ודדליינים לעדכון.</p>
+        <h1 class="tracking-title">
+            <div class="tracking-logo">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+            </div>
+            מעקב אחרי בקשות
+        </h1>
+        <p class="tracking-subtitle">צפה בסטטוס הבקשות שלך, הערות המרצים ודדליינים לעדכון בצורה נוחה ומאורגנת.</p>
     </div>
 
     {% if requests %}
-    <div class="tracking-card animate-fade-in" style="animation-delay: 0.1s;">
+    <div class="tracking-card animate-scale-in" style="animation-delay: 0.2s;">
         <div class="table-responsive">
             <table class="tracking-table table">
                 <thead>
@@ -260,15 +365,40 @@
                         <td>{{ request.request_type }}</td>
                         <td>
                             {% if request.status == "pending" %}
-                            <span class="status-badge status-pending">ממתין</span>
+                            <span class="status-badge status-pending">
+                                <span class="status-icon">
+                                    <i class="fas fa-clock"></i>
+                                </span>
+                                ממתין
+                            </span>
                             {% elif request.status == "in_progress" %}
-                            <span class="status-badge status-in-progress">בטיפול</span>
+                            <span class="status-badge status-in-progress">
+                                <span class="status-icon">
+                                    <i class="fas fa-spinner"></i>
+                                </span>
+                                בטיפול
+                            </span>
                             {% elif request.status == "approved" %}
-                            <span class="status-badge status-approved">מאושר</span>
+                            <span class="status-badge status-approved">
+                                <span class="status-icon">
+                                    <i class="fas fa-check"></i>
+                                </span>
+                                מאושר
+                            </span>
                             {% elif request.status == "rejected" %}
-                            <span class="status-badge status-rejected">נדחה</span>
+                            <span class="status-badge status-rejected">
+                                <span class="status-icon">
+                                    <i class="fas fa-times"></i>
+                                </span>
+                                נדחה
+                            </span>
                             {% elif request.status == "need_update" %}
-                            <span class="status-badge status-need-update">נדרש עדכון</span>
+                            <span class="status-badge status-need-update">
+                                <span class="status-icon">
+                                    <i class="fas fa-edit"></i>
+                                </span>
+                                נדרש עדכון
+                            </span>
                             {% endif %}
                         </td>
                         <td class="lecturer-note">
@@ -282,7 +412,10 @@
                         </td>
                         <td>
                             {% if request.update_deadline %}
-                            <span class="deadline">{{ request.update_deadline|date:"d/m/Y H:i" }}</span>
+                            <span class="deadline">
+                                <i class="far fa-calendar-alt"></i>
+                                {{ request.update_deadline|date:"d/m/Y H:i" }}
+                            </span>
                             {% if request.is_past_deadline %}
                             <span class="deadline-passed">
                                 <i class="fas fa-exclamation-triangle"></i> עבר הדדליין
@@ -299,20 +432,22 @@
         </div>
     </div>
     {% else %}
-    <div class="empty-state animate-fade-in">
-        <i class="fas fa-inbox"></i>
+    <div class="empty-state animate-scale-in" style="animation-delay: 0.2s;">
+        <div class="empty-state-icon">
+            <i class="fas fa-inbox"></i>
+        </div>
         <h3>אין בקשות להצגה</h3>
         <p>נראה שטרם הגשת בקשות אקדמיות במערכת. כאשר תגיש בקשות, תוכל לעקוב אחר הסטטוס שלהן כאן.</p>
         <a href="#services" class="btn btn-isend">
-            <i class="fas fa-plus me-2"></i> יצירת בקשה חדשה
+            <i class="fas fa-plus"></i> יצירת בקשה חדשה
         </a>
     </div>
     {% endif %}
 
     {% if requests %}
-    <div class="mt-4 text-center animate-fade-in" style="animation-delay: 0.2s;">
+    <div class="mt-5 text-center animate-fade-in" style="animation-delay: 0.4s;">
         <a href="#services" class="btn btn-isend">
-            <i class="fas fa-plus me-2"></i> יצירת בקשה חדשה
+            <i class="fas fa-plus"></i> יצירת בקשה חדשה
         </a>
     </div>
     {% endif %}
@@ -324,8 +459,8 @@
         const tableRows = document.querySelectorAll('.tracking-table tbody tr');
         tableRows.forEach((row, index) => {
             row.style.opacity = '0';
-            row.style.transform = 'translateY(10px)';
-            row.style.animation = `fadeIn 0.3s ease forwards ${0.1 + (index * 0.05)}s`;
+            row.style.transform = 'translateY(15px)';
+            row.style.animation = `fadeIn 0.4s ease forwards ${0.3 + (index * 0.07)}s`;
         });
     });
 </script>
