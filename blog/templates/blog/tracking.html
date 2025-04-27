@@ -2,14 +2,34 @@
 
 {% block content %}
 <style>
-    /* Enhanced Request Tracking specific styles matching ISEND theme */
+    /* Color Variables */
+    :root {
+        --green-dark: #2e7d32;
+        --green-main: #43a047;
+        --green-light: #66bb6a;
+        --green-pale: #c8e6c9;
+        --green-bg: #e8f5e9;
+        --white: #ffffff;
+        --off-white: #f9f9f9;
+        --text-dark: #333333;
+        --text-light: rgba(255, 255, 255, 0.9);
+        --gray-light: #f5f5f5;
+        --gray-medium: #e0e0e0;
+        --status-pending: #ffb74d;
+        --status-progress: #64b5f6;
+        --status-approved: #66bb6a;
+        --status-rejected: #ef5350;
+        --status-update: #ba68c8;
+    }
+
+    /* Enhanced Request Tracking specific styles */
     .tracking-header {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        background: var(--green-main);
         color: white;
         border-radius: 15px;
         padding: 30px;
         margin-bottom: 30px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 20px rgba(46, 125, 50, 0.15);
         position: relative;
         overflow: hidden;
     }
@@ -46,7 +66,7 @@
         align-items: center;
         gap: 15px;
     }
-    
+
     .tracking-logo {
         width: 50px;
         height: 50px;
@@ -57,11 +77,11 @@
         justify-content: center;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
-    
+
     .tracking-logo svg {
         width: 28px;
         height: 28px;
-        color: #6a11cb;
+        color: var(--green-main);
     }
 
     .tracking-subtitle {
@@ -73,13 +93,16 @@
         line-height: 1.6;
     }
 
+    /* Tracking card */
     .tracking-card {
         background: white;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         transition: all 0.3s ease;
         border: 1px solid rgba(0, 0, 0, 0.03);
+        margin-bottom: 30px;
+        padding: 25px;
     }
 
     .tracking-card:hover {
@@ -87,44 +110,209 @@
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     }
 
-    .tracking-table {
-        margin-bottom: 0;
+    /* Animation delay classes for cards */
+    .tracking-card-1 { animation-delay: 0.1s; }
+    .tracking-card-2 { animation-delay: 0.2s; }
+    .tracking-card-3 { animation-delay: 0.3s; }
+    .tracking-card-4 { animation-delay: 0.4s; }
+    .tracking-card-5 { animation-delay: 0.5s; }
+    .tracking-card-6 { animation-delay: 0.6s; }
+    .tracking-card-7 { animation-delay: 0.7s; }
+    .tracking-card-8 { animation-delay: 0.8s; }
+    .tracking-card-9 { animation-delay: 0.9s; }
+    .tracking-card-10 { animation-delay: 1s; }
+
+    .tracking-order-info {
+        border-bottom: 1px solid var(--gray-medium);
+        padding-bottom: 20px;
+        margin-bottom: 20px;
     }
 
-    .tracking-table th {
-        background: #2d3748;
-        color: white;
+    .tracking-order-number {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 5px;
+    }
+
+    .tracking-status {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .tracking-status-label {
+        margin-right: 10px;
         font-weight: 600;
-        padding: 18px 20px;
-        border: none;
-        text-align: right;
-        vertical-align: middle;
-        font-size: 15px;
+        color: var(--text-dark);
     }
 
-    .tracking-table td {
-        padding: 20px;
-        vertical-align: middle;
-        border-color: #f0f4f8;
-        font-size: 15px;
+    .tracking-status-value {
+        font-weight: 600;
     }
 
-    .tracking-table tbody tr {
+    .tracking-order-description {
+        color: #666;
+        font-size: 14px;
+    }
+
+    /* Tracking progress visualization */
+    .tracking-progress {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin: 50px 0 30px;
+    }
+
+    .tracking-progress::before {
+        content: '';
+        position: absolute;
+        top: 25px;
+        left: 70px;
+        right: 70px;
+        height: 2px;
+        background-color: var(--gray-medium);
+        z-index: 1;
+    }
+
+    .tracking-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+        width: 20%;
+    }
+
+    .tracking-step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: white;
+        border: 2px solid var(--gray-medium);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
         transition: all 0.3s ease;
-        border-bottom: 1px solid #f0f4f8;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-    
-    .tracking-table tbody tr:last-child {
+
+    .tracking-step-icon i {
+        color: var(--gray-medium);
+        font-size: 20px;
+    }
+
+    .tracking-step-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #666;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Active and completed step styles */
+    .tracking-step.active .tracking-step-icon {
+        background-color: var(--green-main);
+        border-color: var(--green-main);
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+    }
+
+    .tracking-step.active .tracking-step-icon i {
+        color: white;
+    }
+
+    .tracking-step.active .tracking-step-name {
+        color: var(--green-main);
+        font-weight: 700;
+    }
+
+    .tracking-step.completed .tracking-step-icon {
+        background-color: var(--green-main);
+        border-color: var(--green-main);
+    }
+
+    .tracking-step.completed .tracking-step-icon i {
+        color: white;
+    }
+
+    /* Progress line for completed steps */
+    .tracking-progress-line {
+        position: absolute;
+        top: 25px;
+        left: 70px;
+        height: 2px;
+        background-color: var(--green-main);
+        z-index: 1;
+        transition: width 1s ease;
+        width: 0;
+    }
+
+    /* Detailed information section */
+    .tracking-details {
+        margin-top: 20px;
+        background-color: var(--gray-light);
+        border-radius: 10px;
+        padding: 15px;
+    }
+
+    .tracking-detail-item {
+        padding: 15px;
+        border-bottom: 1px solid var(--gray-medium);
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .tracking-detail-item:last-child {
         border-bottom: none;
     }
 
-    .tracking-table tbody tr:hover {
-        background-color: rgba(106, 17, 203, 0.03);
+    .tracking-detail-radio {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1px solid var(--green-main);
+        margin-right: 15px;
+        margin-top: 5px;
+        position: relative;
     }
 
-    /* Enhanced Status badges with ISEND colors and icons */
+    .tracking-detail-radio.active::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--green-main);
+    }
+
+    .tracking-detail-content {
+        flex: 1;
+    }
+
+    .tracking-detail-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-dark);
+    }
+
+    .tracking-detail-date {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 3px;
+    }
+
+    .tracking-detail-description {
+        font-size: 14px;
+        color: #666;
+    }
+
+    /* Status badges */
     .status-badge {
-        display: flex;
+        display: inline-flex;
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
@@ -135,30 +323,30 @@
     }
 
     .status-pending {
-        background-color: rgba(248, 168, 38, 0.15);
-        color: #f8a826;
+        background-color: rgba(255, 183, 77, 0.15);
+        color: var(--status-pending);
     }
 
     .status-in-progress {
-        background-color: rgba(23, 162, 184, 0.15);
-        color: #17a2b8;
+        background-color: rgba(100, 181, 246, 0.15);
+        color: var(--status-progress);
     }
 
     .status-approved {
-        background-color: rgba(16, 165, 90, 0.15);
-        color: #10a55a;
+        background-color: rgba(102, 187, 106, 0.15);
+        color: var(--status-approved);
     }
 
     .status-rejected {
-        background-color: rgba(220, 53, 69, 0.15);
-        color: #dc3545;
+        background-color: rgba(239, 83, 80, 0.15);
+        color: var(--status-rejected);
     }
 
     .status-need-update {
-        background-color: rgba(106, 17, 203, 0.15);
-        color: #6a11cb;
+        background-color: rgba(186, 104, 200, 0.15);
+        color: var(--status-update);
     }
-    
+
     .status-icon {
         display: inline-flex;
         align-items: center;
@@ -169,6 +357,27 @@
         background: currentColor;
         color: white;
         font-size: 12px;
+    }
+
+    /* Action buttons */
+    .btn-isend {
+        background: var(--green-main);
+        color: white;
+        border-radius: 50px;
+        padding: 12px 30px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-isend:hover {
+        background: var(--green-dark);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(46, 125, 50, 0.2);
     }
 
     /* Deadline styling */
@@ -183,43 +392,14 @@
         color: #718096;
     }
 
-    .deadline-passed {
-        color: #dc3545;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        margin-top: 8px;
-    }
-
     .deadline-warning {
         display: flex;
         align-items: center;
         gap: 5px;
+        color: var(--status-rejected);
     }
 
-    .deadline-warning i {
-        color: #dc3545;
-    }
-
-    /* Lecturer note styling */
-    .lecturer-note {
-        position: relative;
-        max-width: 250px;
-    }
-
-    .note-content {
-        position: relative;
-        z-index: 1;
-        line-height: 1.5;
-    }
-
-    .empty-note {
-        color: #a0aec0;
-        font-style: italic;
-    }
-
-    /* Empty state styling with illustration */
+    /* Empty state styling */
     .empty-state {
         text-align: center;
         padding: 70px 20px;
@@ -236,19 +416,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(106, 17, 203, 0.08);
+        background: rgba(46, 125, 50, 0.08);
         border-radius: 50%;
     }
 
     .empty-state-icon i {
         font-size: 55px;
-        color: #6a11cb;
+        color: var(--green-main);
     }
 
     .empty-state h3 {
         font-size: 24px;
         font-weight: 700;
-        color: #2d3748;
+        color: var(--text-dark);
         margin-bottom: 15px;
     }
 
@@ -260,32 +440,12 @@
         line-height: 1.6;
     }
 
-    .btn-isend {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        color: white;
-        border-radius: 50px;
-        padding: 12px 30px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-isend:hover {
-        background: linear-gradient(45deg, #5b0cb0, #1a65e6);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
-    }
-
     /* Animation keyframes */
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(15px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     @keyframes scaleIn {
         from { transform: scale(0.95); opacity: 0; }
         to { transform: scale(1); opacity: 1; }
@@ -294,15 +454,19 @@
     .animate-fade-in {
         animation: fadeIn 0.6s ease forwards;
     }
-    
+
     .animate-scale-in {
         animation: scaleIn 0.5s ease forwards;
     }
 
     /* Responsive adjustments */
     @media (max-width: 992px) {
-        .tracking-table {
-            min-width: 800px;
+        .tracking-progress {
+            margin: 40px 0 20px;
+        }
+        
+        .tracking-step-name {
+            font-size: 12px;
         }
         
         .tracking-title {
@@ -313,7 +477,23 @@
             font-size: 16px;
         }
     }
-    
+
+    @media (max-width: 768px) {
+        .tracking-progress::before {
+            left: 30px;
+            right: 30px;
+        }
+        
+        .tracking-step-icon {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .tracking-step-icon i {
+            font-size: 16px;
+        }
+    }
+
     @media (max-width: 576px) {
         .tracking-header {
             padding: 25px 20px;
@@ -327,6 +507,19 @@
         .tracking-logo svg {
             width: 22px;
             height: 22px;
+        }
+        
+        .tracking-progress {
+            flex-wrap: wrap;
+        }
+        
+        .tracking-step {
+            width: 50%;
+            margin-bottom: 20px;
+        }
+        
+        .tracking-progress::before {
+            display: none;
         }
     }
 </style>
@@ -346,122 +539,254 @@
     </div>
 
     {% if requests %}
-    <div class="tracking-card animate-scale-in" style="animation-delay: 0.2s;">
-        <div class="table-responsive">
-            <table class="tracking-table table">
-                <thead>
-                    <tr>
-                        <th>קורס</th>
-                        <th>סוג בקשה</th>
-                        <th>סטטוס</th>
-                        <th>הערת מרצה</th>
-                        <th>דדליין לעדכון</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for request in requests %}
-                    <tr {% if request.is_past_deadline and request.status == 'need_update' %}class="table-danger"{% endif %}>
-                        <td><strong>{{ request.subject }}</strong></td>
-                        <td>{{ request.request_type }}</td>
-                        <td>
-                            {% if request.status == "pending" %}
-                            <span class="status-badge status-pending">
-                                <span class="status-icon">
-                                    <i class="fas fa-clock"></i>
-                                </span>
-                                ממתין
-                            </span>
-                            {% elif request.status == "in_progress" %}
-                            <span class="status-badge status-in-progress">
-                                <span class="status-icon">
-                                    <i class="fas fa-spinner"></i>
-                                </span>
-                                בטיפול
-                            </span>
-                            {% elif request.status == "approved" %}
-                            <span class="status-badge status-approved">
-                                <span class="status-icon">
-                                    <i class="fas fa-check"></i>
-                                </span>
-                                מאושר
-                            </span>
-                            {% elif request.status == "rejected" %}
-                            <span class="status-badge status-rejected">
-                                <span class="status-icon">
-                                    <i class="fas fa-times"></i>
-                                </span>
-                                נדחה
-                            </span>
-                            {% elif request.status == "need_update" %}
-                            <span class="status-badge status-need-update">
-                                <span class="status-icon">
-                                    <i class="fas fa-edit"></i>
-                                </span>
-                                נדרש עדכון
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="lecturer-note">
-                            <div class="note-content">
-                                {% if request.lecturer_note %}
-                                {{ request.lecturer_note }}
-                                {% else %}
-                                <span class="empty-note">אין הערות</span>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td>
-                            {% if request.update_deadline %}
-                            <span class="deadline">
-                                <i class="far fa-calendar-alt"></i>
-                                {{ request.update_deadline|date:"d/m/Y H:i" }}
-                            </span>
+    <!-- Individual Request Cards - Loop through each request -->
+    {% for request in requests %}
+    <div class="tracking-card animate-scale-in tracking-card-{{ forloop.counter }}">
+        <div class="tracking-order-info">
+            <div class="tracking-order-number">#{{ request.id|stringformat:"06d" }}</div>
+            <div class="tracking-status">
+                <div class="tracking-status-label">סטטוס:</div>
+                {% if request.status == "pending" %}
+                <div class="tracking-status-value" style="color: var(--status-pending);">ממתין</div>
+                {% elif request.status == "in_progress" %}
+                <div class="tracking-status-value" style="color: var(--status-progress);">בטיפול</div>
+                {% elif request.status == "approved" %}
+                <div class="tracking-status-value" style="color: var(--status-approved);">מאושר</div>
+                {% elif request.status == "rejected" %}
+                <div class="tracking-status-value" style="color: var(--status-rejected);">נדחה</div>
+                {% elif request.status == "need_update" %}
+                <div class="tracking-status-value" style="color: var(--status-update);">נדרש עדכון</div>
+                {% endif %}
+            </div>
+            <div class="tracking-order-description">
+                <strong>קורס:</strong> {{ request.subject }} | <strong>סוג בקשה:</strong> {{ request.request_type }}
+            </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="tracking-progress">
+            <!-- Progress line that shows how far the request has progressed -->
+            <div class="tracking-progress-line" id="progress-line-{{ request.id }}"></div>
+            
+            <!-- Step 1: Submitted -->
+            <div class="tracking-step completed">
+                <div class="tracking-step-icon">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="tracking-step-name">הוגש</div>
+            </div>
+            
+            <!-- Step 2: Under Review -->
+            <div class="tracking-step {% if request.status == 'in_progress' %}active{% elif request.status == 'approved' or request.status == 'rejected' or request.status == 'need_update' %}completed{% endif %}">
+                <div class="tracking-step-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="tracking-step-name">בבדיקה</div>
+            </div>
+            
+            <!-- Step 3: Needs Update (if applicable) -->
+            <div class="tracking-step {% if request.status == 'need_update' %}active{% endif %}">
+                <div class="tracking-step-icon">
+                    <i class="fas fa-edit"></i>
+                </div>
+                <div class="tracking-step-name">נדרש עדכון</div>
+            </div>
+            
+            <!-- Step 4: Decision -->
+            <div class="tracking-step {% if request.status == 'approved' or request.status == 'rejected' %}active{% endif %}">
+                <div class="tracking-step-icon">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="tracking-step-name">החלטה</div>
+            </div>
+            
+            <!-- Step 5: Completed -->
+            <div class="tracking-step {% if request.status == 'approved' %}completed active{% endif %}">
+                <div class="tracking-step-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="tracking-step-name">הושלם</div>
+            </div>
+        </div>
+
+        <!-- Detailed tracking information -->
+        <div class="tracking-details">
+            <!-- Submission detail -->
+            <div class="tracking-detail-item">
+                <div class="tracking-detail-radio active"></div>
+                <div class="tracking-detail-content">
+                    <div class="tracking-detail-title">הבקשה הוגשה</div>
+                    <div class="tracking-detail-date">{{ request.created_at|date:"d/m/Y H:i" }}</div>
+                    <div class="tracking-detail-description">הבקשה נשלחה למערכת ונקלטה בהצלחה.</div>
+                </div>
+            </div>
+            
+            <!-- Under review detail -->
+            {% if request.status != 'pending' %}
+            <div class="tracking-detail-item">
+                <div class="tracking-detail-radio active"></div>
+                <div class="tracking-detail-content">
+                    <div class="tracking-detail-title">הבקשה בבדיקה</div>
+                    <div class="tracking-detail-date">{{ request.review_started_at|date:"d/m/Y H:i" }}</div>
+                    <div class="tracking-detail-description">הבקשה נבדקת על-ידי הגורם האחראי.</div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Update required detail -->
+            {% if request.status == 'need_update' %}
+            <div class="tracking-detail-item">
+                <div class="tracking-detail-radio active"></div>
+                <div class="tracking-detail-content">
+                    <div class="tracking-detail-title">נדרש עדכון לבקשה</div>
+                    <div class="tracking-detail-date">{{ request.update_requested_at|date:"d/m/Y H:i" }}</div>
+                    <div class="tracking-detail-description">
+                        {% if request.lecturer_note %}
+                        <strong>הערת מרצה:</strong> {{ request.lecturer_note }}
+                        {% endif %}
+                        {% if request.update_deadline %}
+                        <div {% if request.is_past_deadline %}class="deadline-warning"{% endif %}>
+                            <strong>דדליין לעדכון:</strong> {{ request.update_deadline|date:"d/m/Y H:i" }}
                             {% if request.is_past_deadline %}
-                            <span class="deadline-passed">
-                                <i class="fas fa-exclamation-triangle"></i> עבר הדדליין
-                            </span>
+                            <i class="fas fa-exclamation-triangle" style="color: var(--status-rejected);"></i>
                             {% endif %}
-                            {% else %}
-                            <span class="empty-note">---</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Decision detail -->
+            {% if request.status == 'approved' or request.status == 'rejected' %}
+            <div class="tracking-detail-item">
+                <div class="tracking-detail-radio active"></div>
+                <div class="tracking-detail-content">
+                    <div class="tracking-detail-title">
+                        {% if request.status == 'approved' %}
+                        הבקשה אושרה
+                        {% else %}
+                        הבקשה נדחתה
+                        {% endif %}
+                    </div>
+                    <div class="tracking-detail-date">{{ request.decision_date|date:"d/m/Y H:i" }}</div>
+                    <div class="tracking-detail-description">
+                        {% if request.lecturer_note %}
+                        <strong>הערת מרצה:</strong> {{ request.lecturer_note }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Completion detail -->
+            {% if request.status == 'approved' %}
+            <div class="tracking-detail-item">
+                <div class="tracking-detail-radio active"></div>
+                <div class="tracking-detail-content">
+                    <div class="tracking-detail-title">התהליך הושלם</div>
+                    <div class="tracking-detail-date">{{ request.completed_at|date:"d/m/Y H:i" }}</div>
+                    <div class="tracking-detail-description">הבקשה אושרה והתהליך הושלם בהצלחה.</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Action buttons based on status -->
+        <div class="text-center mt-4">
+            {% if request.status == 'need_update' %}
+            <a href="/request/update/{{ request.id }}/" class="btn btn-isend">
+                <i class="fas fa-edit"></i> עדכון הבקשה
+            </a>
+            {% elif request.status == 'pending' or request.status == 'in_progress' %}
+            <a href="/request/view/{{ request.id }}/" class="btn btn-isend">
+                <i class="fas fa-eye"></i> צפה בפרטי הבקשה
+            </a>
+            {% endif %}
         </div>
     </div>
+    {% endfor %}
+    
+    <!-- New Request Button -->
+    <div class="mt-4 mb-5 text-center animate-fade-in" style="animation-delay: 0.6s;">
+       
+    </div>
+    
     {% else %}
+    <!-- Empty state -->
     <div class="empty-state animate-scale-in" style="animation-delay: 0.2s;">
         <div class="empty-state-icon">
             <i class="fas fa-inbox"></i>
         </div>
         <h3>אין בקשות להצגה</h3>
         <p>נראה שטרם הגשת בקשות אקדמיות במערכת. כאשר תגיש בקשות, תוכל לעקוב אחר הסטטוס שלהן כאן.</p>
-        <a href="#services" class="btn btn-isend">
-            <i class="fas fa-plus"></i> יצירת בקשה חדשה
-        </a>
-    </div>
-    {% endif %}
-
-    {% if requests %}
-    <div class="mt-5 text-center animate-fade-in" style="animation-delay: 0.4s;">
-        <a href="#services" class="btn btn-isend">
-            <i class="fas fa-plus"></i> יצירת בקשה חדשה
-        </a>
+        
     </div>
     {% endif %}
 </div>
+{% endblock %}
 
+
+{% block scripts %}
 <script>
-    // Add animation to table rows for a staggered entrance effect
+    // This approach avoids mixing Django template tags inside JavaScript logic
     document.addEventListener('DOMContentLoaded', function() {
-        const tableRows = document.querySelectorAll('.tracking-table tbody tr');
-        tableRows.forEach((row, index) => {
-            row.style.opacity = '0';
-            row.style.transform = 'translateY(15px)';
-            row.style.animation = `fadeIn 0.4s ease forwards ${0.3 + (index * 0.07)}s`;
+        // Get request data from the hidden div
+        const requestsDataElement = document.getElementById('requestsData');
+        
+        // If there's no data element or no requests, exit early
+        if (!requestsDataElement) return;
+        
+        try {
+            // Try to parse the JSON data
+            const requestsData = JSON.parse(requestsDataElement.getAttribute('data-requests') || '[]');
+            
+            // Process each request
+            requestsData.forEach(function(request) {
+                let progressWidth = 0;
+                
+                // Calculate progress width based on status
+                switch(request.status) {
+                    case 'pending': 
+                        progressWidth = 0; 
+                        break;
+                    case 'in_progress': 
+                        progressWidth = 25; 
+                        break;
+                    case 'need_update': 
+                        progressWidth = 50; 
+                        break;
+                    case 'rejected': 
+                        progressWidth = 75; 
+                        break;
+                    case 'approved': 
+                        progressWidth = 100; 
+                        break;
+                }
+                
+                // Animate progress line
+                setTimeout(function() {
+                    const progressLineElement = document.getElementById('progress-line-' + request.id);
+                    if (progressLineElement) {
+                        progressLineElement.style.width = progressWidth + '%';
+                    }
+                }, 500);
+            });
+        } catch (error) {
+            console.error('Error processing request data:', error);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const viewButtons = document.querySelectorAll('.view-request-btn');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const requestId = this.getAttribute('data-request-id');
+            // You can either redirect:
+            window.location.href = '/request/view/' + requestId + '/';
+            // Or open a modal with the details
         });
     });
+});
 </script>
 {% endblock %}

@@ -15,6 +15,9 @@ urlpatterns = [
     path('academic-request/', views.academic_request, name='academic-request'),
     path('schedule-request/', views.schedule_request, name='schedule_request'),
     path('student/tracking/', views.tracking, name='student_tracking'),
-
+ path('schedule-request/', views.schedule_request_view, name='schedule_request'),
+    path('schedule-request/submit/', views.submit_schedule_request, name='submit_schedule_request'),
+    path('schedule-requests/', views.schedule_requests_list, name='schedule_requests_list'),
+    path('schedule-request/<int:request_id>/', views.schedule_request_detail, name='schedule_request_detail'),
 
 ]

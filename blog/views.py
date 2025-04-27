@@ -13,6 +13,7 @@ import os
 import json
 import base64
 import os
+from django.shortcuts import render, redirect
 from django.conf import settings
 from django.http import JsonResponse
 import users.views
@@ -55,6 +56,46 @@ def tracking(request):
 
     return render(request, 'blog/tracking.html', {'requests': user_requests})
 
+from .models import ScheduleRequest
+
+@login_required
+def schedule_request_view(request):
+    """View for displaying the schedule request form"""
+    return render(request, 'blog/schedule_request.html')
+
+@login_required
+def submit_schedule_request(request):
+    """API endpoint for submitting a new schedule request"""
+    if request.method == "POST":
+        request_type = request.POST.get('request_type')
+        request_text = request.POST.get('request_text')
+        
+        # Create the new request
+        new_request = ScheduleRequest(
+            student=request.user,
+            request_type=request_type,
+            request_text=request_text
+        )
+        new_request.save()
+        
+        return JsonResponse({"status": "success", "message": "הבקשה נשלחה בהצלחה!"})
+    
+    return JsonResponse({"status": "error", "message": "שגיאה בשליחת הבקשה"}, status=400)
+
+@login_required
+def schedule_requests_list(request):
+    """View for listing all schedule requests for a student"""
+    requests = ScheduleRequest.objects.filter(student=request.user).order_by('-created_at')
+    return render(request, 'blog/schedule_requests.html', {'requests': requests})
+
+@login_required
+def schedule_request_detail(request, request_id):
+    """View for displaying the details of a specific schedule request"""
+    try:
+        schedule_request = ScheduleRequest.objects.get(id=request_id, student=request.user)
+        return render(request, 'blog/schedule_requests.html', {'request': schedule_request})
+    except ScheduleRequest.DoesNotExist:
+        return redirect('schedule_requests_list')
 
 
 # @require_POST
@@ -161,9 +202,7 @@ def chatbot_response(request):
             user_message = request.POST.get("message", "")
             print(f"User message: {user_message}")
             
-            # Set a default username
             username = "Anonymous"
-            # If the user is logged in, use their username
             if request.user.is_authenticated:
                 username = request.user.username
 

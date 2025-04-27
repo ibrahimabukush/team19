@@ -204,63 +204,38 @@
 {% block additional_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Define suggestion templates in Hebrew
-        const suggestions = {
-            "שינויי מערכת שעות": "אני מבקש לשנות את מערכת השעות שלי עבור [שם הקורס/קוד]. השינוי הספציפי שאני צריך הוא [הוספה/הסרה/שינוי קבוצה] כי [סיבה לשינוי].",
-            "בקשות הארכת זמן": "אני מבקש הארכת זמן עבור [מטלה/פרויקט/מבחן] בקורס [שם הקורס/קוד]. אני זקוק להארכה זו מכיוון [הסבר קצר לנסיבות]."
-        };
-
-        // Event Listeners
-        document.getElementById("request_type").addEventListener("change", function() {
-            const selected = this.value;
-            document.getElementById("next-step-1").disabled = !selected;
-        });
-
-        // Multi-step Form Navigation
-        document.getElementById("next-step-1").addEventListener("click", function() {
-            document.getElementById("step-1").style.display = "none";
-            document.getElementById("step-2").style.display = "block";
-        });
-
-        document.getElementById("prev-step-2").addEventListener("click", function() {
-            document.getElementById("step-2").style.display = "none";
-            document.getElementById("step-1").style.display = "block";
-        });
-
-        document.getElementById("next-step-2").addEventListener("click", function() {
-            document.getElementById("review-type").textContent = document.getElementById("request_type").value;
-            document.getElementById("review-details").textContent = document.getElementById("request_text").value || "לא סופקו פרטים";
-            
-            document.getElementById("step-2").style.display = "none";
-            document.getElementById("step-3").style.display = "block";
-        });
-
-        document.getElementById("prev-step-3").addEventListener("click", function() {
-            document.getElementById("step-3").style.display = "none";
-            document.getElementById("step-2").style.display = "block";
-        });
-
-        // Form Submission
+        // Form Submission with AJAX
         document.getElementById("course-request-form").addEventListener("submit", function(e) {
             e.preventDefault();
-            document.getElementById("step-3").style.display = "none";
-            document.getElementById("success-message").style.display = "block";
+            
+            // Get form data
+            const formData = new FormData();
+            formData.append('request_type', document.getElementById('request_type').value);
+            formData.append('request_text', document.getElementById('request_text').value);
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            // Send AJAX request
+            fetch('/schedule-request/submit/', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Show success message
+                    document.getElementById("step-3").style.display = "none";
+                    document.getElementById("success-message").style.display = "block";
+                } else {
+                    // Handle errors
+                    alert(data.message || 'שגיאה בשליחת הבקשה');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('שגיאה בתקשורת עם השרת');
+            });
         });
-
-        // AI Suggestion
-        window.generateAiSuggestion = function() {
-            const type = document.getElementById("request_type").value;
-            const aiText = document.getElementById("ai-suggestion-text");
-            aiText.textContent = suggestions[type] || "אנא בחר סוג בקשה תחילה כדי ליצור תבנית";
-            document.getElementById("ai-suggestion-box").classList.remove("d-none");
-        };
-
-        window.useAiSuggestion = function() {
-            const suggestion = document.getElementById("ai-suggestion-text").textContent;
-            const requestText = document.getElementById("request_text");
-            requestText.value = suggestion;
-            requestText.focus();
-        };
     });
 </script>
 {% endblock %}
