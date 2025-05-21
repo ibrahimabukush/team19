@@ -4,9 +4,11 @@ from .views import chatbot_response
 from .views import chat_history
 
 
+
 urlpatterns = [
     path('', views.home, name='blog-home'),
     path('about/', views.about, name='blog-about'),
+    path('technicalmanagement/',views.technicalmanagement, name='technicalmanagement'),
      path('services/', views.services, name='blog-services'),
     path('contact/', views.contact, name='blog-contact'),
      path('chatbot/', chatbot_response, name='chatbot_response'),

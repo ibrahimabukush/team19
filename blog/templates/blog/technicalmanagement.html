@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Reporting System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        .success-message {
+            color: #27ae60;
+            font-size: 16px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Report a Code Error</h1>
+    
+    <div class="form-container">
+        <form id="errorReportForm">
+            <div class="form-group">
+                <label for="reporterName">Your Name:</label>
+                <input type="text" id="reporterName" name="reporterName" required>
+                <div id="nameError" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reporterEmail">Your Email:</label>
+                <input type="email" id="reporterEmail" name="reporterEmail" required>
+                <div id="emailError" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="errorType">Error Type:</label>
+                <select id="errorType" name="errorType" required>
+                    <option value="">Select error type</option>
+                    <option value="syntax">Syntax Error</option>
+                    <option value="logic">Logic Error</option>
+                    <option value="runtime">Runtime Error</option>
+                    <option value="ui">UI/UX Issue</option>
+                    <option value="performance">Performance Issue</option>
+                    <option value="other">Other</option>
+                </select>
+                <div id="typeError" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="errorDescription">Error Description:</label>
+                <textarea id="errorDescription" name="errorDescription" placeholder="Please describe the error in detail, including steps to reproduce if possible..." required></textarea>
+                <div id="descriptionError" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="codeSnippet">Code Snippet (if applicable):</label>
+                <textarea id="codeSnippet" name="codeSnippet" placeholder="Paste the relevant code snippet here..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="urgency">Urgency:</label>
+                <select id="urgency" name="urgency">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical (System Down)</option>
+                </select>
+            </div>
+            
+            <button type="submit">Send Error Report</button>
+        </form>
+        
+        <div id="successMessage" class="success-message">
+            Thank you! Your error report has been sent to our software engineering team.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('errorReportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Reset error messages
+            document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+            
+            // Validate form
+            let isValid = true;
+            const name = document.getElementById('reporterName').value.trim();
+            const email = document.getElementById('reporterEmail').value.trim();
+            const errorType = document.getElementById('errorType').value;
+            const description = document.getElementById('errorDescription').value.trim();
+            
+            if (!name) {
+                document.getElementById('nameError').textContent = 'Please enter your name';
+                isValid = false;
+            }
+            
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Please enter your email';
+                isValid = false;
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email';
+                isValid = false;
+            }
+            
+            if (!errorType) {
+                document.getElementById('typeError').textContent = 'Please select an error type';
+                isValid = false;
+            }
+            
+            if (!description) {
+                document.getElementById('descriptionError').textContent = 'Please describe the error';
+                isValid = false;
+            }
+            
+            if (isValid) {
+                // Collect all form data
+                const formData = {
+                    name: name,
+                    email: email,
+                    errorType: errorType,
+                    description: description,
+                    codeSnippet: document.getElementById('codeSnippet').value.trim(),
+                    urgency: document.getElementById('urgency').value
+                };
+                
+                // Send the email (this would be replaced with actual server-side code)
+                sendEmail(formData);
+                
+                // Show success message and reset form
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('errorReportForm').reset();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+            }
+        });
+        
+        // This is a placeholder function - in a real implementation, you would:
+        // 1. Use a server-side script (PHP, Node.js, etc.) to handle the email sending
+        // 2. Or use a third-party email service like EmailJS or FormSubmit
+        function sendEmail(formData) {
+            // In a real implementation, this would connect to your backend
+            console.log('Preparing to send email with data:', formData);
+            
+            // The email would be sent from your technical manager's email address
+            // to your software engineer's email address
+            const emailContent = `
+                New Error Report Submitted:
+                
+                Reporter Name: ${formData.name}
+                Reporter Email: ${formData.email}
+                Error Type: ${formData.errorType}
+                Urgency: ${formData.urgency}
+                
+                Description:
+                ${formData.description}
+                
+                ${formData.codeSnippet ? 'Code Snippet:\n' + formData.codeSnippet : 'No code snippet provided'}
+            `;
+            
+            console.log('Email content:', emailContent);
+            
+            // In a real implementation, you would use something like:
+            // fetch('/api/send-error-report', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(formData)
+            // });
+        }
+    </script>
+</body>
+</html>

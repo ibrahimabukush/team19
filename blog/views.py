@@ -190,7 +190,10 @@ def services(request):
 
 def contact(request):
     return render(request, 'blog/contact.html', {'title': 'Contact'})
+from django.shortcuts import render
 
+def technicalmanagement(request):
+    return render(request, 'blog/technicalmanagement.html')
 
 @csrf_exempt
 def chatbot_response(request):

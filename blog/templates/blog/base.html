@@ -422,6 +422,9 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
                             </a>
+                           
+                            
+
                         {% elif user.is_authenticated %}
                             <!-- Student Navigation -->
                             <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
@@ -458,6 +461,9 @@
                             </a>
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
+                            </a>
+                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
                             </a>
                         {% endif %}
                     </div>
