@@ -422,6 +422,9 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
                             </a>
+                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+                            </a>
                            
                             
 
@@ -448,6 +451,10 @@
                             <a class="nav-item nav-link" href="{% url 'chat_history' %}">
                                 <i class="fas fa-history fa-sm me-1"></i> היסטורית צ'אט
                             </a>
+                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+                            </a>
+                           
                         {% else %}
                             <!-- Guest Navigation -->
                             <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
@@ -459,12 +466,10 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-cogs fa-sm me-1"></i> שירותים
                             </a>
-                            <a class="nav-item nav-link" href="#">
+                            <a class="nav-item nav-link" href="{% url 'contact' %}">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
                             </a>
-                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
-                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
-                            </a>
+                            
                         {% endif %}
                     </div>
                     

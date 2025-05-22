@@ -1,0 +1,364 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* Social Media Section Styles */
+    .social-section {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .social-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .social-header h2 {
+        color: #2c3e50;
+        font-size: 2.2rem;
+        margin-bottom: 15px;
+    }
+    
+    .social-header p {
+        color: #7f8c8d;
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 1.1rem;
+    }
+    
+    .social-media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+    
+    .social-card {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        text-align: center;
+        border-top: 5px solid;
+        display: flex;
+        flex-direction: column;
+        min-height: 500px; /* Fixed minimum height */
+    }
+    
+    .social-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+    
+    .social-icon {
+        font-size: 2.8rem;
+        margin-bottom: 20px;
+        color: white;
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Social Media Brand Colors */
+    .facebook-card { border-color: #3b5998; }
+    .facebook-bg { background-color: #3b5998; }
+    
+    .twitter-card { border-color: #1da1f2; }
+    .twitter-bg { background-color: #1da1f2; }
+    
+    .instagram-card { border-color: #e1306c; }
+    .instagram-bg { background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d); }
+    
+    .linkedin-card { border-color: #0077b5; }
+    .linkedin-bg { background-color: #0077b5; }
+    
+    .youtube-card { border-color: #ff0000; }
+    .youtube-bg { background-color: #ff0000; }
+    
+    .tiktok-card { border-color: #010101; }
+    .tiktok-bg { background-color: #010101; }
+    
+    .whatsapp-card { border-color: #25D366; }
+    .whatsapp-bg { background-color: #25D366; }
+    
+    .snapchat-card { border-color: #FFFC00; }
+    .snapchat-bg { background-color: #FFFC00; color: #000; }
+    
+    .pinterest-card { border-color: #E60023; }
+    .pinterest-bg { background-color: #E60023; }
+    
+    .reddit-card { border-color: #FF5700; }
+    .reddit-bg { background-color: #FF5700; }
+    
+    .discord-card { border-color: #5865F2; }
+    .discord-bg { background-color: #5865F2; }
+    
+    .social-card h3 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.6rem;
+    }
+    
+    .social-card p {
+        color: #7f8c8d;
+        margin-bottom: 25px;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .social-activities {
+        text-align: left;
+        margin: 20px 0;
+        padding-left: 0; /* Removed left padding */
+        list-style-type: none; /* Removed bullet points */
+        flex-grow: 1; /* Allows this section to grow and push button down */
+    }
+    
+    .social-activities li {
+        margin-bottom: 12px;
+        color: #555;
+        position: relative;
+        padding-left: 15px;
+    }
+    
+    .social-activities li:before {
+        content: ""; /* Removed bullet points */
+    }
+    
+    .social-link-container {
+        margin-top: auto; /* Pushes button to bottom */
+    }
+    
+    .social-link {
+        display: inline-block;
+        padding: 12px 25px;
+        background-color: #8a2be2; /* Purple color */
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .social-link:hover {
+        background-color: #7b1fa2; /* Darker purple */
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .social-media-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .social-card {
+            padding: 25px;
+            min-height: auto; /* Flexible height on mobile */
+        }
+    }
+</style>
+
+<div class="social-section">
+    <div class="social-header">
+        <h2>הצטרפו לקהילה שלנו</h2>
+        <p>התחברו ל-Isend בכל הפלטפורמות כדי לקבל עדכונים אחרונים, תוכן בלעדי ולהיות חלק מקהילת המשלוחים הגדלה שלנו.</p>
+    </div>
+    
+    <div class="social-media-grid">
+        <!-- פייסבוק -->
+        <div class="social-card facebook-card">
+            <div class="social-icon facebook-bg">
+                <i class="fab fa-facebook-f"></i>
+            </div>
+            <h3>פייסבוק</h3>
+            <p>המרכז הראשי של הקהילה שלנו להכרזות ודיונים.</p>
+            <ul class="social-activities">
+                <li>הטבות בלעדיות רק למעקבים בפייסבוק</li>
+                <li>שיחות שאלות ותשובות עם צוות המשלוחים</li>
+                <li>סקרים קהילתיים לעיצוב השירותים שלנו</li>
+                <li>הצגת לקוחות בולטים</li>
+                <li>מאחורי הקלעים של הפעילות שלנו</li>
+            </ul>
+            <a href="https://facebook.com/isend" class="social-link" target="_blank">הצטרפו לקהילה</a>
+        </div>
+        
+        <!-- טוויטר/אקס -->
+        <div class="social-card twitter-card">
+            <div class="social-icon twitter-bg">
+                <i class="fab fa-twitter"></i>
+            </div>
+            <h3>טוויטר/אקס</h3>
+            <p>עדכונים בזמן אמת ואינטראקציות מהירות עם לקוחות.</p>
+            <ul class="social-activities">
+                <li>עדכוני סטטוס שירות מיידיים</li>
+                <li>תמיכת לקוחות מהירה</li>
+                <li>חדשות ומגמות בתעשייה</li>
+                <li>השתתפות ב-Twitter Spaces רלוונטיים</li>
+                <li>שרשורי טיפים שבועיים #DeliveryTips</li>
+            </ul>
+            <a href="https://twitter.com/isend" class="social-link" target="_blank">עקבו אחרינו</a>
+        </div>
+        
+        <!-- אינסטגרם -->
+        <div class="social-card instagram-card">
+            <div class="social-icon instagram-bg">
+                <i class="fab fa-instagram"></i>
+            </div>
+            <h3>אינסטגרם</h3>
+            <p>סיפורים ויזואליים מרשת המשלוחים שלנו.</p>
+            <ul class="social-activities">
+                <li>סיפורי לקוחות עם #ISendStories</li>
+                <li>מדריכי משלוחים ב-IGTV</li>
+                <li>רילסים המציגים טכניקות אריזה</li>
+                <li>השתלטות של שותפי המשלוח שלנו</li>
+                <li>אתגרים והגרלות שבועיות</li>
+            </ul>
+            <a href="https://instagram.com/isend" class="social-link" target="_blank">עקבו וראו סיפורים</a>
+        </div>
+        
+        <!-- לינקדאין -->
+        <div class="social-card linkedin-card">
+            <div class="social-icon linkedin-bg">
+                <i class="fab fa-linkedin-in"></i>
+            </div>
+            <h3>לינקדאין</h3>
+            <p>רשת מקצועית לתובנות עסקיות.</p>
+            <ul class="social-activities">
+                <li>עדכוני צמיחה של החברה</li>
+                <li>מאמרי ניתוח תעשייתי</li>
+                <li>משרות פנויות וסיפורי קריירה</li>
+                <li>הכרזות על שותפויות</li>
+                <li>תוכן מנהיגות מחשבה</li>
+            </ul>
+            <a href="https://linkedin.com/company/isend" class="social-link" target="_blank">התחברו מקצועית</a>
+        </div>
+        
+        <!-- יוטיוב -->
+        <div class="social-card youtube-card">
+            <div class="social-icon youtube-bg">
+                <i class="fab fa-youtube"></i>
+            </div>
+            <h3>יוטיוב</h3>
+            <p>תוכן וידאו למעורבות עמוקה יותר.</p>
+            <ul class="social-activities">
+                <li>סרטוני הדרכה על אריזה</li>
+                <li>הסבר על תהליך המשלוח</li>
+                <li>סרטוני עדויות לקוחות</li>
+                <li>סדרת "פגוש את הצוות"</li>
+                <li>הדגמות משלוח בשידור חי</li>
+            </ul>
+            <a href="https://youtube.com/isend" class="social-link" target="_blank">הירשמו עכשיו</a>
+        </div>
+        
+        <!-- טיקטוק -->
+        <div class="social-card tiktok-card">
+            <div class="social-icon tiktok-bg">
+                <i class="fab fa-tiktok"></i>
+            </div>
+            <h3>טיקטוק</h3>
+            <p>תוכן קצר ומהנה.</p>
+            <ul class="social-activities">
+                <li>סרטוני "יום בחיי" של משלוחים</li>
+                <li>אתגרי אריזה</li>
+                <li>השתתפות בטרנדים עם טוויסט של משלוחים</li>
+                <li>טיפים מהירים ב-60 שניות</li>
+                <li>הצגת תוכן שנוצר על ידי משתמשים</li>
+            </ul>
+            <a href="https://tiktok.com/@isend" class="social-link" target="_blank">עקבו להנאה</a>
+        </div>
+        
+        <!-- וואטסאפ -->
+        <div class="social-card whatsapp-card">
+            <div class="social-icon whatsapp-bg">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <h3>וואטסאפ</h3>
+            <p>ערוץ תקשורת ישיר.</p>
+            <ul class="social-activities">
+                <li>עדכוני סטטוס משלוח מיידיים</li>
+                <li>הטבות בלעדיות בוואטסאפ</li>
+                <li>תמיכת לקוחות מהירה</li>
+                <li>רשימות שידור להכרזות</li>
+                <li>תקשורת דו-כיוונית עם הצוות</li>
+            </ul>
+            <a href="https://wa.me/yournumber" class="social-link" target="_blank">שלחו לנו הודעה</a>
+        </div>
+        
+        <!-- סנאפצ'ט -->
+        <div class="social-card snapchat-card">
+            <div class="social-icon snapchat-bg">
+                <i class="fab fa-snapchat-ghost"></i>
+            </div>
+            <h3>סנאפצ'ט</h3>
+            <p>תוכן מאחורי הקלעים זמני.</p>
+            <ul class="social-activities">
+                <li>סיפורי סנאפ מחיי היום-יום</li>
+                <li>פילטרים בלעדיים בסנאפצ'ט</li>
+                <li>הנחות והטבות בזק</li>
+                <li>עדכוני משלוח בזמן אמת</li>
+                <li>השתלטות של צוות המשלוח</li>
+            </ul>
+            <a href="https://snapchat.com/add/isend" class="social-link" target="_blank">הוסיפו את הסיפור שלנו</a>
+        </div>
+        
+        <!-- פינטרסט -->
+        <div class="social-card pinterest-card">
+            <div class="social-icon pinterest-bg">
+                <i class="fab fa-pinterest-p"></i>
+            </div>
+            <h3>פינטרסט</h3>
+            <p>השראה לאריזה ומשלוחים.</p>
+            <ul class="social-activities">
+                <li>לוחות השראה לאריזה</li>
+                <li>אינפוגרפיקות טיפים למשלוח</li>
+                <li>רעיונות לעטיפת מתנות</li>
+                <li>מדריכי משלוחים לחנויות מקוונות</li>
+                <li>טרנדים עונתיים באריזה</li>
+            </ul>
+            <a href="https://pinterest.com/isend" class="social-link" target="_blank">הצטרפו אלינו</a>
+        </div>
+        
+        <!-- רדיט -->
+        <div class="social-card reddit-card">
+            <div class="social-icon reddit-bg">
+                <i class="fab fa-reddit-alien"></i>
+            </div>
+            <h3>רדיט</h3>
+            <p>דיונים קהילתיים ו-AMA.</p>
+            <ul class="social-activities">
+                <li>מפגשי "שאל אותי הכל" חודשיים</li>
+                <li>השתתפות בפורומים של משלוחים</li>
+                <li>דיונים שקופים על החברה</li>
+                <li>הטכנולוגיה מאחורי השירותים שלנו</li>
+                <li>משוב מונחה קהילה</li>
+            </ul>
+            <a href="https://reddit.com/r/isend" class="social-link" target="_blank">הצטרפו לדיון</a>
+        </div>
+        
+        <!-- דיסקורד -->
+        <div class="social-card discord-card">
+            <div class="social-icon discord-bg">
+                <i class="fab fa-discord"></i>
+            </div>
+            <h3>דיסקורד</h3>
+            <p>צ'אט קהילתי בזמן אמת.</p>
+            <ul class="social-activities">
+                <li>תמיכה קהילתית 24/7</li>
+                <li>ערוצים בלעדיים לחברים</li>
+                <li>שיחות שאלות ותשובות קוליות</li>
+                <li>בדיקת תכונות חדשות</li>
+                <li>אירועים ומשחקים קהילתיים</li>
+            </ul>
+            <a href="https://discord.gg/isend" class="social-link" target="_blank">הצטרפו לשרת</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

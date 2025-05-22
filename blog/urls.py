@@ -10,6 +10,7 @@ urlpatterns = [
     path('about/', views.about, name='blog-about'),
     path('technicalmanagement/',views.technicalmanagement, name='technicalmanagement'),
      path('services/', views.services, name='blog-services'),
+    path('contact/', views.contact, name='contact'),
     path('contact/', views.contact, name='blog-contact'),
      path('chatbot/', chatbot_response, name='chatbot_response'),
     path('chat_history/', chat_history, name='chat_history'),
