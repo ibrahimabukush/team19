@@ -81,8 +81,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'team19',
-        'HOST': 'desktop-lv34vvp',
-        'PORT': '',  # Specify the port
+        'HOST': 'localhost\SQLEXPRESS',
+        'PORT': '',  
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'trusted_connection': 'yes',  # Keep Windows Auth for now
