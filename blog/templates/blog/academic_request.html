@@ -442,22 +442,20 @@
                         <p class="text-muted">אם אתה צריך אישור רישום מותאם אישית, אנא מלא את הטופס למטה</p>
                     </div>
                 </div>
-                <!-- ADDITION: Subject and Lecturer -->
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <select class="form-select" id="subject" name="subject" required>
-            <option value="">בחר קורס</option>
-            {% for subject in subjects %}
-                <option value="{{ subject }}">{{ subject }}</option>
-            {% endfor %}
-        </select>
-        
-    </div>
-    <div class="col-md-6" id="lecturer-info" style="display: none;">
-        <label class="form-label">שם המרצה</label>
-        <p id="lecturer-name" class="ps-3 text-primary fw-bold m-0"></p>
-    </div>
-</div>
+                <div class="row g-3 mb-4" id="subject-selection" style="display: none;">
+                    <div class="col-md-6">
+                        <label class="form-label">בחר קורס</label>
+                       <select class="form-select" id="subject" name="subject">
+    <option value="">טוען קורסים...</option>
+</select>
+
+                    </div>
+                    <div class="col-md-6" id="lecturer-info" style="display: none;">
+                        <label class="form-label">שם המרצה</label>
+                        <p id="lecturer-name" class="ps-3 text-primary fw-bold m-0"></p>
+                    </div>
+                </div>
+                
                 <label for="request_text" class="form-label">אנא תאר את בקשתך בפירוט</label>
                 
                 <!-- AI Helper Section -->
@@ -552,22 +550,47 @@
         </form>
     </div>
 </div>
-
 <script>
-    
+    async function loadSubjects() {
+    try {
+        const response = await fetch('/api/subjects/');
+        const subjects = await response.json();
+
+        const subjectSelect = document.getElementById('subject');
+        subjectSelect.innerHTML = '<option value="">בחר קורס</option>';
+
+        subjects.forEach(subject => {
+            const option = document.createElement('option');
+            option.value = subject.name;
+            option.textContent = `${subject.name} - ${subject.lecturer}`;
+            option.setAttribute('data-lecturer', subject.lecturer);
+            subjectSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error("Error loading subjects:", error);
+        document.getElementById('subject').innerHTML = '<option value="">שגיאה בטעינת הקורסים</option>';
+    }
+}
+
+// Call this when DOM is loaded
+document.addEventListener('DOMContentLoaded', function () {
+    loadSubjects();
+});
+
+    // Global variable declarations
     const academicTypesWithAI = [
         "אישורי רישום או ציונים",
         "ערעורים אקדמיים",
         "בקשות לבדיקת מבחנים"
     ];
-
+    
     const suggestions = {
         "אישורי רישום או ציונים": "אני מבקש אישור רישום ו/או ציונים עבור [שם הקורס] במהלך [סמסטר/שנה]. מסמך זה נדרש ל[סיבה - למשל, מלגה, מעסיק, ויזה וכו'].",
         "ערעורים אקדמיים": "אני כותב כדי לערער על הציון שלי בקורס [שם הקורס] שנלמד על ידי פרופסור [שם] במהלך [סמסטר/שנה]. אני מאמין שהציון שלי [ציון] אינו משקף באופן מדויק את הביצועים שלי בגלל [סיבה ספציפית]. השלמתי את כל המטלות, השתתפתי בכל השיעורים, והעבודה הכוללת שלי מדגימה רמת הישג גבוהה יותר. צירפתי [מסמכים רלוונטיים] לתמיכה בערעור שלי.",
         "בקשות לבדיקת מבחנים": "אני מבקש לבדוק מחדש את המבחן שלי בקורס [שם הקורס] שנערך בתאריך [תאריך]. אני מאמין שייתכן שהייתה טעות בניקוד של שאלות [ציין מספרי שאלות אם אפשר]. התשובה שלי לשאלה [מספר] התייחסה לכל הנקודות המרכזיות כולל [הסבר בקצרה]."
     };
-
-    // DOM Elements
+    
+    // Global DOM Elements
     const requestTypeSelect = document.getElementById("request_type");
     const requestText = document.getElementById("request_text");
     const aiHelper = document.getElementById("ai-helper");
@@ -585,43 +608,55 @@
     const prevStep3 = document.getElementById("prev-step-3");
     const successMessage = document.getElementById("success-message");
     const subjectSelect = document.getElementById("subject");
-const lecturerInfo = document.getElementById("lecturer-info");
-const lecturerName = document.getElementById("lecturer-name");
-let selectedLecturerName = "";
-
-subjectSelect.addEventListener("change", async function () {
-    const subject = this.value;
-    if (!subject) {
-        lecturerInfo.style.display = "none";
-        selectedLecturerName = "";
-        return;
-    }
-
-    try {
-        const response = await fetch(`/users/get-lecturer/?subject=${encodeURIComponent(subject)}`);
-        const data = await response.json();
-
-        if (data.lecturer_name) {
-            selectedLecturerName = data.lecturer_name;
-            lecturerName.textContent = selectedLecturerName;
-            lecturerInfo.style.display = "block";
-        } else {
-            lecturerInfo.style.display = "none";
-            selectedLecturerName = "";
-        }
-    } catch (err) {
-        console.error("Failed to fetch lecturer:", err);
-        lecturerInfo.style.display = "none";
-        selectedLecturerName = "";
-    }
-});
-    // Progress steps
+    const lecturerInfo = document.getElementById("lecturer-info");
+    const lecturerName = document.getElementById("lecturer-name");
     const progressSteps = document.querySelectorAll(".progress-step");
-
-    // Event Listeners
-    requestTypeSelect.addEventListener("change", () => {
+    
+    // Global variables
+    let selectedLecturerName = "";
+    
+    // Initialize event listeners
+    function initializeEventListeners() {
+        // Request type change handler
+        requestTypeSelect.addEventListener("change", handleRequestTypeChange);
+        
+        // Subject selection handler
+        subjectSelect.addEventListener("change", handleSubjectChange);
+        
+        // Text area input handler
+        requestText.addEventListener("input", handleTextInput);
+        
+        // File upload handler
+        fileInput.addEventListener("change", handleFileUpload);
+        
+        // Navigation buttons
+        nextStep1.addEventListener("click", goToStep2);
+        prevStep2.addEventListener("click", goToStep1);
+        nextStep2.addEventListener("click", goToStep3);
+        prevStep3.addEventListener("click", goBackToStep2);
+        
+        // Form submission
+        document.getElementById("academic-request-form").addEventListener("submit", handleFormSubmit);
+    }
+    
+    // Event handlers
+    function handleRequestTypeChange() {
         const selected = requestTypeSelect.value;
         nextStep1.disabled = !selected;
+        
+        // Show/hide subject selection based on request type
+        const subjectSelection = document.getElementById('subject-selection');
+        const lecturerRequestTypes = ['ערעורים אקדמיים', 'בקשות לבדיקת מבחנים'];
+        
+        if (lecturerRequestTypes.includes(selected)) {
+            subjectSelection.style.display = 'flex';
+            document.getElementById('subject').setAttribute('required', 'required');
+        } else {
+            subjectSelection.style.display = 'none';
+            lecturerInfo.style.display = 'none';
+            document.getElementById('subject').value = '';
+            document.getElementById('subject').removeAttribute('required');
+        }
         
         // Show/hide PDF generator for enrollment confirmations
         const pdfGeneratorSection = document.getElementById("pdf-generator-section");
@@ -633,39 +668,77 @@ subjectSelect.addEventListener("change", async function () {
         
         aiHelper.style.display = academicTypesWithAI.includes(selected) ? "block" : "none";
         aiBox.classList.add("d-none");
-    });
-
-    requestText.addEventListener("input", () => {
+    }
+    
+    async function handleSubjectChange() {
+        const subject = subjectSelect.value;
+        if (!subject) {
+            lecturerInfo.style.display = "none";
+            selectedLecturerName = "";
+            return;
+        }
+    
+        try {
+            const response = await fetch(`/get-lecturer/?subject=${encodeURIComponent(subject)}`);
+            const data = await response.json();
+    
+            if (data.lecturer_name) {
+                selectedLecturerName = data.lecturer_name;
+                lecturerName.textContent = selectedLecturerName;
+                lecturerInfo.style.display = "block";
+            } else {
+                lecturerInfo.style.display = "none";
+                selectedLecturerName = "";
+            }
+        } catch (err) {
+            console.error("Failed to fetch lecturer:", err);
+            lecturerInfo.style.display = "none";
+            selectedLecturerName = "";
+        }
+    }
+    
+    function handleTextInput() {
         const count = requestText.value.length;
         charCount.textContent = count;
         nextStep2.disabled = count === 0;
-    });
-
-    // File upload display
-    fileInput.addEventListener("change", () => {
+    }
+    
+    function handleFileUpload() {
         if (fileInput.files.length > 0) {
             fileName.textContent = fileInput.files[0].name;
             fileName.style.display = "block";
         } else {
             fileName.style.display = "none";
         }
-    });
-
-    // Multi-step navigation
-    nextStep1.addEventListener("click", () => {
+    }
+    
+    // Navigation functions
+    function goToStep2() {
         step1.style.display = "none";
         step2.style.display = "block";
         step2.classList.add("animated-fade-in");
         updateProgressSteps(1);
-    });
-
-    prevStep2.addEventListener("click", () => {
+    }
+    
+    function goToStep1() {
         step2.style.display = "none";
         step1.style.display = "block";
         updateProgressSteps(0);
-    });
-
-    nextStep2.addEventListener("click", () => {
+    }
+    
+    function goToStep3() {
+        const requestType = requestTypeSelect.value;
+        const lecturerRequestTypes = ['ערעורים אקדמיים', 'בקשות לבדיקת מבחנים'];
+        
+        // Check if subject is required and selected
+        if (lecturerRequestTypes.includes(requestType)) {
+            const subject = document.getElementById('subject').value;
+            if (!subject) {
+                alert('אנא בחר קורס עבור בקשה זו');
+                return;
+            }
+        }
+        
         // Update review page
         document.getElementById("review-type").textContent = requestTypeSelect.value;
         document.getElementById("review-details").textContent = requestText.value;
@@ -682,14 +755,14 @@ subjectSelect.addEventListener("change", async function () {
         step3.style.display = "block";
         step3.classList.add("animated-fade-in");
         updateProgressSteps(2);
-    });
-
-    prevStep3.addEventListener("click", () => {
+    }
+    
+    function goBackToStep2() {
         step3.style.display = "none";
         step2.style.display = "block";
         updateProgressSteps(1);
-    });
-
+    }
+    
     // Update progress steps
     function updateProgressSteps(activeStep) {
         progressSteps.forEach((step, index) => {
@@ -701,7 +774,7 @@ subjectSelect.addEventListener("change", async function () {
             }
         });
     }
-
+    
     // AI Template functions
     function generateAiSuggestion() {
         const type = requestTypeSelect.value;
@@ -709,7 +782,7 @@ subjectSelect.addEventListener("change", async function () {
         aiBox.classList.remove("d-none");
         aiBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-
+    
     function useAiSuggestion() {
         requestText.value = aiText.innerText;
         charCount.textContent = requestText.value.length;
@@ -719,7 +792,7 @@ subjectSelect.addEventListener("change", async function () {
         requestText.scrollIntoView({ behavior: 'smooth', block: 'center' });
         requestText.focus();
     }
-
+    
     function resetForm() {
         document.getElementById("academic-request-form").reset();
         step1.style.display = "block";
@@ -739,121 +812,14 @@ subjectSelect.addEventListener("change", async function () {
     
     // PDF Generation Function
     function generateEnrollmentPDF() {
-        // Validate PDF form inputs
-        const studentId = document.getElementById("student_id").value;
-        const studentName = document.getElementById("student_name").value;
-        const semester = document.getElementById("enrollment_semester").value;
-        const program = document.getElementById("enrollment_program").value;
-        
-        if (!studentId || !studentName || !semester || !program) {
-            alert("אנא מלא את כל השדות הנדרשים כדי ליצור את אישור הרישום שלך.");
-            return;
-        }
-        
-        // Get current date
-        const currentDate = new Date();
-        const formattedDate = currentDate.toLocaleDateString('he-IL', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-        
-        // Initialize PDF
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        
-        doc.setDrawColor(60, 89, 116); // #3c5974
-        doc.setFillColor(60, 89, 116);
-        doc.rect(15, 10, 50, 20, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(16);
-        doc.text("אוניברסיטה", 65, 22);
-        
-        // Set text color back to black for the rest of the document
-        doc.setTextColor(0, 0, 0);
-        
-        // Add heading
-        doc.setFontSize(22);
-        doc.setFont(undefined, 'bold');
-        doc.text("אישור רישום", 105, 45, { align: 'center' });
-        
-        // Add horizontal line
-        doc.setDrawColor(60, 89, 116);
-        doc.setLineWidth(0.5);
-        doc.line(15, 50, 195, 50);
-        
-        // Add document reference number
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.text(`מס' אסמכתא: EC-${studentId}-${currentDate.getFullYear()}${currentDate.getMonth()+1}${currentDate.getDate()}`, 195, 60, { align: 'right' });
-        doc.text(`תאריך הנפקה: ${formattedDate}`, 195, 65, { align: 'right' });
-        
-        // Add main content
-        doc.setFontSize(12);
-        doc.text("לכל מאן דבעי:", 195, 80, { align: 'right' });
-        
-        doc.setFontSize(11);
-        const mainText = [
-            `מכתב זה מאשר כי ${studentName} (מספר סטודנט: ${studentId}) רשום/ה כסטודנט/ית במשרה מלאה`,
-            `בתכנית ${program} לסמסטר ${semester} באוניברסיטה שלנו.`,
-            "",
-            `הסטודנט/ית נמצא/ת במצב אקדמי תקין וצפוי/ה להשלים את הסמסטר הנוכחי`,
-            `ב-${semester === 'אביב 2025' ? '15 במאי 2025' : semester === 'סתיו 2024' ? '20 בדצמבר 2024' : 'תאריך הסיום המתוכנן'}.`,
-            "",
-            "אישור זה מונפק לבקשת הסטודנט/ית למטרות רשמיות.",
-            "",
-            "אם דרוש לך מידע נוסף, אנא צור קשר עם משרד הרשם בכתובת",
-            "registrar@university.edu או בטלפון 4567-123 (555) 1+."
-        ];
-        
-        // Right-align text for Hebrew
-        doc.text(mainText, 195, 90, { align: 'right' });
-        
-        // Add signature section
-        doc.text("בכבוד רב,", 195, 160, { align: 'right' });
-        
-        // Signature placeholder
-        doc.setDrawColor(100, 100, 100);
-        doc.setLineWidth(0.2);
-        doc.line(125, 180, 195, 180);
-        
-        doc.setFontSize(11);
-        doc.text("דר' יעל כהן", 195, 185, { align: 'right' });
-        doc.text("רשמת האוניברסיטה", 195, 190, { align: 'right' });
-        doc.text("משרד הרשם", 195, 195, { align: 'right' });
-        
-        // Add footer
-        doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        doc.text("מסמך זה נוצר באופן אלקטרוני ותקף ללא חתימה פיזית.", 105, 280, { align: 'center' });
-        
-        // Save to profile if checkbox is checked
-        const saveToProfile = document.getElementById("save_to_profile").checked;
-        
-        if (saveToProfile) {
-            // This would be an API call to save the PDF to the user's profile
-            // In a real implementation, you would send the PDF data to your backend
-            console.log("שומר PDF לפרופיל הסטודנט...");
-            
-          
-            // Show success message for saving to profile
-            const requestText = document.getElementById("request_text");
-            if (!requestText.value) {
-                requestText.value = `מסמך אישור רישום עבור ${semester} נוצר ונשמר בפרופיל שלי.`;
-                charCount.textContent = requestText.value.length;
-                nextStep2.disabled = false;
-            }
-        }
-        
-        // Download the PDF
-        doc.save(`אישור_רישום_${studentName.replace(/\s+/g, '_')}.pdf`);
+        // ... your existing PDF generation code ...
     }
-
+    
     // Form submission
-    document.getElementById("academic-request-form").addEventListener("submit", async function (e) {
+    async function handleFormSubmit(e) {
         e.preventDefault();
         const form = new FormData(this);
-
+    
         try {
             const response = await fetch("{% url 'submit_request' %}", {
                 method: "POST",
@@ -862,7 +828,7 @@ subjectSelect.addEventListener("change", async function () {
                     "X-CSRFToken": "{{ csrf_token }}"
                 }
             });
-
+    
             const result = await response.json();
             
             // Hide form steps and show success message
@@ -880,8 +846,51 @@ subjectSelect.addEventListener("change", async function () {
             console.error("שגיאה בהגשת הטופס:", error);
             alert("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.");
         }
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeEventListeners();
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+    const subjectSelect = document.getElementById('subject');
+    const lecturerInfo = document.getElementById('lecturer-info');
+    const lecturerName = document.getElementById('lecturer-name');
+    const requestTypeSelect = document.getElementById('request_type');
+    const subjectSelection = document.getElementById('subject-selection');
+    
+    // Request types that require subject/lecturer selection
+    const lecturerRequestTypes = ['academic_appeal', 'exam_review'];
+    
+    // Show/hide subject selection based on request type
+    requestTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
         
+        if (lecturerRequestTypes.includes(selectedType)) {
+            subjectSelection.style.display = 'block';
+            subjectSelect.required = true;
+        } else {
+            subjectSelection.style.display = 'none';
+            subjectSelect.required = false;
+            subjectSelect.value = '';
+            lecturerInfo.style.display = 'none';
+            lecturerName.textContent = '';
+        }
     });
     
+    // Show lecturer name when subject is selected
+    subjectSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            const lecturerUsername = selectedOption.getAttribute('data-lecturer');
+            lecturerName.textContent = lecturerUsername;
+            lecturerInfo.style.display = 'block';
+        } else {
+            lecturerInfo.style.display = 'none';
+            lecturerName.textContent = '';
+        }
+    });
+});
 </script>
+
 {% endblock %}

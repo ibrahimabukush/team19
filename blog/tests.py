@@ -15,15 +15,6 @@ class ChatHistoryTests(TestCase):
         )
         self.assertIn("maysa", str(chat))
 
-# class StudentRequestTests(TestCase):
-#     def test_student_request_str(self):
-#         request = StudentRequest.objects.create(
-#             username="student123",
-#             category="General",
-#             request_type="Document Upload",
-#             text="Please upload my document"
-#         )
-#         self.assertIn("student123", str(request))
 
 class AcademicRequestTests(TestCase):
     def setUp(self):
