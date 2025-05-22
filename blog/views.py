@@ -194,6 +194,9 @@ from django.shortcuts import render
 
 def technicalmanagement(request):
     return render(request, 'blog/technicalmanagement.html')
+    
+def contact(request):
+    return render(request, 'blog/contact.html')
 
 @csrf_exempt
 def chatbot_response(request):
