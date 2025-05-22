@@ -19,5 +19,7 @@ urlpatterns = [
     path('schedule-request/submit/', views.submit_schedule_request, name='submit_schedule_request'),
     path('schedule-requests/', views.schedule_requests_list, name='schedule_requests_list'),
     path('schedule-request/<int:request_id>/', views.schedule_request_detail, name='schedule_request_detail'),
-
+    path('secretary-dashboard/', views.secretary_dashboard, name='secretary-dashboard'),
+    path('update-request-status/<int:request_id>/', views.update_request_status, name='update-request-status'),
+    path('secretary-request/<int:request_id>/', views.secretary_request_detail, name='secretary-request-detail'),
 ]
