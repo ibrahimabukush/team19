@@ -715,6 +715,9 @@ def secretary_dashboard(request):
     
     return render(request, 'blog/secretary_dashboard.html', context)
 
+def technicalmanagement(request):
+    return render(request, 'blog/technicalmanagement.html')
+
 @login_required
 def update_request_status(request, request_id):
     if not request.user.is_secretary:
@@ -759,3 +762,5 @@ def secretary_request_detail(request, request_id):
     }
     
     return render(request, 'blog/secretary_request_detail.html', context)
+
+    
