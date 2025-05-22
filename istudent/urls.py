@@ -5,11 +5,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', user_views.register, name='register'),
     path('login/', user_views.login_view, name='login'),
     path('profile/', user_views.profile, name='profile'),
+    path('password/', user_views.password_management, name='password_management'),
+    path('forgot-password/',user_views.forgot_password, name='forgot_password'),
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
 
     # Blog app URLs
