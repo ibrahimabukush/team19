@@ -1,81 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error Reporting System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .form-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="email"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        textarea {
-            height: 150px;
-            resize: vertical;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .error-message {
-            color: #e74c3c;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        .success-message {
-            color: #27ae60;
-            font-size: 16px;
-            margin-top: 15px;
-            text-align: center;
-            display: none;
-        }
-    </style>
-</head>
-<body>
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<style>
+    /* Move all your styles inside the content block */
+    .error-report-body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+    }
+    .error-report-body h1 {
+        color: #2c3e50;
+        text-align: center;
+    }
+    .error-report-body .form-container {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .error-report-body .form-group {
+        margin-bottom: 15px;
+    }
+    .error-report-body label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .error-report-body input[type="text"],
+    .error-report-body input[type="email"],
+    .error-report-body textarea,
+    .error-report-body select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+    .error-report-body textarea {
+        height: 150px;
+        resize: vertical;
+    }
+    .error-report-body button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .error-report-body button:hover {
+        background-color: #2980b9;
+    }
+    .error-report-body .error-message {
+        color: #e74c3c;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    .error-report-body .success-message {
+        color: #27ae60;
+        font-size: 16px;
+        margin-top: 15px;
+        text-align: center;
+        display: none;
+    }
+</style>
+
+<div class="error-report-body">
     <h1>Report a Code Error</h1>
     
     <div class="form-container">
         <form id="errorReportForm">
+            {% csrf_token %}
             <div class="form-group">
                 <label for="reporterName">Your Name:</label>
                 <input type="text" id="reporterName" name="reporterName" required>
@@ -130,8 +129,9 @@
             Thank you! Your error report has been sent to our software engineering team.
         </div>
     </div>
+</div>
 
-    <script>
+ <script>
         document.getElementById('errorReportForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -226,5 +226,4 @@
             // });
         }
     </script>
-</body>
-</html>
+{% endblock %}
