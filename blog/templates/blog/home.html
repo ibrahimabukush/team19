@@ -437,20 +437,23 @@
     }
     
     .service-logo {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        color: white;
-        border-radius: 50%;
-        box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
-        transition: all 0.5s ease;
-        z-index: 1;
-    }
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+    transition: all 0.5s ease;
+    z-index: 1;
+}
+
+
     
     .service-card:hover .service-logo {
         transform: scale(1.15) translateZ(30px);
@@ -760,46 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Features Section -->
-<div class="features-section" id="features">
-    <div class="container">
-        <h2 class="features-title fade-in">למה לבחור ב-ISEND?</h2>
-        <p class="features-subtitle fade-in">אנו מספקים פתרונות חדשניים למוסדות אקדמיים</p>
-        
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.1s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="feature-title">תקשורת משופרת</h3>
-                    <p>אפשרו אינטראקציות חלקות בין סטודנטים וסגל אקדמי באמצעות מערכת ההודעות המשולבת שלנו.</p>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.3s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <h3 class="feature-title">תהליכי עבודה מייעלים</h3>
-                    <p>אוטומציה של עיבוד ומעקב אחר בקשות להבטחת טיפול יעיל בכל פניות הסטודנטים.</p>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.5s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="feature-title">צ'אטבוט חכם</h3>
-                    <p>קבלו מענה מיידי לשאלות בעזרת צ'אטבוט מבוסס בינה מלאכותית, המלווה אתכם בתהליך שלב אחר שלב.</p>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-</div>
+
 
 <!-- Services Section -->
 <div class="services-section" id="services">
@@ -939,29 +903,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Contact Section -->
 <div class="contact-section py-5" id="contact" style="background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 text-center">
-                <h2 class="mb-4 fade-in" style="color: #2d3748; font-size: 2.5rem; font-weight: 800;">צור קשר</h2>
-                <p class="lead mb-5 fade-in" style="color: #4a5568;">יש לך שאלות? אנחנו כאן לעזור! שלח לנו הודעה ונחזור אליך בהקדם.</p>
-                
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="contact-card p-4 rounded-lg shadow-sm bg-white fade-in" style="transition: all 0.3s ease;">
-                            <i class="fas fa-envelope fa-3x mb-3" style="color: #6a11cb;"></i>
-                            <h4 style="color: #2d3748;">דוא"ל</h4>
-                            <p style="color: #4a5568;">info@isend.edu</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="contact-card p-4 rounded-lg shadow-sm bg-white fade-in" style="transition: all 0.3s ease;">
-                            <i class="fas fa-phone fa-3x mb-3" style="color: #6a11cb;"></i>
-                            <h4 style="color: #2d3748;">טלפון</h4>
-                            <p style="color: #4a5568;">03-1234567</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="container text-center">
+        <h2 class="mb-4 fade-in" style="color: #2d3748; font-size: 2.5rem; font-weight: 800;">צור קשר</h2>
+        <p class="lead mb-5 fade-in" style="color: #4a5568;">יש לך שאלות? אנחנו כאן לעזור! שלח לנו הודעה ונחזור אליך בהקדם.</p>
+
+        <!-- Contact info line-style -->
+        <div class="fade-in" style="font-size: 1.2rem; color: #4a5568;">
+            <i class="fas fa-envelope" style="color: #6a11cb;"></i>
+            <span style="margin-right: 8px;">דוא"ל: info@isend.edu</span>
+        </div>
+        <div class="fade-in mt-2" style="font-size: 1.2rem; color: #4a5568;">
+            <i class="fas fa-phone" style="color: #6a11cb;"></i>
+            <span style="margin-right: 8px;">טלפון: 03-1234567</span>
         </div>
     </div>
 </div>
