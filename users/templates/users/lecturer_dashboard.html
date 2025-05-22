@@ -532,7 +532,7 @@
         <div class="col-md-6 mb-4">
             <div class="main-card h-100">
                 <div class="card-header">
-                    <h5 class="card-title">בקשות אחרונות</h5>
+                    <h5 class="card-title">בקשות דחופות</h5>
                 </div>
                 <div>
                     {% for request in recent_requests %}
@@ -585,52 +585,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="main-card h-100">
-                <div class="card-header">
-                    <h5 class="card-title">בקשות עם דדליין קרוב</h5>
-                </div>
-                <div>
-                    {% for request in upcoming_deadlines %}
-                    <a href="#" class="request-item view-request" data-id="{{ request.id }}" data-bs-toggle="modal" data-bs-target="#requestModal">
-                        <div class="request-icon {% if request.is_past_deadline %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning{% endif %}">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
-                        <div class="request-content">
-                            <div class="request-title">{{ request.subject }}</div>
-                            <div class="request-subtitle">{{ request.student.get_full_name }} - {{ request.request_type }}</div>
-                            <div>
-                                {% if request.status == 'pending' %}
-                                <span class="badge bg-warning text-dark">ממתין</span>
-                                {% elif request.status == 'in_progress' %}
-                                <span class="badge bg-info">בטיפול</span>
-                                {% elif request.status == 'need_update' %}
-                                <span class="badge bg-primary">דורש עדכון</span>
-                                {% elif request.status == 'approved' %}
-                                <span class="badge bg-success">מאושר</span>
-                                {% else %}
-                                <span class="badge bg-danger">נדחה</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="request-status">
-                            <div class="{% if request.is_past_deadline %}text-danger{% else %}text-warning{% endif %}">
-                                {% if request.is_past_deadline %}
-                                <i class="fas fa-exclamation-triangle"></i>
-                                {% endif %}
-                                {{ request.update_deadline|date:"d/m/Y" }}
-                            </div>
-                        </div>
-                    </a>
-                    {% empty %}
-                    <div class="empty-state">
-                        <i class="fas fa-calendar-check"></i>
-                        <p>אין בקשות עם דדליין קרוב</p>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+       
     </div>
 
     <!-- Modal for Request Details -->
