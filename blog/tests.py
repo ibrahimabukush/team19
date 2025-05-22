@@ -155,7 +155,7 @@ class AcademicRequestTests(TestCase):
         )
         
         self.client.login(username='testuser', password='testpass123')
-        response = self.client.get(reverse('request-list')))
+        response = self.client.get(reverse('request-list'))
         
         self.assertEqual(response.status_code, 200)
         
