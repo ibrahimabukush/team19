@@ -437,20 +437,23 @@
     }
     
     .service-logo {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        color: white;
-        border-radius: 50%;
-        box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
-        transition: all 0.5s ease;
-        z-index: 1;
-    }
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    width: auto;
+    height: auto;
+    transition: all 0.5s ease;
+    z-index: 1;
+}
+
+
     
     .service-card:hover .service-logo {
         transform: scale(1.15) translateZ(30px);
@@ -760,46 +763,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </div>
 
-<!-- Features Section -->
-<div class="features-section" id="features">
-    <div class="container">
-        <h2 class="features-title fade-in">למה לבחור ב-ISEND?</h2>
-        <p class="features-subtitle fade-in">אנו מספקים פתרונות חדשניים למוסדות אקדמיים</p>
-        
-        <div class="row">
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.1s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="feature-title">תקשורת משופרת</h3>
-                    <p>אפשרו אינטראקציות חלקות בין סטודנטים וסגל אקדמי באמצעות מערכת ההודעות המשולבת שלנו.</p>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.3s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <h3 class="feature-title">תהליכי עבודה מייעלים</h3>
-                    <p>אוטומציה של עיבוד ומעקב אחר בקשות להבטחת טיפול יעיל בכל פניות הסטודנטים.</p>
-                </div>
-            </div>
-            
-            <div class="col-md-4 mb-4">
-                <div class="feature-card fade-in" style="animation-delay: 0.5s;">
-                    <div class="feature-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h3 class="feature-title">צ'אטבוט חכם</h3>
-                    <p>קבלו מענה מיידי לשאלות בעזרת צ'אטבוט מבוסס בינה מלאכותית, המלווה אתכם בתהליך שלב אחר שלב.</p>
-                </div>
-            </div>
-            
-        </div>
-    </div>
-</div>
+
 
 <!-- Services Section -->
 <div class="services-section" id="services">
