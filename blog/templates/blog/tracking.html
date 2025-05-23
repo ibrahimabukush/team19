@@ -3,6 +3,7 @@
 {% block content %}
 <style>
     /* Color Variables */
+<<<<<<< HEAD
     
        :root {
   --purple-dark: #6a1b9a;
@@ -28,15 +29,35 @@
 }
 
     
+=======
+    :root {
+        --green-dark: #33AB5F;     /* Eucalyptus */
+        --green-main: #82AC85;     /* Bay Leaf */
+        --green-light: #A9C7AC;    /* Gum Leaf */
+        --green-pale: #BFD8C4;     /* Edgewater */
+        --green-bg: #e8f5e9;       /* Keep lighter for background */
+        --green-accent: #8CDBA9;   /* Vista Blue */
+        --white: #ffffff;
+        --off-white: #f9f9f9;
+        --text-dark: #333333;
+        --text-light: rgba(255, 255, 255, 0.9);
+        --gray-light: #f5f5f5;
+        --gray-medium: #e0e0e0;
+        --status-pending: #ffb74d;
+        --status-progress: #64b5f6;
+        --status-approved: #66bb6a;
+        --status-rejected: #ef5350;
+        --status-update: #ba68c8;
+    }
+>>>>>>> Yazedasd
 
-    /* Enhanced Request Tracking specific styles */
     .tracking-header {
-        background: var(--green-main);
+        background: linear-gradient(135deg, var(--green-main), var(--green-dark));
         color: white;
         border-radius: 15px;
         padding: 30px;
         margin-bottom: 30px;
-        box-shadow: 0 8px 20px rgba(46, 125, 50, 0.15);
+        box-shadow: 0 8px 20px rgba(130, 172, 133, 0.25);
         position: relative;
         overflow: hidden;
     }
@@ -48,7 +69,7 @@
         right: -50px;
         width: 200px;
         height: 200px;
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.1);
         border-radius: 50%;
     }
 
@@ -59,7 +80,7 @@
         left: -30px;
         width: 150px;
         height: 150px;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 50%;
     }
 
@@ -105,16 +126,16 @@
         background: white;
         border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 5px 15px rgba(130, 172, 133, 0.1);
         transition: all 0.3s ease;
-        border: 1px solid rgba(0, 0, 0, 0.03);
+        border: 1px solid var(--green-pale);
         margin-bottom: 30px;
         padding: 25px;
     }
 
     .tracking-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 15px 35px rgba(130, 172, 133, 0.2);
     }
 
     /* Animation delay classes for cards */
@@ -130,7 +151,7 @@
     .tracking-card-10 { animation-delay: 1s; }
 
     .tracking-order-info {
-        border-bottom: 1px solid var(--gray-medium);
+        border-bottom: 1px solid var(--green-pale);
         padding-bottom: 20px;
         margin-bottom: 20px;
     }
@@ -138,7 +159,7 @@
     .tracking-order-number {
         font-size: 20px;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--green-dark);
         margin-bottom: 5px;
     }
 
@@ -178,7 +199,7 @@
         left: 70px;
         right: 70px;
         height: 2px;
-        background-color: var(--gray-medium);
+        background-color: var(--green-pale);
         z-index: 1;
     }
 
@@ -196,17 +217,17 @@
         height: 50px;
         border-radius: 50%;
         background-color: white;
-        border: 2px solid var(--gray-medium);
+        border: 2px solid var(--green-light);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 10px;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 5px rgba(130, 172, 133, 0.1);
     }
 
     .tracking-step-icon i {
-        color: var(--gray-medium);
+        color: var(--green-light);
         font-size: 20px;
     }
 
@@ -223,7 +244,7 @@
         background-color: var(--green-main);
         border-color: var(--green-main);
         transform: scale(1.1);
-        box-shadow: 0 5px 15px rgba(46, 125, 50, 0.2);
+        box-shadow: 0 5px 15px rgba(130, 172, 133, 0.3);
     }
 
     .tracking-step.active .tracking-step-icon i {
@@ -236,8 +257,8 @@
     }
 
     .tracking-step.completed .tracking-step-icon {
-        background-color: var(--green-main);
-        border-color: var(--green-main);
+        background-color: var(--green-dark);
+        border-color: var(--green-dark);
     }
 
     .tracking-step.completed .tracking-step-icon i {
@@ -259,14 +280,14 @@
     /* Detailed information section */
     .tracking-details {
         margin-top: 20px;
-        background-color: var(--gray-light);
+        background-color: var(--green-bg);
         border-radius: 10px;
         padding: 15px;
     }
 
     .tracking-detail-item {
         padding: 15px;
-        border-bottom: 1px solid var(--gray-medium);
+        border-bottom: 1px solid var(--green-pale);
         display: flex;
         align-items: flex-start;
     }
@@ -303,7 +324,7 @@
     .tracking-detail-title {
         font-weight: 600;
         margin-bottom: 5px;
-        color: var(--text-dark);
+        color: var(--green-dark);
     }
 
     .tracking-detail-date {
@@ -384,7 +405,7 @@
         background: var(--green-dark);
         color: white;
         transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(46, 125, 50, 0.2);
+        box-shadow: 0 10px 20px rgba(130, 172, 133, 0.3);
     }
 
     /* Deadline styling */
@@ -412,8 +433,8 @@
         padding: 70px 20px;
         background-color: white;
         border-radius: 20px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: 0 5px 25px rgba(130, 172, 133, 0.1);
+        border: 1px solid var(--green-pale);
     }
 
     .empty-state-icon {
@@ -423,7 +444,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(46, 125, 50, 0.08);
+        background: var(--green-bg);
         border-radius: 50%;
     }
 
@@ -435,7 +456,7 @@
     .empty-state h3 {
         font-size: 24px;
         font-weight: 700;
-        color: var(--text-dark);
+        color: var(--green-dark);
         margin-bottom: 15px;
     }
 
@@ -699,7 +720,7 @@
             {% endif %}
         </div>
         
-        <!-- Action buttons based on status -->
+        <!-- Action buttons based on status
         <div class="text-center mt-4">
             {% if request.status == 'need_update' %}
             <a href="/request/update/{{ request.id }}/" class="btn btn-isend">
@@ -710,7 +731,7 @@
                 <i class="fas fa-eye"></i> צפה בפרטי הבקשה
             </a>
             {% endif %}
-        </div>
+        </div> -->
     </div>
     {% endfor %}
     

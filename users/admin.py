@@ -1,15 +1,21 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User
-from .models import LecturerProfile
+from .models import LecturerProfile , Subject
 class CustomUserAdmin(UserAdmin):
-    list_display = ['username', 'email', 'is_student', 'is_lecturer', 'is_approved']
+    list_display = ['username', 'email', 'is_student', 'is_lecturer','is_secretary', 'is_approved']
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('is_student', 'is_lecturer', 'is_approved')}),
+        (None, {'fields': ('is_student', 'is_lecturer', 'is_secretary','is_approved')}),
     )
 
 admin.site.register(User, CustomUserAdmin)
 
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('name', 'department', 'lecturer')
+    list_filter = ('department', 'lecturer')
+    search_fields = ('name', 'lecturer__username')
+    ordering = ('name',)
 
 
 
