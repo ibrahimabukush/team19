@@ -88,21 +88,7 @@
                     <label for="id_password2" class="form-label">אימות סיסמה</label>
                     {{ form.password2|as_crispy_field }}
                 </div>
-                
-                <!-- Department and Year Fields (Initially Hidden) -->
-                <div class="role-specific-fields" style="display: none;">
-                    <div class="form-group mb-3">
-                        <label for="id_department" class="form-label">מחלקה</label>
-                        {{ form.department|as_crispy_field }}
-                    </div>
-                    
-                    <div class="form-group mb-3 year-field" style="display: none;">
-                        <label for="id_year" class="form-label">שנה</label>
-                        {{ form.year|as_crispy_field }}
-                    </div>
-                    
-                    <!-- Hidden courses field -->
-                    {{ form.courses }}
+               
                     
                     <!-- Visible course fields section -->
                     <div class="form-group mb-3 courses-section" style="display: none;">

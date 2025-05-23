@@ -15,7 +15,9 @@ from django.views.decorators.csrf import requires_csrf_token
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
+import random
+from .models import PasswordResetCode
+from django.conf import settings
 from django.http import JsonResponse
 from .models import LecturerProfile
 from .forms import PasswordManagementForm
@@ -228,7 +230,9 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import LecturerProfile
 from blog.models import AcademicRequest 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 @login_required
 def lecturer_dashboard(request):

@@ -11,6 +11,7 @@ class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
     is_student = forms.BooleanField(required=False)
     is_lecturer = forms.BooleanField(required=False)
+    
 
     class Meta:
         model = User
