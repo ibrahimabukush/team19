@@ -3,24 +3,31 @@
 {% block content %}
 <style>
     /* Color Variables */
-    :root {
-        --green-dark: #2e7d32;
-        --green-main: #43a047;
-        --green-light: #66bb6a;
-        --green-pale: #c8e6c9;
-        --green-bg: #e8f5e9;
-        --white: #ffffff;
-        --off-white: #f9f9f9;
-        --text-dark: #333333;
-        --text-light: rgba(255, 255, 255, 0.9);
-        --gray-light: #f5f5f5;
-        --gray-medium: #e0e0e0;
-        --status-pending: #ffb74d;
-        --status-progress: #64b5f6;
-        --status-approved: #66bb6a;
-        --status-rejected: #ef5350;
-        --status-update: #ba68c8;
-    }
+    
+       :root {
+  --purple-dark: #6a1b9a;
+  --purple-main: #8e24aa;
+  --purple-light: #ba68c8;
+  --purple-pale: #f3e5f5;
+  --purple-bg: #f8eafc;
+
+  --white: #ffffff;
+  --off-white: #f9f9f9;
+
+  --text-dark: #2c2c2c;
+  --text-light: rgba(255, 255, 255, 0.9);
+
+  --gray-light: #f5f5f5;
+  --gray-medium: #e0e0e0;
+
+  --status-pending: #ce93d8;     /* light purple */
+  --status-progress: #ab47bc;    /* medium purple */
+  --status-approved: #8e24aa;    /* main purple */
+  --status-rejected: #d32f2f;    /* red for rejection still stands out */
+  --status-update: #7e57c2;      /* purple-ish blue for update status */
+}
+
+    
 
     /* Enhanced Request Tracking specific styles */
     .tracking-header {

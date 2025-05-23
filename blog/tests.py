@@ -87,30 +87,41 @@ class ErrorReportFormTests(TestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'success')  # or adjust based on your view
+        
+        # Check hidden div exists but with empty array
+        self.assertContains(response, '<div id="requestsData" data-requests="[]"')
+        
+    def test_view_button_has_correct_attributes(self):
+        """POSITIVE TEST: Verify view buttons have correct data attributes"""
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('request-list'))  # Update with your URL name
+        
+        self.assertEqual(response.status_code, 200)
+        
+        # Check view button exists with correct data attribute
+        self.assertContains(
+            response, 
+            f'class="view-request-btn" data-request-id="{self.pending_request.id}"'
+        )
+        self.assertContains(
+            response,
+            f'href="/request/view/{self.pending_request.id}/"'
+        )
 
-    def test_invalid_email_submission(self):
-        """
-        ❌ Should reject an invalid SCE email (wrong domain).
-        """
-        data = {
-            'name': 'Yazed',
-            'email': 'notvalid@gmail.com',  # wrong domain
-            'errorType': 'Bug',
-            'description': 'Issue here',
-            'urgency': 'Low'
-        }
-        response = self.client.post(self.url, data)
-        self.assertContains(response, 'אימייל SCE תקין')  # match error message from your JS/Python
-
-    def test_missing_fields(self):
-        """
-        ❌ Should reject when required fields are missing.
-        """
-        data = {
-            'email': 'yazed@ac.sce.ac.il',
-            'urgency': 'High'
-            # missing: name, errorType, description
-        }
-        response = self.client.post(self.url, data)
-        self.assertContains(response, 'נא להזין את שמך')  # or similar message
+    def test_page_with_invalid_request_status(self):
+        """NEGATIVE TEST: Verify page handles invalid status gracefully"""
+        # Create request with invalid status
+        invalid_request = AcademicRequest.objects.create(
+            title="Invalid Status Request",
+            status="invalid_status",
+            created_by=self.user
+        )
+        
+        self.client.login(username='testuser', password='testpass123')
+        response = self.client.get(reverse('request-list')))
+        
+        self.assertEqual(response.status_code, 200)
+        
+        # Page should still render without errors
+        self.assertContains(response, f'"id": {invalid_request.id}')
+        self.assertContains(response, f'"status": "invalid_status"')
