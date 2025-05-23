@@ -11,12 +11,17 @@ urlpatterns = [
     path('register/', user_views.register, name='register'),
     path('login/', user_views.login_view, name='login'),
     path('profile/', user_views.profile, name='profile'),
+    #password
     path('password/', user_views.password_management, name='password_management'),
     path('forgot-password/',user_views.forgot_password, name='forgot_password'),
+    path('password/change/', user_views.change_password_direct, name='change_password_direct'),
+
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
 
     # Blog app URLs
     path('', include('blog.urls')),
+     path('password/', user_views.password_management, name='password_management'),
+    path('password/forgot/', user_views.forgot_password, name='forgot_password'),
 
     # Lecturer-specific views
     path('lecturer/dashboard/', user_views.lecturer_dashboard, name='lecturer_dashboard'),

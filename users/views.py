@@ -14,9 +14,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import requires_csrf_token
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from django.http import JsonResponse
 from .models import LecturerProfile
+from .forms import PasswordManagementForm
 
 def get_lecturer_by_subject(request):
     subject = request.GET.get('subject')
@@ -363,19 +365,30 @@ def request_detail(request, request_id):
 
 
 #ViewPassword
-@login_required
-def password_management(request):
-    context = {}
-    stage = request.session.get('password_stage', 'change')  # change, request_code, reset
+
+def change_password_direct(request):
+    """Direct access to password change form"""
+    return password_management(request, direct_access=True)
+
+def password_management(request, direct_access=False):
+    # If coming from profile page, go straight to password change form
+    if request.user.is_authenticated and direct_access:
+        request.session['password_stage'] = 'change'
+    
+    stage = request.session.get('password_stage', 'change' if request.user.is_authenticated else 'request_code')
     
     if request.method == 'POST':
-        form = PasswordManagementForm(request.user, stage, request.POST)
+        form = PasswordManagementForm(
+            user=request.user if request.user.is_authenticated else None,
+            stage=stage,
+            data=request.POST
+        )
         
         if form.is_valid():
-            if stage == 'change':
-                # Regular password change
+            if stage == 'change' and request.user.is_authenticated:
+                # Handle password change for logged-in users
                 user = form.save()
-                update_session_auth_hash(request, user)
+                update_session_auth_hash(request, user)  # Keep user logged in
                 
                 # Send email notification
                 send_mail(
@@ -390,90 +403,98 @@ def password_management(request):
                 return redirect('password_management')
             
             elif stage == 'request_code':
-                # Request password reset code
+                # Handle password reset request
                 email = form.cleaned_data['email']
-                user = User.objects.get(email=email)
+                try:
+                    user = User.objects.get(email=email)
+                    
+                    # Generate and store 6-digit code
+                    code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+                    PasswordResetCode.objects.filter(user=user).delete()
+                    PasswordResetCode.objects.create(
+                        user=user,
+                        code=code,
+                        expires_at=timezone.now() + timedelta(minutes=15)
+                    )
+                    
+                    # Send email with code
+                    send_mail(
+                        'Password Reset Code',
+                        f'Your password reset code is: {code}\n\nThis code will expire in 15 minutes.',
+                        settings.EMAIL_HOST_USER,
+                        [email],
+                        fail_silently=False,
+                    )
+                    
+                    # Set session variables for next stage
+                    request.session['password_stage'] = 'reset'
+                    request.session['reset_user_id'] = user.id
+                    messages.info(request, 'A 6-digit code has been sent to your email.')
+                    return redirect('password_management')
                 
-                # Generate 6-digit code
-                code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-                
-                # Delete any existing codes
-                PasswordResetCode.objects.filter(user=user).delete()
-                
-                # Save new code
-                PasswordResetCode.objects.create(
-                    user=user,
-                    code=code,
-                    expires_at=timezone.now() + timedelta(minutes=15)
-                )
-                
-                # Send email with code
-                send_mail(
-                    'Password Reset Code',
-                    f'Your password reset code is: {code}\n\nThis code will expire in 15 minutes.',
-                    settings.EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False,
-                )
-                
-                request.session['password_stage'] = 'reset'
-                request.session['reset_user_id'] = user.id
-                messages.info(request, 'A 6-digit code has been sent to your email.')
-                return redirect('password_management')
+                except User.DoesNotExist:
+                    messages.error(request, 'No user found with this email address.')
             
             elif stage == 'reset':
-                # Verify code and reset password
+                # Handle password reset with verification code
                 user_id = request.session.get('reset_user_id')
                 if not user_id:
                     return HttpResponseBadRequest("Invalid session")
                 
-                user = User.objects.get(id=user_id)
-                code = form.cleaned_data['code']
-                
-                # Verify code
-                reset_code = PasswordResetCode.objects.filter(
-                    user=user,
-                    code=code,
-                    used=False,
-                    expires_at__gt=timezone.now()
-                ).first()
-                
-                if reset_code:
-                    # Code is valid, update password
-                    new_password = form.cleaned_data['new_password']
-                    user.set_password(new_password)
-                    user.save()
+                try:
+                    user = User.objects.get(id=user_id)
+                    code = form.cleaned_data['code']
                     
-                    # Mark code as used
-                    reset_code.used = True
-                    reset_code.save()
+                    # Verify the code
+                    reset_code = PasswordResetCode.objects.filter(
+                        user=user,
+                        code=code,
+                        used=False,
+                        expires_at__gt=timezone.now()
+                    ).first()
                     
-                    # Clear session
-                    del request.session['password_stage']
-                    del request.session['reset_user_id']
-                    
-                    # Send confirmation email
-                    send_mail(
-                        'Password Reset Successfully',
-                        f'Hello {user.username},\n\nYour password has been successfully reset.',
-                        settings.EMAIL_HOST_USER,
-                        [user.email],
-                        fail_silently=False,
-                    )
-                    
-                    messages.success(request, 'Your password has been reset successfully!')
-                    return redirect('login')
-                else:
-                    messages.error(request, 'Invalid or expired code.')
+                    if reset_code:
+                        # Update password and mark code as used
+                        new_password = form.cleaned_data['new_password1']
+                        user.set_password(new_password)
+                        user.save()
+                        reset_code.used = True
+                        reset_code.save()
+                        
+                        # Clean up session
+                        del request.session['password_stage']
+                        del request.session['reset_user_id']
+                        
+                        # Send confirmation email
+                        send_mail(
+                            'Password Reset Successfully',
+                            f'Hello {user.username},\n\nYour password has been successfully reset.',
+                            settings.EMAIL_HOST_USER,
+                            [user.email],
+                            fail_silently=False,
+                        )
+                        
+                        messages.success(request, 'Your password has been reset successfully!')
+                        return redirect('login')
+                    else:
+                        messages.error(request, 'Invalid or expired code.')
+                except User.DoesNotExist:
+                    messages.error(request, 'Invalid user session.')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        form = PasswordManagementForm(request.user, stage)
+        form = PasswordManagementForm(
+            user=request.user if request.user.is_authenticated else None,
+            stage=stage
+        )
     
-    context['form'] = form
-    context['stage'] = stage
-    return render(request, 'password_management.html', context)
+    return render(request, 'users/password_management.html', {
+        'form': form,
+        'stage': stage,
+        'is_authenticated': request.user.is_authenticated
+    })
 
 def forgot_password(request):
+    """View to initiate password reset process"""
     request.session['password_stage'] = 'request_code'
     return redirect('password_management')

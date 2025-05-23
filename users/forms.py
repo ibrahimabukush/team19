@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Profile
 from .models import User
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.core.exceptions import ValidationError
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -70,12 +71,13 @@ class PasswordManagementForm(forms.Form):
         self.stage = stage
         super().__init__(*args, **kwargs)
         
-        if stage == 'change':
+        if stage == 'change' and user is not None:
+            # Fields for password change
             self.fields['old_password'] = forms.CharField(
                 label='Current Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter your current password'
+                    'placeholder': 'Enter current password'
                 }),
                 required=True
             )
@@ -89,32 +91,36 @@ class PasswordManagementForm(forms.Form):
                 help_text="Your password must contain at least 8 characters."
             )
             self.fields['new_password2'] = forms.CharField(
-                label='Confirm New Password',
+                label='Confirm Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
                     'placeholder': 'Confirm new password'
                 }),
                 required=True
             )
+        
         elif stage == 'request_code':
+            # Field for email submission
             self.fields['email'] = forms.EmailField(
                 label='Email Address',
-                required=True,
                 widget=forms.EmailInput(attrs={
                     'class': 'form-control',
                     'placeholder': 'Enter your registered email'
-                })
+                }),
+                required=True
             )
+        
         elif stage == 'reset':
+            # Fields for password reset with code
             self.fields['code'] = forms.CharField(
                 label='Verification Code',
                 max_length=6,
                 min_length=6,
-                required=True,
                 widget=forms.TextInput(attrs={
                     'class': 'form-control',
-                    'placeholder': '6-digit code from email'
-                })
+                    'placeholder': 'Enter 6-digit code'
+                }),
+                required=True
             )
             self.fields['new_password1'] = forms.CharField(
                 label='New Password',
@@ -125,7 +131,7 @@ class PasswordManagementForm(forms.Form):
                 required=True
             )
             self.fields['new_password2'] = forms.CharField(
-                label='Confirm New Password',
+                label='Confirm Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
                     'placeholder': 'Confirm new password'
@@ -137,13 +143,6 @@ class PasswordManagementForm(forms.Form):
         email = self.cleaned_data.get('email')
         if not User.objects.filter(email=email).exists():
             raise ValidationError("No account found with this email address.")
-        
-        user = User.objects.get(email=email)
-        if hasattr(user, 'is_student') and user.is_student and not email.endswith('@ac.sce.ac.il'):
-            raise ValidationError("Student accounts must use @ac.sce.ac.il email")
-        if hasattr(user, 'is_lecturer') and user.is_lecturer and not email.endswith('@sce.ac.il'):
-            raise ValidationError("Lecturer accounts must use @sce.ac.il email")
-        
         return email
 
     def clean_code(self):
@@ -153,7 +152,6 @@ class PasswordManagementForm(forms.Form):
         code = self.cleaned_data.get('code')
         if not code or len(code) != 6:
             raise ValidationError("Invalid verification code format")
-        
         return code
 
     def clean(self):
@@ -172,6 +170,13 @@ class PasswordManagementForm(forms.Form):
                     raise ValidationError("Your current password was entered incorrectly.")
         
         return cleaned_data
+
+    def save(self):
+        if self.stage == 'change':
+            self.user.set_password(self.cleaned_data['new_password1'])
+            self.user.save()
+            return self.user
+        return None
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
