@@ -1,31 +1,14 @@
 from django.db import models
-#from django.contrib.auth.models import User
+from django.contrib.auth.models import User
 from PIL import Image
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    DEPARTMENT_CHOICES = [
-        ('sw_engineering', 'Software Engineering'),
-        ('computer_science', 'Computer Science'),
-        ('electronic_engineering', 'Electronic Engineering'),
-    ]
-    
-    YEAR_CHOICES = [
-        ('1', 'First Year'),
-        ('2', 'Second Year'),
-        ('3', 'Third Year'),
-        ('4', 'Fourth Year'),
-        ('5', 'Fifth Year'),
-    ]
-    
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
-    is_secretary = models.BooleanField(default=False)
     is_approved = models.BooleanField(default=False)
-    department = models.CharField(max_length=50, choices=DEPARTMENT_CHOICES, blank=True)
-    year = models.CharField(max_length=1, choices=YEAR_CHOICES, blank=True)
-
+    
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='profile_pics', null=True, blank=True)
@@ -45,15 +28,25 @@ class LecturerProfile(models.Model):
 
     def __str__(self):
         return f"{self.user.get_full_name()} - {self.subject}"
-class Secretary(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    employee_id = models.CharField(max_length=20, unique=True)
-    office_location = models.CharField(max_length=100)
-    phone_extension = models.CharField(max_length=10)
+
+#ClassPassWord
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used = models.BooleanField(default=False)
     
-    def __str__(self):
-        return f"{self.user.username} - {self.user.department}"
+    def is_expired(self):
+        return timezone.now() > self.expires_at
     
     class Meta:
         ordering = ['-created_at']
 
+class Subject(models.Model):
+    name = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    lecturer = models.ForeignKey('users.User', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
