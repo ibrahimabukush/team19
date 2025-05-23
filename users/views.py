@@ -226,8 +226,7 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.utils import timezone
 from datetime import timedelta
-from .models import LecturerProfile
-from blog.models import AcademicRequest 
+from .models import AcademicRequest, LecturerProfile
 from django.contrib.auth.models import User
 
 @login_required
