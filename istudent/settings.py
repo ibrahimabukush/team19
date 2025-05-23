@@ -77,18 +77,26 @@ WSGI_APPLICATION = 'istudent.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+#DATABASES = {
+ #   'default': {
+  #      'ENGINE': 'mssql',
+   #     'NAME': 'team19',
+    #    'HOST': r'localhost\SQLEXPRESS',  # Corrected
+     #   'PORT': '',  
+      #  'OPTIONS': {
+       #     'driver': 'ODBC Driver 17 for SQL Server',
+        #    'trusted_connection': 'yes',  # Windows Authentication
+         #   'TrustServerCertificate': 'yes',  # Accept self-signed cert
+#        },
+ #   }
+#}
+
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'team19',
-        'HOST': 'localhost\SQLEXPRESS',
-        'PORT': '',  
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes',  # Keep Windows Auth for now
-            'TrustServerCertificate': 'yes',  # Skip certificate validation
-      
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 # DATABASE_SCHEMA = 'dbo'

@@ -1,10 +1,11 @@
 from django import forms
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from .models import Profile
-from .models import User
-from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from .models import Profile, PasswordResetCode
+from django.utils import timezone
+
+User = get_user_model()
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -22,20 +23,17 @@ class UserRegisterForm(UserCreationForm):
         is_lecturer = cleaned_data.get('is_lecturer')
 
         if not (is_student or is_lecturer):
-            raise forms.ValidationError("Please choose one role.")
+            raise ValidationError("Please choose one role.")
         if is_student and is_lecturer:
-            raise forms.ValidationError("You can't choose both roles.")
+            raise ValidationError("You can't choose both roles.")
 
         if is_lecturer and email and not email.endswith('@sce.ac.il'):
-            raise forms.ValidationError("Lecturers must register with an email ending in @sce.ac.il")
+            raise ValidationError("Lecturers must register with an email ending in @sce.ac.il")
 
         if is_student and email and not email.endswith('@ac.sce.ac.il'):
-            raise forms.ValidationError("Students must register with an email ending in @ac.sce.ac.il")
+            raise ValidationError("Students must register with an email ending in @ac.sce.ac.il")
 
         return cleaned_data
-
-
-
 
 class UserUpdateForm(forms.ModelForm):
     email = forms.EmailField()
@@ -48,22 +46,18 @@ class UserUpdateForm(forms.ModelForm):
         email = self.cleaned_data.get('email')
         user = self.instance
 
-        if user.is_student and not email.endswith('@ac.sce.ac.il'):
-            raise forms.ValidationError("Students must use an email ending with @ac.sce.ac.il")
+        if hasattr(user, 'is_student') and user.is_student and not email.endswith('@ac.sce.ac.il'):
+            raise ValidationError("Students must use an email ending with @ac.sce.ac.il")
 
-        if user.is_lecturer and not email.endswith('@sce.ac.il'):
-            raise forms.ValidationError("Lecturers must use an email ending with @sce.ac.il")
+        if hasattr(user, 'is_lecturer') and user.is_lecturer and not email.endswith('@sce.ac.il'):
+            raise ValidationError("Lecturers must use an email ending with @sce.ac.il")
 
         return email
-
-
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = []
-
-#PasswordForm:
+        fields = ['image']  # Add other profile fields as needed
 
 class PasswordManagementForm(forms.Form):
     def __init__(self, user=None, stage='change', *args, **kwargs):
@@ -72,12 +66,12 @@ class PasswordManagementForm(forms.Form):
         super().__init__(*args, **kwargs)
         
         if stage == 'change' and user is not None:
-            # Fields for password change
             self.fields['old_password'] = forms.CharField(
                 label='Current Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter current password'
+                    'placeholder': 'Enter current password',
+                    'autocomplete': 'current-password'
                 }),
                 required=True
             )
@@ -85,7 +79,8 @@ class PasswordManagementForm(forms.Form):
                 label='New Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter new password'
+                    'placeholder': 'Enter new password',
+                    'autocomplete': 'new-password'
                 }),
                 required=True,
                 help_text="Your password must contain at least 8 characters."
@@ -94,31 +89,32 @@ class PasswordManagementForm(forms.Form):
                 label='Confirm Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Confirm new password'
+                    'placeholder': 'Confirm new password',
+                    'autocomplete': 'new-password'
                 }),
                 required=True
             )
         
         elif stage == 'request_code':
-            # Field for email submission
             self.fields['email'] = forms.EmailField(
                 label='Email Address',
                 widget=forms.EmailInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter your registered email'
+                    'placeholder': 'Enter your registered email',
+                    'autocomplete': 'email'
                 }),
                 required=True
             )
         
         elif stage == 'reset':
-            # Fields for password reset with code
             self.fields['code'] = forms.CharField(
                 label='Verification Code',
                 max_length=6,
                 min_length=6,
                 widget=forms.TextInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter 6-digit code'
+                    'placeholder': 'Enter 6-digit code',
+                    'autocomplete': 'off'
                 }),
                 required=True
             )
@@ -126,7 +122,8 @@ class PasswordManagementForm(forms.Form):
                 label='New Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter new password'
+                    'placeholder': 'Enter new password',
+                    'autocomplete': 'new-password'
                 }),
                 required=True
             )
@@ -134,7 +131,8 @@ class PasswordManagementForm(forms.Form):
                 label='Confirm Password',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Confirm new password'
+                    'placeholder': 'Confirm new password',
+                    'autocomplete': 'new-password'
                 }),
                 required=True
             )
@@ -143,6 +141,13 @@ class PasswordManagementForm(forms.Form):
         email = self.cleaned_data.get('email')
         if not User.objects.filter(email=email).exists():
             raise ValidationError("No account found with this email address.")
+        
+        user = User.objects.get(email=email)
+        if hasattr(user, 'is_student') and user.is_student and not email.endswith('@ac.sce.ac.il'):
+            raise ValidationError("Student accounts must use @ac.sce.ac.il email")
+        if hasattr(user, 'is_lecturer') and user.is_lecturer and not email.endswith('@sce.ac.il'):
+            raise ValidationError("Lecturer accounts must use @sce.ac.il email")
+        
         return email
 
     def clean_code(self):
@@ -152,6 +157,7 @@ class PasswordManagementForm(forms.Form):
         code = self.cleaned_data.get('code')
         if not code or len(code) != 6:
             raise ValidationError("Invalid verification code format")
+        
         return code
 
     def clean(self):
