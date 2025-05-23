@@ -1,10 +1,11 @@
-# blog/models.py
+
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.conf import settings
-from users.models import Subject
+
+
 class ScheduleRequest(models.Model):
     STATUS_CHOICES = [
         ('pending', 'ממתין'),
@@ -36,11 +37,8 @@ class ScheduleRequest(models.Model):
     
     def __str__(self):
         return f"{self.student} - {self.request_type} - {self.status}"
-from django.db import models
-from django.utils import timezone
-from django.conf import settings  # Import settings
-from django.urls import reverse
-from users.models import Subject
+
+
 
 class Post(models.Model):
     title = models.CharField(max_length=100)

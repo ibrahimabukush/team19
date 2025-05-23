@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from PIL import Image
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from blog.models import AcademicRequest
+
 class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
@@ -43,3 +43,10 @@ class PasswordResetCode(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+class Subject(models.Model):
+    name = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    lecturer = models.ForeignKey('users.User', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
