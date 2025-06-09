@@ -419,6 +419,7 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-cogs fa-sm me-1"></i> שירותים
                             </a>
+<<<<<<< HEAD
                              <a class="nav-item nav-link" href="{% url 'contact' %}">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
                             </a>
@@ -428,6 +429,15 @@
     <a class="nav-link" href="{% url 'secretary-dashboard' %}">לוח בקרה</a>
 </li>
 {% endif %}
+=======
+                           
+                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+                            </a>
+                           
+                            
+
+>>>>>>> 2120523cc6d87a2b098fa49f69c44164aa9ec0e0
                         {% elif user.is_authenticated %}
                             <!-- Student Navigation -->
                             <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
@@ -445,10 +455,17 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-cogs fa-sm me-1"></i> שירותים
                             </a>
+<<<<<<< HEAD
                              <a class="nav-item nav-link" href="{% url 'contact' %}">
                                 <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
                             </a>
                             
+=======
+                             
+                            <a class="nav-item nav-link" href="{% url 'chat_history' %}">
+                                <i class="fas fa-history fa-sm me-1"></i> היסטורית צ'אט
+                            </a>
+>>>>>>> 2120523cc6d87a2b098fa49f69c44164aa9ec0e0
                             <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
                                 <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
                             </a>
@@ -464,9 +481,7 @@
                             <a class="nav-item nav-link" href="#">
                                 <i class="fas fa-cogs fa-sm me-1"></i> שירותים
                             </a>
-                            <a class="nav-item nav-link" href="{% url 'contact' %}">
-                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
-                            </a>
+                           
                             
                         {% endif %}
                     </div>
