@@ -28,7 +28,6 @@ urlpatterns = [
     path('api/subjects/', views.get_subjects_by_department, name='get_subjects'),
 path('get-lecturer/', views.get_lecturer, name='get_lecturer'),
 path('submit-request/', views.submit_request, name='submit_request'),
-       # Academic Request URLs
     path('submit-request/', views.submit_request, name='submit-request'),
     path('get-lecturer/', views.get_lecturer, name='get-lecturer'),
     path('get-subjects-by-department/', views.get_subjects_by_department, name='get-subjects-by-department'),
