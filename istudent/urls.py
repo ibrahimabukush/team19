@@ -14,6 +14,11 @@ urlpatterns = [
 
     # Blog app URLs
     path('', include('blog.urls')),
+    #password
+    path('password/', user_views.password_management, name='password_management'),
+    path('forgot-password/',user_views.forgot_password, name='forgot_password'),
+    path('password/change/', user_views.change_password_direct, name='change_password_direct'),
+
 
     # Lecturer-specific views
     path('lecturer/dashboard/', user_views.lecturer_dashboard, name='lecturer_dashboard'),
