@@ -149,6 +149,8 @@ def login_view(request):
 @login_required
 def profile(request):
     profile, created = Profile.objects.get_or_create(user=request.user)
+    # Get chat history for the current user
+    history = ChatHistory.objects.filter(username=request.user.username).order_by('-timestamp')
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST,
@@ -166,12 +168,20 @@ def profile(request):
 
     context = {
         'u_form': u_form,
-        'p_form': p_form
+        'p_form': p_form,
+        'history': history
     }
 
     return render(request, 'users/profile.html', context)
 
+from dotenv import load_dotenv
+from pathlib import Path
+from openai import OpenAI
+import os
+from blog.models import ChatHistory
 
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @requires_csrf_token
 def csrf_failure(request, reason=""):
