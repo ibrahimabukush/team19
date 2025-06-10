@@ -1,3 +1,7 @@
+
+
+from datetime import timedelta
+from itertools import count
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +20,7 @@ import traceback
 
 from openai import OpenAI
 
-from .models import ChatHistory, StudentRequest
+from .models import ChatHistory, ScheduleRequest, StudentRequest
 from users.models import LecturerProfile
 import users.views
 
@@ -33,6 +37,7 @@ User = get_user_model()
 
 # blog/views.py
 # blog/views.py
+
 @login_required
 def submit_request(request):
     if request.method == 'POST':
@@ -50,91 +55,98 @@ def submit_request(request):
         
         request_type = request_type_mapping.get(request_type_hebrew, request_type_hebrew)
         
-        # Determine who to assign the request to
-        assigned_to = None
-        
-        # Check if this is a lecturer-related request
-        lecturer_request_types = ['academic_appeal', 'exam_review']
-        
-        if request_type in lecturer_request_types and subject_name:
-            # Map department for finding the subject
-            department_mapping = {
-                'sw_engineering': 'Software Engineering',
-                'cs_engineering': 'Computer Science',
-                'ee_engineering': 'Electronic Engineering',
-                '': 'Software Engineering',  # Default fallback
-                # Add variations if needed
-                'computer_science': 'Computer Science',
-                'electronic_engineering': 'Electronic Engineering',
-                'software_engineering': 'Software Engineering',
-            }
+        # Create the request WITHOUT assigned_to
+        try:
+            academic_request = AcademicRequest.objects.create(
+                student=request.user,
+                # הסר את assigned_to מכאן
+                subject=subject_name if subject_name else '',
+                request_type=request_type,
+                request_text=description,
+                attachment=attachment,
+                status='pending'
+            )
             
-            user_department = request.user.department
-            subject_department = department_mapping.get(user_department, user_department)
+            messages.success(request, 'הבקשה שלך הוגשה בהצלחה!')
+            return JsonResponse({'status': 'success', 'message': 'הבקשה הוגשה בהצלחה'})
             
-            # Find the lecturer for the selected subject
-            try:
-                subject_obj = Subject.objects.get(
-                    name=subject_name, 
-                    department=subject_department
-                )
-                assigned_to = subject_obj.lecturer
-            except Subject.DoesNotExist:
-                messages.error(request, 'הקורס שנבחר לא נמצא במחלקה שלך.')
-                return JsonResponse({'status': 'error', 'message': 'הקורס שנבחר לא נמצא במחלקה שלך.'})
-        else:
-            # Assign to department secretary
-            department = request.user.department
-            try:
-                assigned_to = User.objects.get(
-                    is_secretary=True, 
-                    department=department
-                )
-            except User.DoesNotExist:
-                messages.error(request, 'לא נמצאה מזכירה למחלקה שלך.')
-                return JsonResponse({'status': 'error', 'message': 'לא נמצאה מזכירה למחלקה שלך.'})
-        
-        # Create the request
-        academic_request = AcademicRequest.objects.create(
-            student=request.user,
-            assigned_to=assigned_to,
-            subject=subject_name if subject_name else '',
-            request_type=request_type,
-            request_text=description,
-            attachment=attachment,
-            status='pending'
-        )
-        
-        messages.success(request, 'הבקשה שלך הוגשה בהצלחה!')
-        return JsonResponse({'status': 'success', 'message': 'הבקשה הוגשה בהצלחה'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': f'שגיאה: {str(e)}'})
     
     # GET request - show the form
-    # Handle department mapping for GET requests too
-    department_mapping = {
-        'sw_engineering': 'Software Engineering',
-        'cs_engineering': 'Computer Science',
-        'ee_engineering': 'Electronic Engineering',
-        '': 'Software Engineering',  # Default fallback
-        # Add variations if needed
-        'computer_science': 'Computer Science',
-        'electronic_engineering': 'Electronic Engineering',
-        'software_engineering': 'Software Engineering',
-    }
+    subjects = Subject.objects.all()
+    return render(request, 'blog/academic_request.html', {'subjects': subjects})
+@login_required 
+def update_request_status(request, request_id):
+    if request.method == 'POST':
+        try:
+            academic_request = get_object_or_404(AcademicRequest, id=request_id)
+            new_status = request.POST.get('status')
+            
+            # בדוק שהסטטוס תקין
+            valid_statuses = ['pending', 'in_progress', 'need_update', 'approved', 'rejected']
+            if new_status in valid_statuses:
+                academic_request.status = new_status
+                academic_request.save()
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'סטטוס עודכן בהצלחה'
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'סטטוס לא תקין'
+                })
+                
+        except AcademicRequest.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'בקשה לא נמצאה'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            })
     
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+@login_required
+def get_subjects_by_department(request):
+    """
+    API endpoint to get subjects filtered by the user's department
+    """
     user_department = request.user.department
-    subject_department = department_mapping.get(user_department, user_department)
+    subjects = Subject.objects.filter(department=user_department).order_by('name')
     
-    subjects = Subject.objects.filter(department=subject_department).order_by('name')
+    subjects_data = []
+    for subject in subjects:
+        lecturer_name = f"{subject.lecturer.first_name} {subject.lecturer.last_name}"
+        if not subject.lecturer.first_name:
+            lecturer_name = subject.lecturer.username
+            
+        subjects_data.append({
+            'name': subject.name,
+            'lecturer_name': lecturer_name,
+            'lecturer_id': subject.lecturer.id
+        })
     
-    return render(request, 'blog/academic_requests.html', {'subjects': subjects})
+    return JsonResponse({'subjects': subjects_data})
+
 @login_required
 def get_lecturer(request):
+    """
+    API endpoint to get lecturer information for a specific subject
+    """
     subject_name = request.GET.get('subject')
+    user_department = request.user.department
+    
     try:
         # Filter by department to ensure security
         subject = Subject.objects.get(
             name=subject_name, 
-            department=request.user.department
+            department=user_department
         )
         
         lecturer_name = f"{subject.lecturer.first_name} {subject.lecturer.last_name}"
@@ -147,17 +159,8 @@ def get_lecturer(request):
         })
     except Subject.DoesNotExist:
         return JsonResponse({'lecturer_name': None, 'lecturer_id': None})
-# @login_required
-# def lecturer_dashboard(request):
-#     if not request.user.is_lecturer:
-#         return redirect('home')
-    
-#     # Get all requests assigned to this lecturer
-#     requests = AcademicRequest.objects.filter(
-#         assigned_to=request.user
-#     ).order_by('-created_at')
-    
-#     return render(request, 'users/lecturer_dashboard.html', {'requests': requests})
+
+# Rest of the views remain the same...
 def home(request):
     if request.user.is_authenticated:
         if request.user.is_secretary:
@@ -167,6 +170,7 @@ def home(request):
     posts = Post.objects.all().order_by('-date_posted') if 'Post' in globals() else []
     
     return render(request, 'blog/home.html', {'posts': posts})
+
 def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
 
@@ -176,30 +180,16 @@ def services(request):
 def contact(request):
     return render(request, 'blog/contact.html', {'title': 'Contact'})
 
-# @login_required
-# def secretary_dashboard(request):
-#     if not request.user.is_secretary:
-#         return redirect('home')
-    
-#     # Get all requests assigned to this secretary
-#     requests = AcademicRequest.objects.filter(
-#         assigned_to=request.user
-#     ).order_by('-created_at')
-    
-#     return render(request, 'secretary_dashboard.html', {'requests': requests})
 
 @login_required
-def get_lecturer(request):
-    subject_name = request.GET.get('subject')
-    try:
-        subject = Subject.objects.get(name=subject_name)
-        return JsonResponse({
-            'lecturer_name': f"{subject.lecturer.first_name} {subject.lecturer.last_name}" 
-            if subject.lecturer.first_name 
-            else subject.lecturer.username
-        })
-    except Subject.DoesNotExist:
-        return JsonResponse({'lecturer_name': None})
+def academic_request(request):
+    subjects = LecturerProfile.objects.exclude(subject__isnull=True).exclude(subject__exact='').values_list('subject', flat=True).distinct()
+    return render(request, 'blog/academic_request.html', {
+        'subjects': subjects
+    })
+@login_required
+def schedule_request(request):
+    return render(request, 'blog/schedule_requests.html')
 @login_required
 def tracking(request):
     user_requests = AcademicRequest.objects.filter(student=request.user)
@@ -211,8 +201,6 @@ def tracking(request):
             req.is_past_deadline = timezone.now() > req.update_deadline
 
     return render(request, 'blog/tracking.html', {'requests': user_requests})
-
-from .models import ScheduleRequest
 
 @login_required
 def schedule_request_view(request):
@@ -257,66 +245,12 @@ def schedule_request_detail(request, request_id):
 def secretary_dashboard(request):
     # Check if user is a secretary
     if not request.user.is_secretary:
-        return redirect('blog-home')
-    
-    # Get today's date
-    today = timezone.now().date()
-    
-    # Get quick stats for today
-    today_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user,
-        created_at__date=today
-    ).count()
-    
-    # Get pending requests count
-    pending_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user,
-        status='pending'
-    ).count()
-    
-    # Get urgent requests (older than 3 days and still pending)
-    urgent_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user,
-        status='pending',
-        created_at__lte=timezone.now() - timedelta(days=3)
-    ).count()
-    
-    # Get recent 5 requests
-    recent_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user
-    ).order_by('-created_at')[:5]
-    
-    # Updated department name mapping to handle all variations
-    department_names = {
-        'sw_engineering': 'הנדסת תוכנה',
-        'cs_engineering': 'מדעי המחשב',
-        'ee_engineering': 'הנדסת אלקטרוניקה',
-        'electronic_engineering': 'הנדסת אלקטרוניקה',
-        'computer_science': 'מדעי המחשב',
-        'software_engineering': 'הנדסת תוכנה',
-    }
-    
-    context = {
-        'department_name': department_names.get(request.user.department, request.user.department),
-        'today_requests': today_requests,
-        'pending_requests': pending_requests,
-        'urgent_requests': urgent_requests,
-        'recent_requests': recent_requests,
-        'current_time': timezone.now(),
-    }
-    
-    return render(request, 'blog/secretary_home.html', context)
-
-@login_required
-def secretary_dashboard(request):
-    # Check if user is a secretary
-    if not request.user.is_secretary:
         messages.error(request, 'הגישה מותרת למזכירות בלבד.')
         return redirect('blog-home')
     
-    # Get all requests assigned to this secretary
+    # Get requests only from students in the same department as this secretary
     all_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user
+        student__department=request.user.department
     ).order_by('-created_at')
     
     # Debug logging
@@ -341,6 +275,7 @@ def secretary_dashboard(request):
     }
     
     # Get requests by type
+    from django.db.models import Count
     request_types_stats = all_requests.values('request_type').annotate(
         count=Count('id')
     ).order_by('-count')
@@ -364,14 +299,14 @@ def secretary_dashboard(request):
         created_at__lte=three_days_ago
     )
     
-    # Updated department name mapping
+    # Department names mapping
     department_names = {
+        'מדעי המחשב': 'מדעי המחשב',
+        'הנדסת תוכנה': 'הנדסת תוכנה', 
+        'הנדסת אלקטרוניקה': 'הנדסת אלקטרוניקה',
         'sw_engineering': 'הנדסת תוכנה',
         'cs_engineering': 'מדעי המחשב',
         'ee_engineering': 'הנדסת אלקטרוניקה',
-        'electronic_engineering': 'הנדסת אלקטרוניקה',
-        'computer_science': 'מדעי המחשב',
-        'software_engineering': 'הנדסת תוכנה',
     }
     
     department_display = department_names.get(request.user.department, request.user.department)
@@ -384,9 +319,11 @@ def secretary_dashboard(request):
         'request_types_stats': request_types_stats,
         'status_filter': status_filter,
         'department_display': department_display,
+        'three_days_ago': three_days_ago,
     }
     
     return render(request, 'blog/secretary_dashboard.html', context)
+
 # @require_POST
 # @csrf_exempt  # For testing only; use proper CSRF protection in production
 # def save_pdf_to_profile(request):
@@ -596,171 +533,153 @@ Your goal is to understand what the student means and guide them step-by-step.
     return JsonResponse({"reply": "Invalid request method."})
 
 
-@login_required
-def academic_request(request):
-    subjects = LecturerProfile.objects.exclude(subject__isnull=True).exclude(subject__exact='').values_list('subject', flat=True).distinct()
-    return render(request, 'blog/academic_request.html', {
-        'subjects': subjects
-    })
-@login_required
-def schedule_request(request):
-    return render(request, 'blog/schedule_requests.html')
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from users.models import LecturerProfile
-from .models import AcademicRequest
-
-@login_required
-def lecturer_requests_view(request):
-    user = request.user
-
-    # Check if user is a lecturer
-    if not user.is_authenticated or not hasattr(user, 'lecturerprofile'):
-        return render(request, 'blog/not_authorized.html')
-
-    subject = user.lecturerprofile.subject
-
-    # Get all requests that match the subject this lecturer teaches
-    requests = AcademicRequest.objects.filter(subject=subject)
-
-    return render(request, 'blog/lecturer_requests.html', {
-        'requests': requests,
-        'subject': subject,
-    })
-#----------------------------------------------------------------------------------$
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.db.models import Q, Count
-from django.utils import timezone
-from datetime import timedelta
-from django.http import JsonResponse
-from .models import AcademicRequest
-
-@login_required
-def secretary_dashboard(request):
-    # Check if user is a secretary
-    if not request.user.is_secretary:
-        messages.error(request, 'הגישה מותרת למזכירות בלבד.')
-        return redirect('blog-home')
-    
-    # Get all requests assigned to this secretary
-    all_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user
-    ).order_by('-created_at')
-    
-    # Filter by status if provided
-    status_filter = request.GET.get('status', 'all')
-    if status_filter != 'all':
-        filtered_requests = all_requests.filter(status=status_filter)
-    else:
-        filtered_requests = all_requests
-    
-    # Get statistics
-    stats = {
-        'total': all_requests.count(),
-        'pending': all_requests.filter(status='pending').count(),
-        'in_progress': all_requests.filter(status='in_progress').count(),
-        'need_update': all_requests.filter(status='need_update').count(),
-        'approved': all_requests.filter(status='approved').count(),
-        'rejected': all_requests.filter(status='rejected').count(),
-    }
-    
-    # Get requests by type
-    request_types_stats = all_requests.values('request_type').annotate(
-        count=Count('id')
-    ).order_by('-count')
-    
-    # Format request types for display
-    type_display_names = {
-        'enrollment_confirmation': 'אישורי רישום או ציונים',
-        'academic_appeal': 'ערעורים אקדמיים',
-        'exam_review': 'בקשות לבדיקת מבחנים',
-        'schedule_change': 'שינוי מערכת שעות',
-        'administrative': 'בקשות מנהליות',
-    }
-    
-    for stat in request_types_stats:
-        stat['display_name'] = type_display_names.get(stat['request_type'], stat['request_type'])
-    
-    # Get urgent requests (pending for more than 3 days)
-    three_days_ago = timezone.now() - timedelta(days=3)
-    urgent_requests = all_requests.filter(
-        status='pending',
-        created_at__lte=three_days_ago
-    )
-    
-    # Department name mapping
-    department_names = {
-         'sw_engineering': 'הנדסת תוכנה',
-    'cs_engineering': 'מדעי המחשב',
-    'ee_engineering': 'הנדסת אלקטרוניקה',
-    'Computer Science': 'מדעי המחשב',
-    'Software Engineering': 'הנדסת תוכנה',
-    'Electronic Engineering': 'הנדסת אלקטרוניקה',
-    }
-    
-    department_display = department_names.get(request.user.department, request.user.department)
-    
-    context = {
-        'all_requests': all_requests,
-        'filtered_requests': filtered_requests,
-        'urgent_requests': urgent_requests,
-        'stats': stats,
-        'request_types_stats': request_types_stats,
-        'status_filter': status_filter,
-        'department_display': department_display,
-    }
-    
-    return render(request, 'blog/secretary_dashboard.html', context)
-
 def technicalmanagement(request):
+    """
+    Display the technical management error reporting form
+    """
     return render(request, 'blog/technicalmanagement.html')
 
-@login_required
-def update_request_status(request, request_id):
-    if not request.user.is_secretary:
-        messages.error(request, 'הגישה מותרת למזכירות בלבד.')
-        return redirect('blog-home')
-    
-    if request.method == 'POST':
-        academic_request = get_object_or_404(AcademicRequest, id=request_id)
-        new_status = request.POST.get('status')
+@require_POST
+def submit_error_report(request):
+    """
+    Handle the submission of error reports
+    """
+    try:
+        # Extract form data
+        reporter_name = request.POST.get('name', '').strip()
+        reporter_email = request.POST.get('email', '').strip()
+        error_type = request.POST.get('errorType', '')
+        error_description = request.POST.get('description', '').strip()
+        urgency = request.POST.get('urgency', 'medium')
+        error_media = request.FILES.get('errorMedia')
         
-        academic_request.status = new_status
-        academic_request.save()
+        # Validate required fields
+        if not all([reporter_name, reporter_email, error_type, error_description]):
+            return JsonResponse({
+                'success': False,
+                'message': 'נא למלא את כל השדות הנדרשים'
+            }, status=400)
         
-        messages.success(request, 'סטטוס הבקשה עודכן בהצלחה.')
-        return JsonResponse({'success': True})
-    
-    return JsonResponse({'success': False})
-@login_required
-def get_subjects_by_department(request):
-    user = request.user
-    if user.is_student:
-        subjects = Subject.objects.filter(department=user.department)
-        data = [
-            {
-                "name": subject.name,
-                "lecturer": subject.lecturer.get_full_name() or subject.lecturer.username
-            } for subject in subjects
-        ]
-        return JsonResponse(data, safe=False)
-    return JsonResponse({"error": "Unauthorized"}, status=403)
+        # Validate email format
+        import re
+        email_pattern = r'^[^\s@]+@[^\s@]+\.[^\s@]+$'
+        if not re.match(email_pattern, reporter_email):
+            return JsonResponse({
+                'success': False,
+                'message': 'נא להזין כתובת אימייל תקינה'
+            }, status=400)
+        
+        # Validate file size if media is uploaded
+        if error_media and error_media.size > 20 * 1024 * 1024:  # 20MB limit
+            return JsonResponse({
+                'success': False,
+                'message': 'גודל הקובץ המקסימלי המותר הוא 20MB'
+            }, status=400)
+        
+        # Create ErrorReport instance
+        # Note: You'll need to uncomment this when you add the model to blog/models.py
+        """
+        error_report = ErrorReport.objects.create(
+            reporter_name=reporter_name,
+            reporter_email=reporter_email,
+            error_type=error_type,
+            error_description=error_description,
+            urgency=urgency,
+            error_media=error_media
+        )
+        """
+        
+        # For now, just log the data (remove this when using the actual model)
+        print(f"Error Report Submitted:")
+        print(f"Name: {reporter_name}")
+        print(f"Email: {reporter_email}")
+        print(f"Type: {error_type}")
+        print(f"Description: {error_description}")
+        print(f"Urgency: {urgency}")
+        print(f"Media: {error_media.name if error_media else 'None'}")
+        
+        # Return success response
+        return JsonResponse({
+            'success': True,
+            'message': 'הדיווח נשלח בהצלחה! הצוות הטכני יטפל בתקלה במהירות האפשרית.'
+        })
+        
+    except Exception as e:
+        print(f"Error in submit_error_report: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': 'אירעה שגיאה בשליחת הדיווח. נא לנסות שוב.'
+        }, status=500)
 
-@login_required
-def secretary_request_detail(request, request_id):
-    if not request.user.is_secretary:
-        messages.error(request, 'הגישה מותרת למזכירות בלבד.')
+# Additional view for listing error reports (for admin/technical team)
+def error_reports_list(request):
+    """
+    Display list of all error reports (for technical team)
+    """
+    # Note: Uncomment when ErrorReport model is added
+    """
+    if not request.user.is_staff:
         return redirect('blog-home')
     
-    academic_request = get_object_or_404(AcademicRequest, id=request_id, assigned_to=request.user)
-    
+    reports = ErrorReport.objects.all().order_by('-created_at')
     context = {
-        'request': academic_request,
+        'reports': reports,
+        'pending_count': reports.filter(status='pending').count(),
+        'in_progress_count': reports.filter(status='in_progress').count(),
     }
+    return render(request, 'blog/error_reports_list.html', context)
+    """
     
-    return render(request, 'blog/secretary_request_detail.html', context)
+    # Temporary placeholder
+    return render(request, 'blog/error_reports_list.html', {
+        'reports': [],
+        'pending_count': 0,
+        'in_progress_count': 0,
+    })
 
-    
+# View for updating error report status (for technical team)
+@require_POST
+def update_error_report_status(request, report_id):
+    """
+    Update the status of an error report
+    """
+    try:
+        # Note: Uncomment when ErrorReport model is added
+        """
+        if not request.user.is_staff:
+            return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+        
+        report = ErrorReport.objects.get(id=report_id)
+        new_status = request.POST.get('status')
+        admin_notes = request.POST.get('admin_notes', '')
+        
+        if new_status in dict(ErrorReport.STATUS_CHOICES):
+            report.status = new_status
+            if admin_notes:
+                report.admin_notes = admin_notes
+            report.assigned_to = request.user
+            report.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'סטטוס הדיווח עודכן בהצלחה'
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'message': 'סטטוס לא תקין'
+            }, status=400)
+        """
+        
+        # Temporary placeholder
+        return JsonResponse({
+            'success': True,
+            'message': 'סטטוס הדיווח עודכן בהצלחה (demo mode)'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'שגיאה בעדכון הסטטוס'
+        }, status=500)
+

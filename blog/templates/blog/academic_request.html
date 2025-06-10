@@ -349,6 +349,7 @@
         </div>
 
         <form id="academic-request-form" enctype="multipart/form-data">
+            {% csrf_token %}
             <!-- Progress Indicator -->
             <div class="progress-indicator">
                 <div class="progress-step active">
@@ -420,6 +421,8 @@
                                 <select class="form-select" id="enrollment_program">
                                     <option value="">בחר תכנית</option>
                                     <option value="הנדסת תוכנה">הנדסת תוכנה</option>
+                                    <option value="מדעי המחשב">מדעי המחשב</option>
+                                    <option value="הנדסת אלקטרוניקה">הנדסת אלקטרוניקה</option>
                                 </select>
                             </div>
                         </div>
@@ -442,13 +445,19 @@
                         <p class="text-muted">אם אתה צריך אישור רישום מותאם אישית, אנא מלא את הטופס למטה</p>
                     </div>
                 </div>
+                
+                <!-- Subject Selection for Lecturer-related requests -->
                 <div class="row g-3 mb-4" id="subject-selection" style="display: none;">
                     <div class="col-md-6">
                         <label class="form-label">בחר קורס</label>
-                       <select class="form-select" id="subject" name="subject">
-    <option value="">טוען קורסים...</option>
-</select>
-
+                        <select class="form-select" id="subject" name="subject">
+                            <option value="">טוען קורסים...</option>
+                           {% for subject in subjects %}
+    <option value="{{ subject }}">
+        {{ subject }}
+    </option>
+{% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-6" id="lecturer-info" style="display: none;">
                         <label class="form-label">שם המרצה</label>
@@ -518,12 +527,22 @@
                     <p id="review-type" class="ps-3"></p>
                 </div>
                 
+                <div class="mb-4" id="review-subject-section" style="display: none;">
+                    <h6>קורס:</h6>
+                    <p id="review-subject" class="ps-3"></p>
+                </div>
+                
+                <div class="mb-4" id="review-lecturer-section" style="display: none;">
+                    <h6>מרצה:</h6>
+                    <p id="review-lecturer" class="ps-3"></p>
+                </div>
+                
                 <div class="mb-4">
                     <h6>פרטי הבקשה:</h6>
                     <p id="review-details" class="ps-3"></p>
                 </div>
                 
-                <div class="mb-4" id="review-attachment-section">
+                <div class="mb-4" id="review-attachment-section" style="display: none;">
                     <h6>מסמך מצורף:</h6>
                     <p id="review-attachment" class="ps-3"></p>
                 </div>
@@ -550,347 +569,510 @@
         </form>
     </div>
 </div>
+
 <script>
-    async function loadSubjects() {
-    try {
-        const response = await fetch('/api/subjects/');
-        const subjects = await response.json();
+// Enhanced JavaScript for Academic Request Form with Subject-Lecturer Selection
 
-        const subjectSelect = document.getElementById('subject');
-        subjectSelect.innerHTML = '<option value="">בחר קורס</option>';
+// Global variable declarations
+const academicTypesWithAI = [
+    "אישורי רישום או ציונים",
+    "ערעורים אקדמיים", 
+    "בקשות לבדיקת מבחנים"
+];
 
-        subjects.forEach(subject => {
-            const option = document.createElement('option');
-            option.value = subject.name;
-            option.textContent = `${subject.name} - ${subject.lecturer}`;
-            option.setAttribute('data-lecturer', subject.lecturer);
-            subjectSelect.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Error loading subjects:", error);
-        document.getElementById('subject').innerHTML = '<option value="">שגיאה בטעינת הקורסים</option>';
+const lecturerRequestTypes = [
+    "ערעורים אקדמיים",
+    "בקשות לבדיקת מבחנים"
+];
+
+const suggestions = {
+    "אישורי רישום או ציונים": "אני מבקש אישור רישום ו/או ציונים עבור [שם הקורס] במהלך [סמסטר/שנה]. מסמך זה נדרש ל[סיבה - למשל, מלגה, מעסיק, ויזה וכו'].",
+    "ערעורים אקדמיים": "אני כותב כדי לערער על הציון שלי בקורס [שם הקורס] שנלמד על ידי פרופסור [שם] במהלך [סמסטר/שנה]. אני מאמין שהציון שלי [ציון] אינו משקף באופן מדויק את הביצועים שלי בגלל [סיבה ספציפית]. השלמתי את כל המטלות, השתתפתי בכל השיעורים, והעבודה הכוללת שלי מדגימה רמת הישג גבוהה יותר. צירפתי [מסמכים רלוונטיים] לתמיכה בערעור שלי.",
+    "בקשות לבדיקת מבחנים": "אני מבקש לבדוק מחדש את המבחן שלי בקורס [שם הקורס] שנערך בתאריך [תאריך]. אני מאמין שייתכן שהייתה טעות בניקוד של שאלות [ציין מספרי שאלות אם אפשר]. התשובה שלי לשאלה [מספר] התייחסה לכל הנקודות המרכזיות כולל [הסבר בקצרה]."
+};
+
+// Global DOM Elements
+let requestTypeSelect, requestText, aiHelper, aiBox, aiText, charCount;
+let fileInput, fileName, step1, step2, step3;
+let nextStep1, nextStep2, prevStep2, prevStep3, successMessage;
+let subjectSelect, lecturerInfo, lecturerName, progressSteps;
+let selectedLecturerName = "";
+
+// CSRF Token Helper
+function getCSRFToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    return csrfInput ? csrfInput.value : '';
+}
+
+// Initialize DOM elements
+function initializeDOMElements() {
+    requestTypeSelect = document.getElementById("request_type");
+    requestText = document.getElementById("request_text");
+    aiHelper = document.getElementById("ai-helper");
+    aiBox = document.getElementById("ai-suggestion-box");
+    aiText = document.getElementById("ai-suggestion-text");
+    charCount = document.getElementById("char-count");
+    fileInput = document.getElementById("attachment");
+    fileName = document.getElementById("file-name");
+    step1 = document.getElementById("step-1");
+    step2 = document.getElementById("step-2");
+    step3 = document.getElementById("step-3");
+    nextStep1 = document.getElementById("next-step-1");
+    nextStep2 = document.getElementById("next-step-2");
+    prevStep2 = document.getElementById("prev-step-2");
+    prevStep3 = document.getElementById("prev-step-3");
+    successMessage = document.getElementById("success-message");
+    subjectSelect = document.getElementById("subject");
+    lecturerInfo = document.getElementById("lecturer-info");
+    lecturerName = document.getElementById("lecturer-name");
+    progressSteps = document.querySelectorAll(".progress-step");
+}
+
+// Initialize event listeners
+function initializeEventListeners() {
+    if (!requestTypeSelect) return;
+
+    // Request type change handler
+    requestTypeSelect.addEventListener("change", handleRequestTypeChange);
+    
+    // Subject selection handler
+    if (subjectSelect) {
+        subjectSelect.addEventListener("change", handleSubjectChange);
+    }
+    
+    // Text area input handler
+    if (requestText) {
+        requestText.addEventListener("input", handleTextInput);
+    }
+    
+    // File upload handler
+    if (fileInput) {
+        fileInput.addEventListener("change", handleFileUpload);
+    }
+    
+    // Navigation buttons
+    if (nextStep1) nextStep1.addEventListener("click", goToStep2);
+    if (prevStep2) prevStep2.addEventListener("click", goToStep1);
+    if (nextStep2) nextStep2.addEventListener("click", goToStep3);
+    if (prevStep3) prevStep3.addEventListener("click", goBackToStep2);
+    
+    // Form submission
+    const form = document.getElementById("academic-request-form");
+    if (form) {
+        form.addEventListener("submit", handleFormSubmit);
     }
 }
 
-// Call this when DOM is loaded
-document.addEventListener('DOMContentLoaded', function () {
-    loadSubjects();
-});
-
-    // Global variable declarations
-    const academicTypesWithAI = [
-        "אישורי רישום או ציונים",
-        "ערעורים אקדמיים",
-        "בקשות לבדיקת מבחנים"
-    ];
-    
-    const suggestions = {
-        "אישורי רישום או ציונים": "אני מבקש אישור רישום ו/או ציונים עבור [שם הקורס] במהלך [סמסטר/שנה]. מסמך זה נדרש ל[סיבה - למשל, מלגה, מעסיק, ויזה וכו'].",
-        "ערעורים אקדמיים": "אני כותב כדי לערער על הציון שלי בקורס [שם הקורס] שנלמד על ידי פרופסור [שם] במהלך [סמסטר/שנה]. אני מאמין שהציון שלי [ציון] אינו משקף באופן מדויק את הביצועים שלי בגלל [סיבה ספציפית]. השלמתי את כל המטלות, השתתפתי בכל השיעורים, והעבודה הכוללת שלי מדגימה רמת הישג גבוהה יותר. צירפתי [מסמכים רלוונטיים] לתמיכה בערעור שלי.",
-        "בקשות לבדיקת מבחנים": "אני מבקש לבדוק מחדש את המבחן שלי בקורס [שם הקורס] שנערך בתאריך [תאריך]. אני מאמין שייתכן שהייתה טעות בניקוד של שאלות [ציין מספרי שאלות אם אפשר]. התשובה שלי לשאלה [מספר] התייחסה לכל הנקודות המרכזיות כולל [הסבר בקצרה]."
-    };
-    
-    // Global DOM Elements
-    const requestTypeSelect = document.getElementById("request_type");
-    const requestText = document.getElementById("request_text");
-    const aiHelper = document.getElementById("ai-helper");
-    const aiBox = document.getElementById("ai-suggestion-box");
-    const aiText = document.getElementById("ai-suggestion-text");
-    const charCount = document.getElementById("char-count");
-    const fileInput = document.getElementById("attachment");
-    const fileName = document.getElementById("file-name");
-    const step1 = document.getElementById("step-1");
-    const step2 = document.getElementById("step-2");
-    const step3 = document.getElementById("step-3");
-    const nextStep1 = document.getElementById("next-step-1");
-    const nextStep2 = document.getElementById("next-step-2");
-    const prevStep2 = document.getElementById("prev-step-2");
-    const prevStep3 = document.getElementById("prev-step-3");
-    const successMessage = document.getElementById("success-message");
-    const subjectSelect = document.getElementById("subject");
-    const lecturerInfo = document.getElementById("lecturer-info");
-    const lecturerName = document.getElementById("lecturer-name");
-    const progressSteps = document.querySelectorAll(".progress-step");
-    
-    // Global variables
-    let selectedLecturerName = "";
-    
-    // Initialize event listeners
-    function initializeEventListeners() {
-        // Request type change handler
-        requestTypeSelect.addEventListener("change", handleRequestTypeChange);
-        
-        // Subject selection handler
-        subjectSelect.addEventListener("change", handleSubjectChange);
-        
-        // Text area input handler
-        requestText.addEventListener("input", handleTextInput);
-        
-        // File upload handler
-        fileInput.addEventListener("change", handleFileUpload);
-        
-        // Navigation buttons
-        nextStep1.addEventListener("click", goToStep2);
-        prevStep2.addEventListener("click", goToStep1);
-        nextStep2.addEventListener("click", goToStep3);
-        prevStep3.addEventListener("click", goBackToStep2);
-        
-        // Form submission
-        document.getElementById("academic-request-form").addEventListener("submit", handleFormSubmit);
+// Event handlers
+function handleRequestTypeChange() {
+    const selected = requestTypeSelect.value;
+    if (nextStep1) {
+        nextStep1.disabled = !selected;
     }
     
-    // Event handlers
-    function handleRequestTypeChange() {
-        const selected = requestTypeSelect.value;
-        nextStep1.disabled = !selected;
-        
-        // Show/hide subject selection based on request type
-        const subjectSelection = document.getElementById('subject-selection');
-        const lecturerRequestTypes = ['ערעורים אקדמיים', 'בקשות לבדיקת מבחנים'];
-        
+    // Show/hide subject selection based on request type
+    const subjectSelection = document.getElementById('subject-selection');
+    
+    if (subjectSelection) {
         if (lecturerRequestTypes.includes(selected)) {
             subjectSelection.style.display = 'flex';
-            document.getElementById('subject').setAttribute('required', 'required');
+            if (subjectSelect) {
+                subjectSelect.setAttribute('required', 'required');
+            }
         } else {
             subjectSelection.style.display = 'none';
-            lecturerInfo.style.display = 'none';
-            document.getElementById('subject').value = '';
-            document.getElementById('subject').removeAttribute('required');
+            if (lecturerInfo) lecturerInfo.style.display = 'none';
+            if (subjectSelect) {
+                subjectSelect.value = '';
+                subjectSelect.removeAttribute('required');
+            }
         }
-        
-        // Show/hide PDF generator for enrollment confirmations
-        const pdfGeneratorSection = document.getElementById("pdf-generator-section");
+    }
+    
+    // Show/hide PDF generator for enrollment confirmations
+    const pdfGeneratorSection = document.getElementById("pdf-generator-section");
+    if (pdfGeneratorSection) {
         if (selected === "אישורי רישום או ציונים") {
             pdfGeneratorSection.style.display = "block";
         } else {
             pdfGeneratorSection.style.display = "none";
         }
-        
+    }
+    
+    // Show/hide AI helper
+    if (aiHelper) {
         aiHelper.style.display = academicTypesWithAI.includes(selected) ? "block" : "none";
+    }
+    if (aiBox) {
         aiBox.classList.add("d-none");
     }
+}
+
+function handleSubjectChange() {
+    const subject = subjectSelect.value;
+    if (!subject) {
+        if (lecturerInfo) lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
+        return;
+    }
+
+    // Get lecturer name from the selected option's data attribute
+    const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
+    const lecturerNameFromOption = selectedOption.getAttribute('data-lecturer');
     
-    async function handleSubjectChange() {
-        const subject = subjectSelect.value;
-        if (!subject) {
-            lecturerInfo.style.display = "none";
-            selectedLecturerName = "";
-            return;
-        }
-    
-        try {
-            const response = await fetch(`/get-lecturer/?subject=${encodeURIComponent(subject)}`);
-            const data = await response.json();
-    
-            if (data.lecturer_name) {
-                selectedLecturerName = data.lecturer_name;
-                lecturerName.textContent = selectedLecturerName;
-                lecturerInfo.style.display = "block";
-            } else {
-                lecturerInfo.style.display = "none";
-                selectedLecturerName = "";
+    if (lecturerNameFromOption && lecturerNameFromOption !== 'None None') {
+        selectedLecturerName = lecturerNameFromOption;
+        if (lecturerName) lecturerName.textContent = selectedLecturerName;
+        if (lecturerInfo) lecturerInfo.style.display = "block";
+    } else {
+        // Fallback to API call if data attribute is not available
+        fetchLecturerFromAPI(subject);
+    }
+}
+
+async function fetchLecturerFromAPI(subject) {
+    try {
+        const response = await fetch(`/get-lecturer/?subject=${encodeURIComponent(subject)}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCSRFToken()
             }
-        } catch (err) {
-            console.error("Failed to fetch lecturer:", err);
-            lecturerInfo.style.display = "none";
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.lecturer_name) {
+            selectedLecturerName = data.lecturer_name;
+            if (lecturerName) lecturerName.textContent = selectedLecturerName;
+            if (lecturerInfo) lecturerInfo.style.display = "block";
+        } else {
+            if (lecturerInfo) lecturerInfo.style.display = "none";
             selectedLecturerName = "";
         }
+    } catch (err) {
+        console.error("Failed to fetch lecturer:", err);
+        if (lecturerInfo) lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
     }
-    
-    function handleTextInput() {
-        const count = requestText.value.length;
-        charCount.textContent = count;
-        nextStep2.disabled = count === 0;
-    }
-    
-    function handleFileUpload() {
-        if (fileInput.files.length > 0) {
+}
+
+function handleTextInput() {
+    const count = requestText.value.length;
+    if (charCount) charCount.textContent = count;
+    if (nextStep2) nextStep2.disabled = count === 0;
+}
+
+function handleFileUpload() {
+    if (fileInput.files.length > 0) {
+        if (fileName) {
             fileName.textContent = fileInput.files[0].name;
             fileName.style.display = "block";
-        } else {
-            fileName.style.display = "none";
+        }
+    } else {
+        if (fileName) fileName.style.display = "none";
+    }
+}
+
+// Validation functions
+function validateStep1() {
+    return requestTypeSelect && requestTypeSelect.value !== "";
+}
+
+function validateStep2() {
+    if (!requestText || requestText.value.trim() === "") {
+        alert('אנא תאר את בקשתך');
+        return false;
+    }
+    
+    // Check if subject is required and selected
+    const requestType = requestTypeSelect.value;
+    if (lecturerRequestTypes.includes(requestType)) {
+        if (!subjectSelect || subjectSelect.value === "") {
+            alert('אנא בחר קורס');
+            return false;
         }
     }
     
-    // Navigation functions
-    function goToStep2() {
-        step1.style.display = "none";
+    return true;
+}
+
+// Navigation functions
+function goToStep2() {
+    if (!validateStep1()) {
+        alert('אנא בחר סוג בקשה');
+        return;
+    }
+    
+    if (step1) step1.style.display = "none";
+    if (step2) {
         step2.style.display = "block";
         step2.classList.add("animated-fade-in");
-        updateProgressSteps(1);
+    }
+    updateProgressSteps(1);
+}
+
+function goToStep1() {
+    if (step2) step2.style.display = "none";
+    if (step1) step1.style.display = "block";
+    updateProgressSteps(0);
+}
+
+function goToStep3() {
+    if (!validateStep2()) {
+        return;
     }
     
-    function goToStep1() {
-        step2.style.display = "none";
-        step1.style.display = "block";
-        updateProgressSteps(0);
+    // Update review page
+    const reviewType = document.getElementById("review-type");
+    const reviewDetails = document.getElementById("review-details");
+    const reviewSubject = document.getElementById("review-subject");
+    const reviewLecturer = document.getElementById("review-lecturer");
+    const reviewSubjectSection = document.getElementById("review-subject-section");
+    const reviewLecturerSection = document.getElementById("review-lecturer-section");
+    
+    if (reviewType && requestTypeSelect) {
+        reviewType.textContent = requestTypeSelect.value;
+    }
+    if (reviewDetails && requestText) {
+        reviewDetails.textContent = requestText.value;
     }
     
-    function goToStep3() {
-        const requestType = requestTypeSelect.value;
-        const lecturerRequestTypes = ['ערעורים אקדמיים', 'בקשות לבדיקת מבחנים'];
-        
-        // Check if subject is required and selected
-        if (lecturerRequestTypes.includes(requestType)) {
-            const subject = document.getElementById('subject').value;
-            if (!subject) {
-                alert('אנא בחר קורס עבור בקשה זו');
-                return;
-            }
-        }
-        
-        // Update review page
-        document.getElementById("review-type").textContent = requestTypeSelect.value;
-        document.getElementById("review-details").textContent = requestText.value;
-        
-        const attachmentSection = document.getElementById("review-attachment-section");
-        if (fileInput.files.length > 0) {
-            document.getElementById("review-attachment").textContent = fileInput.files[0].name;
+    // Show subject and lecturer info if applicable
+    const requestType = requestTypeSelect.value;
+    if (lecturerRequestTypes.includes(requestType) && subjectSelect && subjectSelect.value) {
+        if (reviewSubject) reviewSubject.textContent = subjectSelect.value;
+        if (reviewLecturer) reviewLecturer.textContent = selectedLecturerName;
+        if (reviewSubjectSection) reviewSubjectSection.style.display = "block";
+        if (reviewLecturerSection) reviewLecturerSection.style.display = "block";
+    } else {
+        if (reviewSubjectSection) reviewSubjectSection.style.display = "none";
+        if (reviewLecturerSection) reviewLecturerSection.style.display = "none";
+    }
+    
+    const attachmentSection = document.getElementById("review-attachment-section");
+    const reviewAttachment = document.getElementById("review-attachment");
+    
+    if (attachmentSection && reviewAttachment) {
+        if (fileInput && fileInput.files.length > 0) {
+            reviewAttachment.textContent = fileInput.files[0].name;
             attachmentSection.style.display = "block";
         } else {
             attachmentSection.style.display = "none";
         }
-        
-        step2.style.display = "none";
+    }
+    
+    if (step2) step2.style.display = "none";
+    if (step3) {
         step3.style.display = "block";
         step3.classList.add("animated-fade-in");
-        updateProgressSteps(2);
+    }
+    updateProgressSteps(2);
+}
+
+function goBackToStep2() {
+    if (step3) step3.style.display = "none";
+    if (step2) step2.style.display = "block";
+    updateProgressSteps(1);
+}
+
+// Update progress steps
+function updateProgressSteps(activeStep) {
+    if (!progressSteps) return;
+    
+    progressSteps.forEach((step, index) => {
+        step.classList.remove("active", "completed");
+        if (index === activeStep) {
+            step.classList.add("active");
+        } else if (index < activeStep) {
+            step.classList.add("completed");
+        }
+    });
+}
+
+// AI Template functions
+function generateAiSuggestion() {
+    if (!requestTypeSelect || !aiText || !aiBox) return;
+    
+    const type = requestTypeSelect.value;
+    aiText.innerText = suggestions[type] || "התחל בהצהרה ברורה על בקשתך וספק פרטים רלוונטיים.";
+    aiBox.classList.remove("d-none");
+    aiBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function useAiSuggestion() {
+    if (!requestText || !aiText || !charCount) return;
+    
+    requestText.value = aiText.innerText;
+    charCount.textContent = requestText.value.length;
+    if (nextStep2) nextStep2.disabled = false;
+    
+    // Scroll to textarea
+    requestText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestText.focus();
+}
+
+function resetForm() {
+    const form = document.getElementById("academic-request-form");
+    if (form) form.reset();
+    
+    if (step1) step1.style.display = "block";
+    if (step2) step2.style.display = "none";
+    if (step3) step3.style.display = "none";
+    if (successMessage) successMessage.style.display = "none";
+    
+    updateProgressSteps(0);
+    
+    if (nextStep1) nextStep1.disabled = true;
+    if (nextStep2) nextStep2.disabled = true;
+    if (fileName) fileName.style.display = "none";
+    if (aiBox) aiBox.classList.add("d-none");
+    if (charCount) charCount.textContent = "0";
+    if (lecturerInfo) lecturerInfo.style.display = "none";
+    
+    selectedLecturerName = "";
+    
+    // Reset PDF generator section
+    const pdfGeneratorSection = document.getElementById("pdf-generator-section");
+    if (pdfGeneratorSection) {
+        pdfGeneratorSection.style.display = "none";
     }
     
-    function goBackToStep2() {
-        step3.style.display = "none";
-        step2.style.display = "block";
-        updateProgressSteps(1);
+    // Reset subject selection
+    const subjectSelection = document.getElementById('subject-selection');
+    if (subjectSelection) {
+        subjectSelection.style.display = 'none';
     }
+}
+
+// PDF Generation Function
+function generateEnrollmentPDF() {
+    try {
+        // Get form values
+        const studentId = document.getElementById("student_id")?.value || '';
+        const studentName = document.getElementById("student_name")?.value || '';
+        const semester = document.getElementById("enrollment_semester")?.value || '';
+        const program = document.getElementById("enrollment_program")?.value || '';
+        
+        // Validate required fields
+        if (!studentId || !studentName || !semester || !program) {
+            alert('אנא מלא את כל השדות הנדרשים');
+            return;
+        }
+        
+        // Check if jsPDF is loaded
+        if (typeof window.jsPDF === 'undefined') {
+            alert('שגיאה: ספריית PDF לא נטענה');
+            return;
+        }
+        
+        // Create new PDF document
+        const { jsPDF } = window.jsPDF;
+        const doc = new jsPDF();
+        
+        // Set font for Hebrew (if available)
+        doc.setFont('helvetica');
+        
+        // Add content to PDF
+        doc.setFontSize(20);
+        doc.text('אישור רישום', 105, 30, { align: 'center' });
+        
+        doc.setFontSize(14);
+        doc.text(`שם הסטודנט: ${studentName}`, 20, 60);
+        doc.text(`מספר סטודנט: ${studentId}`, 20, 80);
+        doc.text(`תכנית לימודים: ${program}`, 20, 100);
+        doc.text(`סמסטר: ${semester}`, 20, 120);
+        doc.text(`תאריך הנפקה: ${new Date().toLocaleDateString('he-IL')}`, 20, 140);
+        
+        // Save the PDF
+        doc.save(`אישור_רישום_${studentId}.pdf`);
+        
+        // Optional: Save to profile if checkbox is checked
+        const saveToProfile = document.getElementById("save_to_profile")?.checked;
+        if (saveToProfile) {
+            console.log('Saving to profile...'); // Implement backend save logic here
+        }
+        
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('שגיאה ביצירת הקובץ. אנא נסה שוב.');
+    }
+}
+
+// Form submission
+async function handleFormSubmit(e) {
+    e.preventDefault();
     
-    // Update progress steps
-    function updateProgressSteps(activeStep) {
-        progressSteps.forEach((step, index) => {
-            step.classList.remove("active", "completed");
-            if (index === activeStep) {
-                step.classList.add("active");
-            } else if (index < activeStep) {
-                step.classList.add("completed");
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    if (!submitBtn) return;
+    
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>שולח...';
+    submitBtn.disabled = true;
+    
+    const form = new FormData(e.target);
+    
+    try {
+        const response = await fetch("/submit-request/", {
+            method: "POST",
+            body: form,
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
             }
         });
-    }
-    
-    // AI Template functions
-    function generateAiSuggestion() {
-        const type = requestTypeSelect.value;
-        aiText.innerText = suggestions[type] || "התחל בהצהרה ברורה על בקשתך וספק פרטים רלוונטיים.";
-        aiBox.classList.remove("d-none");
-        aiBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-    
-    function useAiSuggestion() {
-        requestText.value = aiText.innerText;
-        charCount.textContent = requestText.value.length;
-        nextStep2.disabled = false;
         
-        // Scroll to textarea
-        requestText.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        requestText.focus();
-    }
-    
-    function resetForm() {
-        document.getElementById("academic-request-form").reset();
-        step1.style.display = "block";
-        step2.style.display = "none";
-        step3.style.display = "none";
-        successMessage.style.display = "none";
-        updateProgressSteps(0);
-        nextStep1.disabled = true;
-        nextStep2.disabled = true;
-        fileName.style.display = "none";
-        aiBox.classList.add("d-none");
-        charCount.textContent = "0";
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         
-        // Reset PDF generator section
-        document.getElementById("pdf-generator-section").style.display = "none";
-    }
-    
-    // PDF Generation Function
-    function generateEnrollmentPDF() {
-        // ... your existing PDF generation code ...
-    }
-    
-    // Form submission
-    async function handleFormSubmit(e) {
-        e.preventDefault();
-        const form = new FormData(this);
-    
-        try {
-            const response = await fetch("{% url 'submit_request' %}", {
-                method: "POST",
-                body: form,
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            });
-    
-            const result = await response.json();
-            
+        const result = await response.json();
+        
+        if (result.status === 'success') {
             // Hide form steps and show success message
-            step3.style.display = "none";
-            successMessage.style.display = "block";
-            successMessage.classList.add("animated-fade-in");
+            if (step3) step3.style.display = "none";
+            if (successMessage) {
+                successMessage.style.display = "block";
+                successMessage.classList.add("animated-fade-in");
+            }
             
             // Mark all steps as completed
-            progressSteps.forEach(step => {
-                step.classList.remove("active");
-                step.classList.add("completed");
-            });
-            
-        } catch (error) {
-            console.error("שגיאה בהגשת הטופס:", error);
-            alert("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.");
+            if (progressSteps) {
+                progressSteps.forEach(step => {
+                    step.classList.remove("active");
+                    step.classList.add("completed");
+                });
+            }
+        } else {
+            throw new Error(result.message || 'שגיאה בהגשת הבקשה');
         }
-    }
-    
-    // Initialize when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        initializeEventListeners();
-    });
-    document.addEventListener('DOMContentLoaded', function() {
-    const subjectSelect = document.getElementById('subject');
-    const lecturerInfo = document.getElementById('lecturer-info');
-    const lecturerName = document.getElementById('lecturer-name');
-    const requestTypeSelect = document.getElementById('request_type');
-    const subjectSelection = document.getElementById('subject-selection');
-    
-    // Request types that require subject/lecturer selection
-    const lecturerRequestTypes = ['academic_appeal', 'exam_review'];
-    
-    // Show/hide subject selection based on request type
-    requestTypeSelect.addEventListener('change', function() {
-        const selectedType = this.value;
         
-        if (lecturerRequestTypes.includes(selectedType)) {
-            subjectSelection.style.display = 'block';
-            subjectSelect.required = true;
-        } else {
-            subjectSelection.style.display = 'none';
-            subjectSelect.required = false;
-            subjectSelect.value = '';
-            lecturerInfo.style.display = 'none';
-            lecturerName.textContent = '';
-        }
-    });
-    
-    // Show lecturer name when subject is selected
-    subjectSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.value) {
-            const lecturerUsername = selectedOption.getAttribute('data-lecturer');
-            lecturerName.textContent = lecturerUsername;
-            lecturerInfo.style.display = 'block';
-        } else {
-            lecturerInfo.style.display = 'none';
-            lecturerName.textContent = '';
-        }
-    });
+    } catch (error) {
+        console.error("שגיאה בהגשת הטופס:", error);
+        alert("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.");
+        
+        // Restore button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDOMElements();
+    initializeEventListeners();
 });
+
+// Make functions globally available for onclick handlers
+window.generateAiSuggestion = generateAiSuggestion;
+window.useAiSuggestion = useAiSuggestion;
+window.resetForm = resetForm;
+window.generateEnrollmentPDF = generateEnrollmentPDF;
 </script>
 
 {% endblock %}
+

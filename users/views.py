@@ -118,9 +118,8 @@ def login_view(request):
     if request.method == 'POST':
         if form.is_valid():
             user = form.get_user()
-            if user.is_lecturer and not user.is_approved:
-                msg = "Lecturer account is awaiting admin approval."
-            else:
+            # תקן את התנאי כאן
+            if user.is_lecturer or user.is_secretary or user.is_student:  # ← תקן כאן
                 login(request, user)
 
                 # Send login email
@@ -141,10 +140,11 @@ def login_view(request):
                     return redirect('lecturer_dashboard')
                 elif user.is_superuser:
                     return redirect('adminpage')
+            else:
+                msg = "Account not approved or invalid user type."
         else:
             msg = "Invalid username or password."
     return render(request, 'users/login.html', {'form': form, 'msg': msg})
-
 
 @login_required
 def profile(request):
@@ -172,45 +172,7 @@ def profile(request):
     return render(request, 'users/profile.html', context)
 
 
-@login_required
-def lecturer_dashboard(request):
-    # Check if user is a lecturer
-    if not request.user.is_lecturer:
-        messages.error(request, 'Access denied. This page is for lecturers only.')
-        return redirect('blog-home')  # Fixed: using correct URL name
-    
-    # Get all requests assigned to this lecturer
-    academic_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user
-    ).order_by('-created_at')
-    
-    # Get statistics
-    pending_requests = academic_requests.filter(status='pending')
-    in_progress_requests = academic_requests.filter(status='in_progress')
-    approved_requests = academic_requests.filter(status='approved')
-    rejected_requests = academic_requests.filter(status='rejected')
-    
-    # Get recent requests (last 5)
-    recent_requests = academic_requests[:5]
-    
-    # Get requests with upcoming deadlines
-    upcoming_deadlines = academic_requests.filter(
-        update_deadline__isnull=False,
-        update_deadline__gte=timezone.now()
-    ).order_by('update_deadline')[:5]
-    
-    context = {
-        'academic_requests': academic_requests,
-        'pending_requests': pending_requests,
-        'in_progress_requests': in_progress_requests,
-        'approved_requests': approved_requests,
-        'rejected_requests': rejected_requests,
-        'recent_requests': recent_requests,
-        'upcoming_deadlines': upcoming_deadlines,
-    }
-    
-    # Fixed: correct template path
-    return render(request, 'users/lecturer_dashboard.html', context)
+
 @requires_csrf_token
 def csrf_failure(request, reason=""):
     return render(request, 'users/csrf_failure.html', {'reason': reason}, status=403)
@@ -221,11 +183,8 @@ def update_request_status(request, request_id):
         return redirect('blog-home')
     
     if request.method == "POST":
-        academic_request = get_object_or_404(
-            AcademicRequest, 
-            id=request_id,
-            assigned_to=request.user  # Ensure the request is assigned to this lecturer
-        )
+        # הסר את הפילטר assigned_to זמנית
+        academic_request = get_object_or_404(AcademicRequest, id=request_id)
         
         new_status = request.POST.get("status")
         lecturer_note = request.POST.get("lecturer_note", "")
@@ -246,18 +205,14 @@ def update_request_status(request, request_id):
             messages.error(request, 'Invalid status selected.')
     
     return redirect("lecturer_dashboard")
-
 @login_required
 def get_request_details(request, request_id):
     """AJAX view to get request details"""
     if not request.user.is_lecturer:
         return JsonResponse({'error': 'Access denied'}, status=403)
     
-    academic_request = get_object_or_404(
-        AcademicRequest, 
-        id=request_id,
-        assigned_to=request.user
-    )
+    # הסר את הפילטר assigned_to זמנית
+    academic_request = get_object_or_404(AcademicRequest, id=request_id)
     
     data = {
         'id': academic_request.id,
@@ -306,6 +261,38 @@ def lecturer_dashboard(request):
             academic_request.update_deadline = None
         
         academic_request.save()
+@login_required
+def lecturer_dashboard(request):
+    """
+    Display the lecturer dashboard with academic requests and handle request updates.
+    """
+    # Check if user is a lecturer
+    if not request.user.is_lecturer:
+        messages.error(request, 'Access denied. This page is for lecturers only.')
+        return redirect('blog-home')
+    
+    # Handle form submission for request update
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        status = request.POST.get('status')
+        lecturer_note = request.POST.get('lecturer_note')
+        update_deadline = request.POST.get('update_deadline')
+        
+        # Get the academic request
+        academic_request = get_object_or_404(AcademicRequest, id=request_id)
+        
+        # Update the request
+        academic_request.status = status
+        academic_request.lecturer_note = lecturer_note
+        
+        # Update deadline if status is 'need_update' and deadline provided
+        if status == 'need_update' and update_deadline:
+            academic_request.update_deadline = update_deadline
+        elif status != 'need_update':
+            # Clear deadline if status is not 'need_update'
+            academic_request.update_deadline = None
+        
+        academic_request.save()
         
         # Add success message
         messages.success(request, 'הבקשה עודכנה בהצלחה')
@@ -313,16 +300,14 @@ def lecturer_dashboard(request):
         # Redirect to avoid form resubmission
         return redirect('lecturer_dashboard')
     
-    # Get academic requests for this lecturer
-    academic_requests = AcademicRequest.objects.filter(
-        assigned_to=request.user
-    ).order_by('-created_at')
+    # Get ALL academic requests (remove assigned_to filter temporarily)
+    academic_requests = AcademicRequest.objects.all().order_by('-created_at')
     
-    # Get statistics
-    pending_requests = academic_requests.filter(status='pending')
-    in_progress_requests = academic_requests.filter(status='in_progress')
-    approved_requests = academic_requests.filter(status='approved')
-    rejected_requests = academic_requests.filter(status='rejected')
+    # Get statistics for ALL requests
+    pending_requests = AcademicRequest.objects.filter(status='pending')
+    in_progress_requests = AcademicRequest.objects.filter(status='in_progress')
+    approved_requests = AcademicRequest.objects.filter(status='approved')
+    rejected_requests = AcademicRequest.objects.filter(status='rejected')
     
     # Get recent requests
     recent_requests = academic_requests[:5]
@@ -383,49 +368,7 @@ def request_detail(request, request_id):
     return JsonResponse(data)
 
 
-@login_required
-def update_request_status(request, request_id):
-    """
-    Handle updating an academic request status
-    """
-    # Check if user has a lecturer profile
-    try:
-        lecturer_profile = request.user.lecturerprofile
-    except LecturerProfile.DoesNotExist:
-        # Handle case where user is not a lecturer
-        return redirect('home')  # Redirect to appropriate page
-    
-    # Get the academic request
-    academic_request = get_object_or_404(AcademicRequest, id=request_id)
-    
-    if request.method == 'POST':
-        # Get form data
-        status = request.POST.get('status')
-        lecturer_note = request.POST.get('lecturer_note')
-        update_deadline = request.POST.get('update_deadline')
-        
-        # Update the request
-        academic_request.status = status
-        academic_request.lecturer_note = lecturer_note
-        
-        # Update deadline if status is 'need_update' and deadline provided
-        if status == 'need_update' and update_deadline:
-            academic_request.update_deadline = update_deadline
-        elif status != 'need_update':
-            # Clear deadline if status is not 'need_update'
-            academic_request.update_deadline = None
-        
-        academic_request.save()
-        
-        # Add success message if messages framework is enabled
-        try:
-            from django.contrib import messages
-            messages.success(request, 'הבקשה עודכנה בהצלחה')
-        except ImportError:
-            pass
-    
-    # Redirect back to dashboard
-    return redirect('lecturer_dashboard')
+
 from django.utils import timezone
 from datetime import timedelta
 

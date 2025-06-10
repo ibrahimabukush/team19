@@ -32,7 +32,7 @@ class StudentRequestAdmin(admin.ModelAdmin):
 
 @admin.register(AcademicRequest)
 class AcademicRequestAdmin(admin.ModelAdmin):
-    list_display = ('student', 'assigned_to', 'subject', 'request_type', 'status', 'created_at')
+    list_display = ('student', 'subject', 'request_type', 'status', 'created_at')
     list_filter = ('status', 'request_type', 'created_at')
     search_fields = ('student__username', 'subject', 'request_text')
     ordering = ('-created_at',)

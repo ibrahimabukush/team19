@@ -22,7 +22,6 @@ class User(AbstractUser):
     is_student = models.BooleanField(default=False)
     is_lecturer = models.BooleanField(default=False)
     is_secretary = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
     department = models.CharField(max_length=50, choices=DEPARTMENT_CHOICES, blank=True)
     year = models.CharField(max_length=1, choices=YEAR_CHOICES, blank=True)
 
@@ -71,3 +70,4 @@ class Subject(models.Model):
     
     class Meta:
         unique_together = ('name', 'lecturer')
+

@@ -395,7 +395,7 @@
             <div class="container">
                 <a class="navbar-brand me-4" href="{% url 'blog-home' %}">
                     <!-- Logo placement -->
-                    <img src="{% static 'blog/images/SCE_logo.png' %}" alt="SCE Logo" height="40" class="d-inline-block align-text-top me-2">
+                    <img src="" height="40" class="d-inline-block align-text-top me-2">
                     ISEND
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
@@ -413,15 +413,9 @@
                                 <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
                             </a>
                            
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
-                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
-                            </a>
-                            <a class="nav-item nav-link" href="#">
-                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
-                            </a>
-                             <a class="nav-item nav-link" href="{% url 'contact' %}">
-                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
-                            </a>
+                         
+                      
+                          
                             <!-- In blog/base.html navbar -->
 {% if user.is_authenticated and user.is_secretary %}
 <li class="nav-item">
@@ -439,15 +433,8 @@
                             <a class="nav-item nav-link" href="{% url 'student_tracking' %}">
                                 <i class="fas fa-eye fa-sm me-1"></i> מעקב בקשות
                             </a>
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
-                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
-                            </a>
-                            <a class="nav-item nav-link" href="#">
-                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
-                            </a>
-                             <a class="nav-item nav-link" href="{% url 'contact' %}">
-                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
-                            </a>
+                         
+                          
                             <a class="nav-item nav-link" href="{% url 'chat_history' %}">
                                 <i class="fas fa-history fa-sm me-1"></i> היסטורית צ'אט
                             </a>
@@ -460,15 +447,7 @@
                             <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
                                 <i class="fas fa-home fa-sm me-1"></i> דף הבית
                             </a>
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-about' %}active{% endif %}" href="{% url 'blog-about' %}">
-                                <i class="fas fa-info-circle fa-sm me-1"></i> אודות
-                            </a>
-                            <a class="nav-item nav-link" href="#">
-                                <i class="fas fa-cogs fa-sm me-1"></i> שירותים
-                            </a>
-                            <a class="nav-item nav-link" href="{% url 'contact' %}">
-                                <i class="fas fa-envelope fa-sm me-1"></i> צור קשר
-                            </a>
+                          
                             
                         {% endif %}
                     </div>
