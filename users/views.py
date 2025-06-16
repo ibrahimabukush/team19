@@ -180,6 +180,7 @@ from pathlib import Path
 from openai import OpenAI
 import os
 from blog.models import ChatHistory
+from django.contrib.auth import update_session_auth_hash
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -396,8 +397,11 @@ def return_for_update(request, request_id):
 
 
 
-
-#ViewPassword
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.shortcuts import redirect, render
+from django.conf import settings
 from .forms import PasswordManagementForm
 from django.contrib.auth import get_user_model
 from django.http import HttpResponseForbidden
@@ -471,78 +475,78 @@ def password_management(request, direct_access=False):
                 try:
                     user = User.objects.get(email=email)
                     
-                    # Generate and store 6-digit code
-                    code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-                    PasswordResetCode.objects.filter(user=user).delete()
-                    PasswordResetCode.objects.create(
-                        user=user,
-                        code=code,
-                        expires_at=timezone.now() + timedelta(minutes=15)
-                    )
+                    # Generate a simple 6-digit code
+                    reset_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
+                    
+                    # Store in session (temporary storage)
+                    request.session['reset_code'] = reset_code
+                    request.session['reset_user_id'] = user.id
+                    request.session['password_stage'] = 'reset'  # Go directly to reset stage
                     
                     # Send email with code
-                    send_mail(
-                        'Password Reset Code',
-                        f'Your password reset code is: {code}\n\nThis code will expire in 15 minutes.',
-                        settings.EMAIL_HOST_USER,
-                        [email],
-                        fail_silently=False,
-                    )
+                    try:
+                        send_mail(
+                            'Your Password Reset Code - SCE System',
+                            f'Hello {user.username},\n\n'
+                            f'Your verification code is: {reset_code}\n\n'
+                            'This code will expire in 15 minutes.\n\n'
+                            'If you didn\'t request this, please ignore this email.',
+                            settings.EMAIL_HOST_USER,
+                            [email],
+                            fail_silently=False,
+                        )
+                        messages.info(request, 'Verification code sent to your email.')
+                    except Exception as e:
+                        messages.error(request, 'Failed to send email. Please try again later.')
+                        print(f"Email sending error: {e}")  # For debugging
+                        return redirect('password_management')
                     
-                    # Set session variables for next stage
-                    request.session['password_stage'] = 'reset'
-                    request.session['reset_user_id'] = user.id
-                    messages.info(request, 'A 6-digit code has been sent to your email.')
                     return redirect('password_management')
                 
                 except User.DoesNotExist:
-                    messages.error(request, 'No user found with this email address.')
+                    messages.info(request, 'If an account exists with this email, you will receive a verification code.')
+                    return redirect('password_management')
             
             elif stage == 'reset':
                 # Handle password reset with verification code
                 user_id = request.session.get('reset_user_id')
-                if not user_id:
-                    return HttpResponseBadRequest("Invalid session")
+                submitted_code = form.cleaned_data.get('code')
+                stored_code = request.session.get('reset_code')
+                
+                if not user_id or not stored_code:
+                    messages.error(request, 'Please start the reset process again.')
+                    return redirect('forgot_password')
+                
+                # Verify the code
+                if submitted_code != stored_code:
+                    messages.error(request, 'Invalid verification code.')
+                    return redirect('password_management')
                 
                 try:
                     user = User.objects.get(id=user_id)
-                    code = form.cleaned_data['code']
+                    new_password = form.cleaned_data['new_password1']
+                    user.set_password(new_password)
+                    user.save()
                     
-                    # Verify the code
-                    reset_code = PasswordResetCode.objects.filter(
-                        user=user,
-                        code=code,
-                        used=False,
-                        expires_at__gt=timezone.now()
-                    ).first()
+                    # Clean up session
+                    del request.session['password_stage']
+                    del request.session['reset_user_id']
+                    del request.session['reset_code']
                     
-                    if reset_code:
-                        # Update password and mark code as used
-                        new_password = form.cleaned_data['new_password1']
-                        user.set_password(new_password)
-                        user.save()
-                        reset_code.used = True
-                        reset_code.save()
-                        
-                        # Clean up session
-                        del request.session['password_stage']
-                        del request.session['reset_user_id']
-                        
-                        # Send confirmation email
-                        send_mail(
-                            'Password Reset Successfully',
-                            f'Hello {user.username},\n\nYour password has been successfully reset.',
-                            settings.EMAIL_HOST_USER,
-                            [user.email],
-                            fail_silently=False,
-                        )
-                        
-                        messages.success(request, 'Your password has been reset successfully!')
-                        return redirect('login')
-                    else:
-                        messages.error(request, 'Invalid or expired code.')
+                    # Send confirmation email
+                    send_mail(
+                        'Password Reset Successfully',
+                        f'Hello {user.username},\n\nYour password has been successfully reset.',
+                        settings.EMAIL_HOST_USER,
+                        [user.email],
+                        fail_silently=False,
+                    )
+                    
+                    messages.success(request, 'Your password has been reset successfully!')
+                    return redirect('login')
                 except User.DoesNotExist:
-                    messages.error(request, 'Invalid user session.')
+                    messages.error(request, 'Invalid user. Please start the reset process again.')
+                    return redirect('forgot_password')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -557,8 +561,12 @@ def password_management(request, direct_access=False):
         'is_authenticated': request.user.is_authenticated
     })
 
+
+
+
 def forgot_password(request):
     """View to initiate password reset process"""
     request.session['password_stage'] = 'request_code'
     return redirect('password_management')
 
+import secrets
