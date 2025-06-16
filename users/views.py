@@ -475,24 +475,52 @@ def password_management(request, direct_access=False):
                 try:
                     user = User.objects.get(email=email)
                     
-                    # Store user ID in session for verification
-                    request.session['password_stage'] = 'reset'
-                    request.session['reset_user_id'] = user.id
+                    # Generate a simple 6-digit code
+                    reset_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
                     
-                    messages.info(request, 'You can now reset your password.')
+                    # Store in session (temporary storage)
+                    request.session['reset_code'] = reset_code
+                    request.session['reset_user_id'] = user.id
+                    request.session['password_stage'] = 'reset'  # Go directly to reset stage
+                    
+                    # Send email with code
+                    try:
+                        send_mail(
+                            'Your Password Reset Code - SCE System',
+                            f'Hello {user.username},\n\n'
+                            f'Your verification code is: {reset_code}\n\n'
+                            'This code will expire in 15 minutes.\n\n'
+                            'If you didn\'t request this, please ignore this email.',
+                            settings.EMAIL_HOST_USER,
+                            [email],
+                            fail_silently=False,
+                        )
+                        messages.info(request, 'Verification code sent to your email.')
+                    except Exception as e:
+                        messages.error(request, 'Failed to send email. Please try again later.')
+                        print(f"Email sending error: {e}")  # For debugging
+                        return redirect('password_management')
+                    
                     return redirect('password_management')
                 
                 except User.DoesNotExist:
-                    # Don't reveal whether email exists
-                    messages.info(request, 'If an account exists with this email, you can now reset your password.')
+                    messages.info(request, 'If an account exists with this email, you will receive a verification code.')
                     return redirect('password_management')
             
             elif stage == 'reset':
-                # Handle password reset without verification code
+                # Handle password reset with verification code
                 user_id = request.session.get('reset_user_id')
-                if not user_id:
+                submitted_code = form.cleaned_data.get('code')
+                stored_code = request.session.get('reset_code')
+                
+                if not user_id or not stored_code:
                     messages.error(request, 'Please start the reset process again.')
                     return redirect('forgot_password')
+                
+                # Verify the code
+                if submitted_code != stored_code:
+                    messages.error(request, 'Invalid verification code.')
+                    return redirect('password_management')
                 
                 try:
                     user = User.objects.get(id=user_id)
@@ -503,6 +531,7 @@ def password_management(request, direct_access=False):
                     # Clean up session
                     del request.session['password_stage']
                     del request.session['reset_user_id']
+                    del request.session['reset_code']
                     
                     # Send confirmation email
                     send_mail(
@@ -532,8 +561,12 @@ def password_management(request, direct_access=False):
         'is_authenticated': request.user.is_authenticated
     })
 
+
+
+
 def forgot_password(request):
     """View to initiate password reset process"""
     request.session['password_stage'] = 'request_code'
     return redirect('password_management')
 
+import secrets
