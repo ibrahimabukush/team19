@@ -48,4 +48,6 @@ path('submit-request/', views.submit_request, name='submit_request'),
     path('update-error-report/<int:report_id>/', views.update_error_report_status, name='update-error-report-status'),
     # Secretary Dashboard
     path('secretary-dashboard/', views.secretary_dashboard, name='secretary-dashboard'),
+    
+    
 ]

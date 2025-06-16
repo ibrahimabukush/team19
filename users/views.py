@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -402,7 +403,35 @@ from django.core.mail import send_mail
 from django.shortcuts import redirect, render
 from django.conf import settings
 from .forms import PasswordManagementForm
-from .models import User
+from django.contrib.auth import get_user_model
+from django.http import HttpResponseForbidden
+from django.contrib.auth.models import User
+from django.shortcuts import render
+User = get_user_model()
+
+@login_required
+@user_passes_test(lambda u: u.is_secretary)
+
+
+def secretary_user_list(request):
+    users = User.objects.exclude(is_superuser=True).exclude(is_staff=True).exclude(is_secretary=True)
+    return render(request, 'users/secretary_user_list.html', {'users': users})
+
+@login_required
+@user_passes_test(lambda u: u.is_secretary)
+def secretary_delete_user(request, user_id):
+    user_to_delete = get_object_or_404(User, id=user_id)
+
+    # Prevent secretaries from deleting other secretaries or superusers
+    if user_to_delete.is_secretary or user_to_delete.is_superuser:
+        return HttpResponseForbidden("You cannot delete another secretary or admin.")
+
+    if request.method == 'POST':
+        user_to_delete.delete()
+        messages.success(request, 'User deleted successfully.')
+        return redirect('secretary_user_list')
+
+    return render(request, 'users/secretary_confirm_delete.html', {'user': user_to_delete})
 
 def change_password_direct(request):
     """Direct access to password change form"""
@@ -507,3 +536,4 @@ def forgot_password(request):
     """View to initiate password reset process"""
     request.session['password_stage'] = 'request_code'
     return redirect('password_management')
+

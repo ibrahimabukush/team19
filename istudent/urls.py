@@ -27,6 +27,9 @@ urlpatterns = [
     path('lecturer/request/<int:request_id>/update-status/', user_views.update_request_status, name='update_request_status'),
 
     path('get-lecturer/', user_views.get_lecturer_by_subject, name='get_lecturer_by_subject'),
+    path('secretary/users/', user_views.secretary_user_list, name='secretary_user_list'),
+    path('secretary/users/delete/<int:user_id>/', user_views.secretary_delete_user, name='secretary_delete_user'),
+   
 ]
 
 if settings.DEBUG:
