@@ -179,6 +179,7 @@ from pathlib import Path
 from openai import OpenAI
 import os
 from blog.models import ChatHistory
+from django.contrib.auth import update_session_auth_hash
 
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / ".env")
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -395,9 +396,13 @@ def return_for_update(request, request_id):
 
 
 
-
-#ViewPassword
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.shortcuts import redirect, render
+from django.conf import settings
 from .forms import PasswordManagementForm
+from .models import User
 
 def change_password_direct(request):
     """Direct access to password change form"""
@@ -441,78 +446,49 @@ def password_management(request, direct_access=False):
                 try:
                     user = User.objects.get(email=email)
                     
-                    # Generate and store 6-digit code
-                    code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-                    PasswordResetCode.objects.filter(user=user).delete()
-                    PasswordResetCode.objects.create(
-                        user=user,
-                        code=code,
-                        expires_at=timezone.now() + timedelta(minutes=15)
-                    )
-                    
-                    # Send email with code
-                    send_mail(
-                        'Password Reset Code',
-                        f'Your password reset code is: {code}\n\nThis code will expire in 15 minutes.',
-                        settings.EMAIL_HOST_USER,
-                        [email],
-                        fail_silently=False,
-                    )
-                    
-                    # Set session variables for next stage
+                    # Store user ID in session for verification
                     request.session['password_stage'] = 'reset'
                     request.session['reset_user_id'] = user.id
-                    messages.info(request, 'A 6-digit code has been sent to your email.')
+                    
+                    messages.info(request, 'You can now reset your password.')
                     return redirect('password_management')
                 
                 except User.DoesNotExist:
-                    messages.error(request, 'No user found with this email address.')
+                    # Don't reveal whether email exists
+                    messages.info(request, 'If an account exists with this email, you can now reset your password.')
+                    return redirect('password_management')
             
             elif stage == 'reset':
-                # Handle password reset with verification code
+                # Handle password reset without verification code
                 user_id = request.session.get('reset_user_id')
                 if not user_id:
-                    return HttpResponseBadRequest("Invalid session")
+                    messages.error(request, 'Please start the reset process again.')
+                    return redirect('forgot_password')
                 
                 try:
                     user = User.objects.get(id=user_id)
-                    code = form.cleaned_data['code']
+                    new_password = form.cleaned_data['new_password1']
+                    user.set_password(new_password)
+                    user.save()
                     
-                    # Verify the code
-                    reset_code = PasswordResetCode.objects.filter(
-                        user=user,
-                        code=code,
-                        used=False,
-                        expires_at__gt=timezone.now()
-                    ).first()
+                    # Clean up session
+                    del request.session['password_stage']
+                    del request.session['reset_user_id']
                     
-                    if reset_code:
-                        # Update password and mark code as used
-                        new_password = form.cleaned_data['new_password1']
-                        user.set_password(new_password)
-                        user.save()
-                        reset_code.used = True
-                        reset_code.save()
-                        
-                        # Clean up session
-                        del request.session['password_stage']
-                        del request.session['reset_user_id']
-                        
-                        # Send confirmation email
-                        send_mail(
-                            'Password Reset Successfully',
-                            f'Hello {user.username},\n\nYour password has been successfully reset.',
-                            settings.EMAIL_HOST_USER,
-                            [user.email],
-                            fail_silently=False,
-                        )
-                        
-                        messages.success(request, 'Your password has been reset successfully!')
-                        return redirect('login')
-                    else:
-                        messages.error(request, 'Invalid or expired code.')
+                    # Send confirmation email
+                    send_mail(
+                        'Password Reset Successfully',
+                        f'Hello {user.username},\n\nYour password has been successfully reset.',
+                        settings.EMAIL_HOST_USER,
+                        [user.email],
+                        fail_silently=False,
+                    )
+                    
+                    messages.success(request, 'Your password has been reset successfully!')
+                    return redirect('login')
                 except User.DoesNotExist:
-                    messages.error(request, 'Invalid user session.')
+                    messages.error(request, 'Invalid user. Please start the reset process again.')
+                    return redirect('forgot_password')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
