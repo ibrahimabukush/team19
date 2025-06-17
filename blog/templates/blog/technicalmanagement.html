@@ -3,421 +3,687 @@
 {% block content %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+    /* Modern Error Report Styling with Navbar Colors */
+    :root {
+        --gradient-primary: linear-gradient(45deg, #6a11cb, #2575fc);
+        --purple-dark: #6a11cb;
+        --blue-main: #2575fc;
+        --purple-light: #8a52ff;
+        --blue-light: #4d8cff;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --white: #ffffff;
+        --red-500: #ef4444;
+        --green-500: #10b981;
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
 
-.media-upload-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    direction: rtl;
-    border: 2px dashed #ddd;
-    padding: 10px;
-    border-radius: 8px;
-    background-color: #fafafa;
-}
+    body {
+        background: linear-gradient(135deg, #e0f2fe 0%, var(--gray-100) 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-/* Hide default input */
-.media-upload-container input[type="file"] {
-    display: none;
-}
-
-/* Custom upload button */
-.custom-file-upload {
-    border: 2px solid #6e8efb;
-    color: #6e8efb;
-    background-color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.custom-file-upload:hover {
-    background-color: #f0f5ff;
-}
-
-.custom-file-upload i {
-    font-size: 18px;
-}
-
-/* File chosen text */
-#file-chosen {
-    flex-grow: 1;
-    text-align: right;
-    color: #666;
-    padding-right: 10px;
-}
-    /* Move all your styles inside the content block */
-    .error-report-body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
+    .error-report-container {
         max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        color: #333;
+        margin: 2rem auto;
+        padding: 1rem;
+        direction: rtl;
     }
-    .error-report-body h1 {
-        color: #2c3e50;
+
+    /* Modern Card Design */
+    .modern-card {
+        background: var(--white);
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modern-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Header Section */
+    .error-report-header {
+        background: var(--gradient-primary);
+        padding: 3rem 2rem;
         text-align: center;
+        position: relative;
+        overflow: hidden;
     }
-    .error-report-body .form-container {
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+
+    .error-report-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="4"/></g></svg>');
+        animation: float 20s ease-in-out infinite;
     }
-    .error-report-body .form-group {
-        margin-bottom: 15px;
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
     }
-    .error-report-body label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
+
+    .error-report-header h2 {
+        color: var(--white);
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0 0 1rem 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 10;
     }
-    .error-report-body input[type="text"],
-    .error-report-body input[type="email"],
-    .error-report-body textarea,
-    .error-report-body select {
+
+    .error-report-header p {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 1.3rem;
+        margin: 0;
+        font-weight: 500;
+        position: relative;
+        z-index: 10;
+    }
+
+    .error-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2.5rem;
+        color: var(--white);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Form Container */
+    .form-container {
+        padding: 3rem 2rem 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+    }
+
+    .form-row {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 1.5rem;
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
     }
-    .error-report-body textarea {
-        height: 150px;
+
+    @media (max-width: 768px) {
+        .form-row {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+
+    /* Labels */
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        font-size: 1rem;
+        position: relative;
+    }
+
+    .form-group label::before {
+        content: '';
+        position: absolute;
+        right: -12px;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Input Styling */
+    .modern-input, .modern-select, .modern-textarea {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: var(--gray-50);
+        direction: rtl;
+        font-family: inherit;
+    }
+
+    .modern-input:focus,
+    .modern-select:focus,
+    .modern-textarea:focus {
+        outline: none;
+        border-color: var(--blue-main);
+        background-color: var(--white);
+        box-shadow: 0 0 0 4px rgba(37, 117, 252, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .modern-textarea {
+        min-height: 150px;
         resize: vertical;
+        line-height: 1.6;
     }
-    .error-report-body button {
-    /* Base Styles */
-    background: linear-gradient(135deg, #6e8efb, #a777e3); /* Blue-purple gradient */
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    font-weight: bold;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    display: block;
-    margin: 20px auto; /* Centers the button */
-    width: fit-content;
-    min-width: 200px; /* Initial width */
-    
-    /* Glow Effect */
-    box-shadow: 0 0 15px rgba(103, 119, 251, 0.5);
-}
 
-
-.error-report-body button:hover {
-    /* Hover Effects */
-    transform: scale(1.05); /* Grow effect */
-    box-shadow: 0 0 25px rgba(103, 119, 251, 0.8); /* Stronger glow */
-    min-width: 220px; /* Grows wider */
-
-}
-    .error-report-body .error-message {
-        color: #e74c3c;
-        font-size: 14px;
-        margin-top: 5px;
+    .modern-select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: left 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-left: 2.5rem;
     }
-    .error-report-body .success-message {
-        color: #27ae60;
-        font-size: 16px;
-        margin-top: 15px;
+
+    /* File Upload Modern Design */
+    .media-upload-container {
+        border: 2px dashed var(--gray-300);
+        border-radius: 16px;
+        padding: 2rem;
         text-align: center;
+        background: linear-gradient(45deg, var(--gray-50), rgba(37, 117, 252, 0.02));
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .media-upload-container:hover {
+        border-color: var(--blue-main);
+        background: linear-gradient(45deg, rgba(37, 117, 252, 0.05), rgba(106, 17, 203, 0.02));
+    }
+
+    .media-upload-container.dragover {
+        border-color: var(--purple-dark);
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.05));
+        transform: scale(1.02);
+    }
+
+    .custom-file-upload {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        box-shadow: 0 4px 14px 0 rgba(106, 17, 203, 0.4);
+    }
+
+    .custom-file-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(106, 17, 203, 0.5);
+    }
+
+    .custom-file-upload i {
+        font-size: 1.2rem;
+    }
+
+    .media-upload-container input[type="file"] {
         display: none;
     }
 
-    /* Container styling */
-.form-container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 1.5rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  direction: rtl; /* RTL for entire container */
-}
-
-/* Form group (specific to your HTML) */
-.form-container #errorReportForm .form-group {
-  margin-bottom: 1.5rem;
-}
-
-/* Labels (Hebrew) */
-.form-container #errorReportForm .form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #333;
-  font-size: 1rem;
-}
-
-/* Input fields */
-.form-container #errorReportForm .form-group input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 1rem;
-  direction: rtl; /* RTL typing inside inputs */
-}
-
-/* Placeholders (Hebrew) */
-.form-container #errorReportForm .form-group input::placeholder {
-  color: #999;
-  font-style: italic;
-  opacity: 1; /* Fix for Firefox */
-}
-
-/* Error messages */
-.form-container #errorReportForm .form-group .error-message {
-  color: #d9534f; /* Red */
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  text-align: right;
-}
-
-/* Focus state */
-.form-container #errorReportForm .form-group input:focus {
-  border-color: #66afe9;
-  outline: none;
-  box-shadow: 0 0 5px rgba(102, 175, 233, 0.5);
-}
-.error-report-header {
-        text-align: center;
-        margin: 0 auto 2.5rem auto;
-        direction: rtl;
-        max-width: 600px;
-        padding: 0 20px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    #file-chosen {
+        margin-top: 1rem;
+        color: var(--gray-600);
+        font-weight: 500;
     }
-    
-    .error-report-header h2 {
-        color: #2c3e50;
-        font-size: 2rem;
-        margin: 0 0 0.7rem 0;
-        line-height: 1.3;
+
+    .remove-btn {
+        background: var(--red-500);
+        color: var(--white);
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
         font-weight: 600;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
     }
-    
-    .error-report-header p {
-        color: #5a6a7f;
+
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    /* File Preview */
+    .file-preview {
+        max-width: 200px;
+        max-height: 200px;
+        margin: 1rem auto 0;
+        border-radius: 12px;
+        border: 2px solid var(--gray-200);
+        box-shadow: var(--shadow-lg);
+        display: block;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        background: var(--gradient-primary);
+        color: var(--white);
+        border: none;
+        padding: 1.25rem 3rem;
+        border-radius: 16px;
+        cursor: pointer;
         font-size: 1.2rem;
+        font-weight: 700;
+        display: block;
+        margin: 2rem auto 0;
+        min-width: 200px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 25px 0 rgba(106, 17, 203, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px 0 rgba(106, 17, 203, 0.6);
+    }
+
+    .submit-btn:active {
+        transform: translateY(-1px) scale(1.02);
+    }
+
+    /* Error Messages */
+    .error-message {
+        color: var(--red-500);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .error-message::before {
+        
+        font-size: 1rem;
+    }
+
+    /* Success Message */
+    .success-message {
+        background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        border: 2px solid var(--green-500);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        margin-top: 2rem;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-message h3 {
+        color: var(--green-500);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .success-message p {
+        color: var(--gray-700);
         margin: 0;
         line-height: 1.6;
-        letter-spacing: 0.3px;
+        font-size: 1.1rem;
     }
-    
-    /* Emoji styling */
-    .error-report-header h2 emoji,
-    .error-report-header p emoji {
-        font-style: normal;
+
+    /* Upload Area States */
+    .upload-area-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .upload-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--blue-main);
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-text {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        color: var(--gray-500);
+        font-size: 0.9rem;
+    }
+
+    /* Loading State */
+    .loading-spinner {
         display: inline-block;
-        transition: transform 0.3s ease;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--white);
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
     }
-    
-    .error-report-header h2:hover emoji,
-    .error-report-header p:hover emoji {
-        transform: scale(1.1) rotate(5deg);
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
     }
-    
-    /* Decorative elements */
-    .error-report-header::after {
-        content: "";
-        display: block;
-        width: 100px;
-        height: 3px;
-        background: linear-gradient(90deg, #6e8efb, #a777e3);
-        margin: 1.5rem auto 0 auto;
-        border-radius: 3px;
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .error-report-container {
+            margin: 1rem auto;
+            padding: 0.5rem;
+        }
+
+        .error-report-header {
+            padding: 2rem 1rem;
+        }
+
+        .error-report-header h2 {
+            font-size: 2rem;
+        }
+
+        .form-container {
+            padding: 2rem 1rem;
+        }
+
+        .modern-card {
+            border-radius: 16px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            margin: 1.5rem 0 0;
+        }
     }
-  
-.file-preview {
-    max-width: 200px;
-    max-height: 200px;
-    margin-top: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    display: block;
-}
 
-    .form-row {
-                display: flex;
-                flex-direction: row-reverse; /* RTL layout */
-                gap: 15px;
-                width: 100%;
-            }
-            
-            @media (max-width: 768px) {
-                .form-row {
-                    flex-direction: column;
-                }
-                .form-row .form-group {
-                    margin-left: 0 !important;
-                }
-            }
+    /* Accessibility */
+    .modern-input:focus,
+    .modern-select:focus,
+    .modern-textarea:focus,
+    .submit-btn:focus,
+    .custom-file-upload:focus {
+        outline: 2px solid var(--blue-main);
+        outline-offset: 2px;
+    }
 
-.remove-btn {
-    background-color: #ff4444;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-right: 10px;
-    font-size: 0.9rem;
-    transition: background-color 0.3s;
-}
+    /* Custom Scrollbar for Textarea */
+    .modern-textarea::-webkit-scrollbar {
+        width: 8px;
+    }
 
-.remove-btn:hover {
-    background-color: #cc0000;
-}
+    .modern-textarea::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 4px;
+    }
 
-.remove-btn i {
-    margin-left: 5px;
-}
+    .modern-textarea::-webkit-scrollbar-thumb {
+        background: var(--blue-main);
+        border-radius: 4px;
+    }
 
-#mediaPreview {
-    margin-top: 10px;
-}
+    .modern-textarea::-webkit-scrollbar-thumb:hover {
+        background: var(--purple-dark);
+    }
 </style>
 
-<div class="error-report-body">
-    <h2 >
-        דווח על תקלה בקוד 
-    </h2>
-    <p >
-        ראית בעיה? ספר לנו ונסייע לפתור אותה במהירות! 
-    </p>
-    
-    <div class="form-container">
-        <form id="errorReportForm">
-            {% csrf_token %}
-            <div class="form-row">  <!-- New row container -->
-            
-
-            <div class="form-group" style="flex: 1;">  <!-- Email field -->
-                <label for="reporterEmail">אימייל:</label>
-                <input type="email" id="reporterEmail" name="reporterEmail" required 
-                       placeholder="הזן את האימייל שלך (Gmail)">
-                <div id="emailError" class="error-message"></div>
+<div class="error-report-container">
+    <div class="modern-card">
+        <!-- Header Section -->
+        <div class="error-report-header">
+            <div class="error-icon">
+                <i class="fas fa-bug"></i>
             </div>
-            <div class="form-group" style="flex: 1; margin-left: 15px;">  <!-- Name field -->
-                <label for="reporterName">שם מלא:</label>
-                <input type="text" id="reporterName" name="reporterName" required 
-                       placeholder="הזן את שמך המלא">
-                <div id="nameError" class="error-message"></div>
-            </div>
+            <h2>דווח על תקלה בקוד</h2>
+            <p>ראית בעיה? ספר לנו ונסייע לפתור אותה במהירות!</p>
         </div>
-
-            <div class="form-group">
-                <label for="errorType">סוג השגיאה:</label>
-                <select id="errorType" name="errorType" required>
-                    <option value="">בחר סוג שגיאה</option>
-                    <option value="syntax">שגיאת תחביר (Syntax)</option>
-                    <option value="logic">שגיאה לוגית</option>
-                    <option value="runtime">שגיאת ריצה</option>
-                    <option value="ui">בעיה בממשק משתמש (UI/UX)</option>
-                    <option value="performance">בעיית ביצועים</option>
-                    <option value="login">בעיית התחברות (לא נכנס למערכת)</option>
-                    <option value="notification">התראות לא נשלחות</option>
-                    <option value="other">אחר</option>
-                </select>
-                <div id="typeError" class="error-message"></div>
-            </div>
-
-
-            <div class="form-group">
-                <label for="errorDescription">תיאור השגיאה:</label>
-                <textarea id="errorDescription" name="errorDescription" placeholder="נא לתאר את השגיאה בפירוט, כולל שלבים לשחזור הבעיה (אם אפשרי)..." required></textarea>
-                <div id="descriptionError" class="error-message"></div>
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="errorMedia">תיעוד השגיאה (מומלץ):</label>
-
-                <div class="media-upload-container">
-                    <input type="file" id="errorMedia" name="errorMedia" accept="image/*, video/*, .mp4, .mov">
-                    <label for="errorMedia" class="custom-file-upload">
-                        <i class="fas fa-file-upload"></i> בחר קובץ
-                    </label>
-                    <span id="file-chosen">לא נבחר קובץ</span>
-                    <button type="button" id="removeMedia" class="remove-btn" style="display: none;">
-
-                        <i class="fas fa-times"></i> הסר תמונה
-                    </button>
-                </div>
-                <div id="mediaPreview"></div>
-                <div id="mediaError" class="error-message"></div>
-            </div>
-
-            <button type="submit">שלח דיווח שגיאה </button>
-        </form>
         
-        <div id="successMessage" style="display: none; direction: rtl; background-color: #e8f5e9; padding: 1rem; border-radius: 8px; text-align: center; margin-top: 1rem;">
-            <p style="font-weight: bold; font-size: 1.1rem; margin-bottom: 0.5rem;">
-                הדיווח נשלח בהצלחה! 
-            </p>
-            <p style="margin: 0;">
-                הצוות הטכני של ISEND כבר עובד על התיקון <br>
-                נטפל בתקלה במהירות האפשרית 
-            </p>
-        </div>
+        <!-- Form Container -->
+        <div class="form-container">
+            <form id="errorReportForm">
+                {% csrf_token %}
+                
+                <!-- Name and Email Row -->
+                <div class="form-row">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="reporterEmail">אימייל:</label>
+                        <input type="email" id="reporterEmail" name="reporterEmail" required 
+                               class="modern-input" placeholder="הזן את האימייל שלך">
+                        <div id="emailError" class="error-message"></div>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label for="reporterName">שם מלא:</label>
+                        <input type="text" id="reporterName" name="reporterName" required 
+                               class="modern-input" placeholder="הזן את שמך המלא">
+                        <div id="nameError" class="error-message"></div>
+                    </div>
+                </div>
 
+                <!-- Error Type -->
+                <div class="form-group">
+                    <label for="errorType">סוג השגיאה:</label>
+                    <select id="errorType" name="errorType" required class="modern-select">
+                        <option value="">בחר סוג שגיאה</option>
+                        <option value="syntax">שגיאת תחביר (Syntax)</option>
+                        <option value="logic">שגיאה לוגית</option>
+                        <option value="runtime">שגיאת ריצה</option>
+                        <option value="ui">בעיה בממשק משתמש (UI/UX)</option>
+                        <option value="performance">בעיית ביצועים</option>
+                        <option value="login">בעיית התחברות (לא נכנס למערכת)</option>
+                        <option value="notification">התראות לא נשלחות</option>
+                        <option value="other">אחר</option>
+                    </select>
+                    <div id="typeError" class="error-message"></div>
+                </div>
+
+                <!-- Error Description -->
+                <div class="form-group">
+                    <label for="errorDescription">תיאור השגיאה:</label>
+                    <textarea id="errorDescription" name="errorDescription" required class="modern-textarea"
+                              placeholder="נא לתאר את השגיאה בפירוט, כולל שלבים לשחזור הבעיה (אם אפשרי)..."></textarea>
+                    <div id="descriptionError" class="error-message"></div>
+                </div>
+
+                <!-- Media Upload -->
+                <div class="form-group">
+                    <label for="errorMedia">תיעוד השגיאה (מומלץ):</label>
+                    <div class="media-upload-container" id="uploadContainer">
+                        <div class="upload-area-content">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <div class="upload-text">גרור קבצים כאן או לחץ לבחירה</div>
+                            <div class="upload-hint">תמונות, וידאו - עד 20MB</div>
+                            <input type="file" id="errorMedia" name="errorMedia" accept="image/*, video/*, .mp4, .mov">
+                            <label for="errorMedia" class="custom-file-upload">
+                                <i class="fas fa-file-upload"></i>
+                                בחר קובץ
+                            </label>
+                        </div>
+                        <div id="file-chosen"></div>
+                        <button type="button" id="removeMedia" class="remove-btn" style="display: none;">
+                            <i class="fas fa-times"></i>
+                            הסר קובץ
+                        </button>
+                    </div>
+                    <div id="mediaPreview"></div>
+                    <div id="mediaError" class="error-message"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane" style="margin-left: 0.5rem;"></i>
+                    שלח דיווח שגיאה
+                </button>
+            </form>
+            
+            <!-- Success Message -->
+            <div id="successMessage" class="success-message" style="display: none;">
+                <h3>
+                    <i class="fas fa-check-circle"></i>
+                    הדיווח נשלח בהצלחה!
+                </h3>
+                <p>
+                    הצוות הטכני של ISEND כבר עובד על התיקון<br>
+                    נטפל בתקלה במהירות האפשרית 🚀
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // File upload handler
-    document.getElementById('errorMedia').addEventListener('change', function(e) {
-        const fileChosen = document.getElementById('file-chosen');
-        const removeBtn = document.getElementById('removeMedia');
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('errorMedia');
+    const fileChosen = document.getElementById('file-chosen');
+    const removeBtn = document.getElementById('removeMedia');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const previewContainer = document.getElementById('mediaPreview');
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        uploadContainer.classList.add('dragover');
+    }
+
+    function unhighlight() {
+        uploadContainer.classList.remove('dragover');
+    }
+
+    uploadContainer.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
         
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelection(files[0]);
+        }
+    }
+
+    // File selection handler
+    fileInput.addEventListener('change', function(e) {
         if (this.files && this.files.length > 0) {
-            fileChosen.textContent = this.files[0].name;
-            removeBtn.style.display = 'inline-block';
-            
-            // Clear previous preview
-            const previewContainer = document.getElementById('mediaPreview');
-            previewContainer.innerHTML = '';
-            
-            if (this.files[0].type.startsWith('image/')) {
-                const preview = document.createElement('img');
-                preview.src = URL.createObjectURL(this.files[0]);
-                preview.style.maxWidth = '200px';
-                preview.style.marginTop = '10px';
-                preview.classList.add('file-preview');
-                previewContainer.appendChild(preview);
-            }
+            handleFileSelection(this.files[0]);
         } else {
-            fileChosen.textContent = 'לא נבחר קובץ';
-            removeBtn.style.display = 'none';
+            resetFileSelection();
         }
     });
 
-    // Remove media handler
-    document.getElementById('removeMedia').addEventListener('click', function() {
-        const fileInput = document.getElementById('errorMedia');
-        const fileChosen = document.getElementById('file-chosen');
-        const previewContainer = document.getElementById('mediaPreview');
+    function handleFileSelection(file) {
+        fileChosen.textContent = file.name;
+        fileChosen.style.display = 'block';
+        removeBtn.style.display = 'inline-flex';
         
-        fileInput.value = ''; // Clear file input
-        fileChosen.textContent = 'לא נבחר קובץ';
+        // Clear previous preview
         previewContainer.innerHTML = '';
-        this.style.display = 'none';
+        
+        if (file.type.startsWith('image/')) {
+            const preview = document.createElement('img');
+            preview.src = URL.createObjectURL(file);
+            preview.classList.add('file-preview');
+            previewContainer.appendChild(preview);
+        }
+    }
+
+    function resetFileSelection() {
+        fileChosen.textContent = '';
+        fileChosen.style.display = 'none';
+        removeBtn.style.display = 'none';
+        previewContainer.innerHTML = '';
+    }
+
+    // Remove media handler
+    removeBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        resetFileSelection();
         document.getElementById('mediaError').textContent = '';
     });
 
+    // Form submission
     document.getElementById('errorReportForm').addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -440,8 +706,8 @@
         if (!email) {
             document.getElementById('emailError').textContent = 'נא להזין כתובת אימייל';
             isValid = false;
-        } else if (!/^[^\s@]+@ac\.sce\.ac\.il$/.test(email)) {
-            document.getElementById('emailError').textContent = 'נא להזין אימייל SCE תקין (מסתיים ב-ac.sce.ac.il)';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('emailError').textContent = 'נא להזין אימייל תקין';
             isValid = false;
         }
         
@@ -461,33 +727,35 @@
         }
         
         if (isValid) {
-            const formData = new FormData();
-            formData.append('name', name);
-            formData.append('email', email);
-            formData.append('errorType', errorType);
-            formData.append('description', description);
-            formData.append('urgency', document.getElementById('urgency').value);
+            // Add loading state
+            const submitBtn = this.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loading-spinner"></div> שולח...';
+            submitBtn.disabled = true;
             
-            if (errorMedia) {
-                formData.append('errorMedia', errorMedia);
-            }
-            
-            submitFormData(formData);
+            // Simulate form submission
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Show success message
+                document.getElementById('successMessage').style.display = 'block';
+                this.reset();
+                resetFileSelection();
+                
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+                
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 2000);
         }
     });
-    
-    function submitFormData(formData) {
-        console.log('Form data to be submitted:', Object.fromEntries(formData.entries()));
-        
-        document.getElementById('successMessage').style.display = 'block';
-        document.getElementById('errorReportForm').reset();
-        document.getElementById('file-chosen').textContent = 'לא נבחר קובץ';
-        document.getElementById('mediaPreview').innerHTML = '';
-        document.getElementById('removeMedia').style.display = 'none';
-        
-        setTimeout(() => {
-            document.getElementById('successMessage').style.display = 'none';
-        }, 5000);
-    }
+});
 </script>
 {% endblock %}
