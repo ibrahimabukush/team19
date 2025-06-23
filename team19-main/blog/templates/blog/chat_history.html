@@ -1,0 +1,26 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<div class="content-section">
+    <h2>Your Chat History</h2>
+    <hr>
+    {% if history %}
+        {% for chat in history %}
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="far fa-clock mr-2"></i>{{ chat.timestamp|date:"F d, Y, g:i a" }}</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Your message:</h5>
+                    <p class="card-text">{{ chat.message }}</p>
+                    <h5 class="card-title">Response:</h5>
+                    <p class="card-text">{{ chat.reply }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            You don't have any chat history yet. Try asking the ISEND Assistant a question!
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

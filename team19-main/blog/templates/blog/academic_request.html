@@ -1,0 +1,1377 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block additional_css %}
+<!-- PDF.js library for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+    body {
+        direction: rtl;
+        text-align: right;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .request-form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .request-header {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .request-header h2 {
+        color: #667eea;
+        font-weight: 700;
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .request-header p {
+        color: #666;
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .request-header::after {
+        content: "";
+        display: block;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        margin: 25px auto 0;
+        border-radius: 2px;
+    }
+
+    .form-section {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+        border-right: 5px solid #667eea;
+        border-left: none;
+        border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .form-section.active {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        transform: translateY(-5px);
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+    }
+
+    .form-select, .form-control {
+        border: 2px solid rgba(102, 126, 234, 0.3);
+        padding: 15px 18px;
+        border-radius: 12px;
+        transition: all 0.3s;
+        font-size: 1rem;
+        text-align: right;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-select:focus, .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        background: white;
+    }
+
+    .textarea-counter {
+        font-size: 0.9rem;
+        color: #764ba2;
+        text-align: left;
+        margin-top: 8px;
+        font-weight: 500;
+    }
+
+    .btn {
+        padding: 15px 30px;
+        font-weight: 600;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #5a6fd8, #6a4190);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        padding: 16px 35px;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(45deg, #218838, #1ba085);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(45deg, #6c757d, #868e96);
+        border: none;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(45deg, #5a6268, #74818a);
+        transform: translateY(-2px);
+    }
+
+    .file-upload-wrapper {
+        position: relative;
+        margin-top: 15px;
+    }
+
+    .file-upload-wrapper .file-upload-label {
+        border: 3px dashed rgba(102, 126, 234, 0.5);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .file-upload-wrapper:hover .file-upload-label {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .file-upload-wrapper input[type="file"] {
+        opacity: 0;
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .file-upload-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 15px;
+    }
+
+    .file-upload-text {
+        color: #764ba2;
+        font-weight: 500;
+    }
+
+    .file-name {
+        margin-top: 15px;
+        padding: 12px 16px;
+        background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        border-radius: 8px;
+        display: none;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .ai-suggestion-container {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 20px;
+        position: relative;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .ai-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .ai-icon {
+        font-size: 1.8rem;
+        color: #667eea;
+        margin-left: 12px;
+        margin-right: 0;
+    }
+
+    .ai-title {
+        font-weight: 600;
+        color: #667eea;
+        margin: 0;
+        font-size: 1.3rem;
+    }
+
+    .ai-suggestion-box {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        border-right: 4px solid #667eea;
+        border-left: none;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(102, 126, 234, 0.1);
+    }
+
+    .progress-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        padding: 0 20px;
+    }
+
+    .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+    }
+
+    .progress-step::before {
+        content: "";
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(45deg, rgba(102, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+        position: absolute;
+        top: 18px;
+        right: 50%;
+        left: auto;
+        z-index: 1;
+    }
+
+    .progress-step:last-child::before {
+        display: none;
+    }
+
+    .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #e0e0e0, #f0f0f0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    .progress-step.active .step-icon {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .progress-step.completed .step-icon {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .step-label {
+        font-size: 1rem;
+        color: #666;
+        transition: all 0.3s;
+        font-weight: 500;
+    }
+
+    .progress-step.active .step-label {
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    .submit-success {
+        text-align: center;
+        padding: 40px;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+        border-radius: 15px;
+        margin-top: 30px;
+        display: none;
+        border: 1px solid rgba(40, 167, 69, 0.3);
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .success-message {
+        font-weight: 600;
+        color: #155724;
+        margin-bottom: 15px;
+        font-size: 1.4rem;
+    }
+
+    .success-details {
+        color: #155724;
+        font-size: 1.1rem;
+    }
+
+    /* Request Type Card Options */
+    .request-options {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .request-option {
+        background: rgba(255, 255, 255, 0.8);
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 12px;
+        padding: 25px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .request-option:hover {
+        border-color: #667eea;
+        background: white;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .request-option.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .request-option-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .request-option-title {
+        font-weight: 600;
+        color: #667eea;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+    }
+
+    .request-option-desc {
+        color: #666;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .checkmark {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 25px;
+        height: 25px;
+        background: #667eea;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        opacity: 0;
+        transform: scale(0);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .request-option.selected .checkmark {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .request-option.selected .request-option-icon {
+        transform: scale(1.1);
+        color: #667eea;
+    }
+
+    /* Subject Selection Styles */
+    .subject-selection-section {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 20px;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+        display: none;
+    }
+
+    .subject-selection-section.show {
+        display: block;
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    .debug-info {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+        padding: 15px;
+        margin: 15px 0;
+        border: 1px solid rgba(255, 193, 7, 0.3);
+        border-radius: 10px;
+        font-size: 0.9rem;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+        font-weight: 500;
+    }
+
+    .text-primary {
+        color: #667eea !important;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animated-fade-in {
+        animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .me-2 {
+        margin-left: 0.5rem !important;
+        margin-right: 0 !important;
+    }
+    
+    .ms-2 {
+        margin-right: 0.5rem !important;
+        margin-left: 0 !important;
+    }
+    
+    .ps-3 {
+        padding-right: 1rem !important;
+        padding-left: 0 !important;
+    }
+    
+    .me-3 {
+        margin-left: 1rem !important;
+        margin-right: 0 !important;
+    }
+    
+    .fa-arrow-left {
+        transform: rotate(180deg);
+    }
+    
+    .fa-arrow-right {
+        transform: rotate(180deg);
+    }
+
+    .row.g-3 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+
+    .col-md-6 {
+        flex: 0 0 auto;
+        width: 50%;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-6 {
+            width: 100%;
+        }
+        
+        .request-form-container {
+            padding: 25px;
+            margin: 15px;
+        }
+        
+        .progress-indicator {
+            padding: 0 10px;
+        }
+        
+        .step-icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .step-label {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Loading animation */
+    .btn.loading {
+        position: relative;
+        color: transparent;
+    }
+
+    .btn.loading::after {
+        content: "";
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        top: 50%;
+        left: 50%;
+        margin-left: -8px;
+        margin-top: -8px;
+        border: 2px solid transparent;
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Bounce animation for card selection */
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+        40% {transform: translateY(-10px);}
+        60% {transform: translateY(-5px);}
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="request-form-container">
+        <div class="request-header">
+            <h2><i class="fas fa-graduation-cap me-3"></i>בקשות אקדמיות</h2>
+            <div class="register-divider">
+                <span class="register-divider-line"></span>
+            </div>
+        </div>
+
+        <!-- Debug info for admins -->
+        {% if user.is_superuser %}
+        <div class="debug-info">
+            <strong><i class="fas fa-info-circle me-2"></i>מידע למפתח (מוצג רק למנהלי מערכת):</strong><br>
+            משתמש: {{ user.full_name }}<br>
+            מחלקה: {{ user.department }}<br>
+            קורסים נמצאו: {{ subjects_count|default:0 }}<br>
+            {% for subject in subjects %}
+                <div style="margin-top: 5px;">📚 {{ subject.name }} - 👨‍🏫 {{ subject.lecturer.full_name}}</div>
+            {% empty %}
+                <div style="color: #dc3545; margin-top: 5px;">❌ לא נמצאו קורסים!</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form id="academic-request-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-step active">
+                    <div class="step-icon">1</div>
+                    <div class="step-label">בחירת סוג</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-icon">2</div>
+                    <div class="step-label">פרטי הבקשה</div>
+                </div>
+                <div class="progress-step">
+                    <div class="step-icon">3</div>
+                    <div class="step-label">סקירה והגשה</div>
+                </div>
+            </div>
+
+            <!-- Step 1: Request Type Selection -->
+            <div class="form-section active" id="step-1">
+                <label for="request_type" class="form-label">
+                    <i class="fas fa-list-ul me-2"></i>איזה סוג של סיוע אקדמי אתה צריך?
+                </label>
+                
+                <div class="request-options">
+                    <div class="request-option" data-value="אישורי רישום או ציונים">
+                        <div class="request-option-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="request-option-title">אישורי רישום או ציונים</div>
+                        <div class="request-option-desc">קבל אישורי רישום רשמיים, גיליונות ציונים ותעודות לצרכים שונים</div>
+                        <div class="checkmark">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="request-option" data-value="ערעורים אקדמיים">
+                        <div class="request-option-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <div class="request-option-title">ערעורים אקדמיים</div>
+                        <div class="request-option-desc">הגש ערעור על ציון סופי, החלטה אקדמית או הליך שנעשה</div>
+                        <div class="checkmark">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="request-option" data-value="בקשות לבדיקת מבחנים">
+                        <div class="request-option-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="request-option-title">בקשות לבדיקת מבחנים</div>
+                        <div class="request-option-desc">בקש בדיקה מחדש של מבחן, עיון במבחן או הסבר על הציון שקיבלת</div>
+                        <div class="checkmark">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="hidden" id="request_type" name="request_type" value="">
+                
+                <!-- Subject Selection Section -->
+                <div class="subject-selection-section" id="subject-selection">
+                    <h5 class="mb-3" style="color: #667eea;">
+                        <i class="fas fa-book me-2"></i>בחר קורס ומרצה
+                    </h5>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        <i class="fas fa-info-circle me-2"></i>
+                        בחר את הקורס הרלוונטי לבקשתך. המרצה יוצג אוטומטית.
+                    </p>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                <i class="fas fa-book me-2"></i>בחר קורס
+                            </label>
+                            <select class="form-select" id="subject" name="subject">
+                                <option value="">🔽 אנא בחר קורס</option>
+                                {% for subject in subjects %}
+                                    <option value="{{ subject.name }}" 
+                                            data-lecturer="{{ subject.lecturer_full_name }}">
+                                        📚 {{ subject.name }}
+                                    </option>
+                                {% empty %}
+                                    <option value="" disabled style="color: #dc3545;">❌ לא נמצאו קורסים במחלקה שלך</option>
+                                {% endfor %}
+                            </select>
+                            {% if not subjects %}
+                                <small class="text-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    לא נמצאו קורסים עבור המחלקה שלך. אנא פנה למזכירות.
+                                </small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6" id="lecturer-info" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-user-tie me-2"></i>שם המרצה
+                            </label>
+                            <p id="lecturer-name" class="ps-3 text-primary fw-bold m-0" style="padding-top: 15px; font-size: 1.1rem;"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-start">
+                    <button type="button" class="btn btn-primary" id="next-step-1" disabled>
+                        המשך לשלב הבא <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Request Details -->
+            <div class="form-section" id="step-2" style="display: none;">
+                
+                <label for="request_text" class="form-label">
+                    <i class="fas fa-edit me-2"></i>אנא תאר את בקשתך בפירוט
+                </label>
+                
+                <!-- AI Helper Section -->
+                <div id="ai-helper">
+                    <div class="ai-suggestion-container">
+                        <div class="ai-header">
+                            <div class="ai-icon"><i class="fas fa-robot"></i></div>
+                            <h5 class="ai-title">עוזר כתיבה חכם</h5>
+                        </div>
+                        <p style="margin-bottom: 20px; color: #666;">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            צריך עזרה בכתיבת הבקשה? תן לבינה המלאכותית שלנו ליצור תבנית מותאמת עבורך.
+                        </p>
+                        <button type="button" class="btn btn-primary" onclick="generateAiSuggestion()">
+                            <i class="fas fa-magic me-2"></i>צור תבנית חכמה
+                        </button>
+                        
+                        <div id="ai-suggestion-box" class="ai-suggestion-box mt-3 d-none">
+                            <p id="ai-suggestion-text" style="margin-bottom: 15px; line-height: 1.6;"></p>
+                            <button type="button" class="btn btn-secondary" onclick="useAiSuggestion()">
+                                <i class="fas fa-check me-2"></i>השתמש בתבנית זו
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <textarea class="form-control mt-3" id="request_text" name="request_text" rows="6" 
+                    placeholder="אנא היה ספציפי וכלול מידע רלוונטי כמו תאריכים, שמות קורסים, או כל פרט שיכול לעזור לנו להבין טוב יותר את בקשתך..."
+                    maxlength="1000"></textarea>
+                <div class="textarea-counter">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <span id="char-count">0</span>/1000 תווים
+                </div>
+                
+                <!-- File Upload Section -->
+                <div class="mt-4">
+                    <label class="form-label">
+                        <i class="fas fa-paperclip me-2"></i>מסמכים תומכים (אופציונלי)
+                    </label>
+                    <div class="file-upload-wrapper">
+                        <div class="file-upload-label">
+                            <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <div class="file-upload-text">
+                                <strong>גרור ושחרר קבצים כאן או לחץ לעיון</strong><br>
+                                <small>תומך בקבצי PDF, Word, תמונות (עד 10MB)</small>
+                            </div>
+                        </div>
+                        <input type="file" class="form-control" id="attachment" name="attachment" 
+                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
+                    </div>
+                    <div id="file-name" class="file-name">
+                        <i class="fas fa-file me-2"></i>
+                        <span id="file-name-text"></span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 d-flex justify-content-between">
+                    <button type="button" class="btn btn-primary" id="next-step-2" disabled>
+                        <i class="fas fa-search me-2"></i>סקירה והגשה
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="prev-step-2">
+                        <i class="fas fa-arrow-left me-2"></i>חזרה
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Review & Submit -->
+            <div class="form-section" id="step-3" style="display: none;">
+                <h4 class="mb-4" style="color: #667eea;">
+                    <i class="fas fa-eye me-2"></i>סקירת הבקשה שלך
+                </h4>
+                
+                <div class="mb-4">
+                    <h6 style="color: #764ba2;"><i class="fas fa-tag me-2"></i>סוג בקשה:</h6>
+                    <p id="review-type" class="ps-3" style="font-weight: 500; color: #333;"></p>
+                </div>
+                
+                <div class="mb-4" id="review-subject-section" style="display: none;">
+                    <h6 style="color: #764ba2;"><i class="fas fa-book me-2"></i>קורס:</h6>
+                    <p id="review-subject" class="ps-3" style="font-weight: 500; color: #333;"></p>
+                </div>
+                
+                <div class="mb-4" id="review-lecturer-section" style="display: none;">
+                    <h6 style="color: #764ba2;"><i class="fas fa-user-tie me-2"></i>מרצה:</h6>
+                    <p id="review-lecturer" class="ps-3" style="font-weight: 500; color: #333;"></p>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 style="color: #764ba2;"><i class="fas fa-comment-alt me-2"></i>פרטי הבקשה:</h6>
+                    <div id="review-details" class="ps-3" style="background: rgba(102, 126, 234, 0.05); padding: 15px; border-radius: 8px; border-right: 3px solid #667eea; line-height: 1.6;"></div>
+                </div>
+                
+                <div class="mb-4" id="review-attachment-section" style="display: none;">
+                    <h6 style="color: #764ba2;"><i class="fas fa-paperclip me-2"></i>מסמך מצורף:</h6>
+                    <p id="review-attachment" class="ps-3" style="font-weight: 500; color: #333;">
+                        <i class="fas fa-file me-2"></i><span id="review-attachment-name"></span>
+                    </p>
+                </div>
+                
+                <div class="alert alert-info mt-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>הערה:</strong> הבקשה תישלח ישירות למזכירות האקדמית לטיפול.
+                </div>
+                
+                <div class="mt-5 d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success" id="submit-btn">
+                        <i class="fas fa-paper-plane me-2"></i>הגש בקשה
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="prev-step-3">
+                        <i class="fas fa-edit me-2"></i>ערוך בקשה
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Success Message -->
+            <div class="submit-success" id="success-message">
+                <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                <h4 class="success-message">🎉 בקשתך הוגשה בהצלחה!</h4>
+                <p class="success-details">
+                    אנו נטפל בבקשתך ונחזור אליך בהקדם האפשרי.<br>
+                    <small>תוכל לעקוב אחר סטטוס הבקשה בעמוד המעקב שלך.</small>
+                </p>
+                <button type="button" class="btn btn-primary mt-3" onclick="resetForm()">
+                    <i class="fas fa-plus me-2"></i>הגש בקשה נוספת
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Enhanced JavaScript for Academic Request Form with Card-Based Selection
+
+// Global variable declarations
+const academicTypesWithAI = [
+    "אישורי רישום או ציונים",
+    "ערעורים אקדמיים", 
+    "בקשות לבדיקת מבחנים"
+];
+
+const lecturerRequestTypes = [
+    "ערעורים אקדמיים",
+    "בקשות לבדיקת מבחנים"
+];
+
+const suggestions = {
+    "אישורי רישום או ציונים": "אני מבקש/ת אישור רישום ו/או ציונים עבור [שם הקורס] במהלך [סמסטר/שנה]. מסמך זה נדרש ל[סיבה - למשל: מלגה, מעסיק, ויזה, המשך לימודים וכו']. אבקש לקבל את האישור בהקדם האפשרי.",
+    "ערעורים אקדמיים": "אני כותב/ת כדי לערער על הציון שלי בקורס [שם הקורס] שנלמד על ידי [שם המרצה] במהלך [סמסטר/שנה]. אני מאמין/ה שהציון שלי [ציון שהתקבל] אינו משקף באופן מדויק את הביצועים שלי בגלל [סיבה ספציפית - לדוגמה: טעות בבדיקה, אי התחשבות בחלק מהתשובות, בעיה טכנית במהלך המבחן]. השלמתי את כל המטלות, השתתפתי בכל השיעורים, והעבודה הכוללת שלי מדגימה רמת הישג גבוהה יותר. צירפתי [מסמכים רלוונטיים] לתמיכה בערעור שלי.",
+    "בקשות לבדיקת מבחנים": "אני מבקש/ת לבדוק מחדש את המבחן שלי בקורס [שם הקורס] שנערך בתאריך [תאריך]. אני מאמין/ה שייתכן שהייתה טעות בניקוד של שאלות [ציין מספרי שאלות אם אפשר]. התשובה שלי לשאלה [מספר] התייחסה לכל הנקודות המרכזיות כולל [הסבר בקצרה את התוכן]. אבקש לקבוע פגישה לעיון במבחן ובדיקה מחדש של הציון."
+};
+
+// Global DOM Elements
+let requestTypeSelect, requestText, aiHelper, aiBox, aiText, charCount;
+let fileInput, fileName, fileNameText, step1, step2, step3;
+let nextStep1, nextStep2, prevStep2, prevStep3, successMessage, submitBtn;
+let subjectSelect, lecturerInfo, lecturerName, progressSteps;
+let requestOptions, subjectSelection;
+let selectedLecturerName = "";
+
+// CSRF Token Helper
+function getCSRFToken() {
+    const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+    return csrfInput ? csrfInput.value : '';
+}
+
+// Initialize DOM elements
+function initializeDOMElements() {
+    requestTypeSelect = document.getElementById("request_type");
+    requestText = document.getElementById("request_text");
+    aiHelper = document.getElementById("ai-helper");
+    aiBox = document.getElementById("ai-suggestion-box");
+    aiText = document.getElementById("ai-suggestion-text");
+    charCount = document.getElementById("char-count");
+    fileInput = document.getElementById("attachment");
+    fileName = document.getElementById("file-name");
+    fileNameText = document.getElementById("file-name-text");
+    step1 = document.getElementById("step-1");
+    step2 = document.getElementById("step-2");
+    step3 = document.getElementById("step-3");
+    nextStep1 = document.getElementById("next-step-1");
+    nextStep2 = document.getElementById("next-step-2");
+    prevStep2 = document.getElementById("prev-step-2");
+    prevStep3 = document.getElementById("prev-step-3");
+    successMessage = document.getElementById("success-message");
+    submitBtn = document.getElementById("submit-btn");
+    subjectSelect = document.getElementById("subject");
+    lecturerInfo = document.getElementById("lecturer-info");
+    lecturerName = document.getElementById("lecturer-name");
+    progressSteps = document.querySelectorAll(".progress-step");
+    requestOptions = document.querySelectorAll(".request-option");
+    subjectSelection = document.getElementById("subject-selection");
+}
+
+// Initialize event listeners
+function initializeEventListeners() {
+    // Request option selection (card-based)
+    if (requestOptions) {
+        requestOptions.forEach(option => {
+            option.addEventListener("click", handleRequestOptionClick);
+        });
+    }
+    
+    // Subject selection handler
+    if (subjectSelect) {
+        subjectSelect.addEventListener("change", handleSubjectChange);
+    }
+    
+    // Text area input handler
+    if (requestText) {
+        requestText.addEventListener("input", handleTextInput);
+    }
+    
+    // File upload handler
+    if (fileInput) {
+        fileInput.addEventListener("change", handleFileUpload);
+    }
+    
+    // Navigation buttons
+    if (nextStep1) nextStep1.addEventListener("click", goToStep2);
+    if (prevStep2) prevStep2.addEventListener("click", goToStep1);
+    if (nextStep2) nextStep2.addEventListener("click", goToStep3);
+    if (prevStep3) prevStep3.addEventListener("click", goBackToStep2);
+    
+    // Form submission
+    const form = document.getElementById("academic-request-form");
+    if (form) {
+        form.addEventListener("submit", handleFormSubmit);
+    }
+}
+
+// Handle request option card click
+function handleRequestOptionClick(event) {
+    // Remove selection from all options
+    requestOptions.forEach(opt => opt.classList.remove("selected"));
+    
+    // Add selection to clicked option
+    event.currentTarget.classList.add("selected");
+    
+    // Set the value
+    const value = event.currentTarget.getAttribute("data-value");
+    if (requestTypeSelect) {
+        requestTypeSelect.value = value;
+    }
+    
+    // Show/hide subject selection based on request type
+    if (subjectSelection) {
+        if (lecturerRequestTypes.includes(value)) {
+            subjectSelection.classList.add('show');
+            if (subjectSelect) {
+                subjectSelect.setAttribute('required', 'required');
+            }
+        } else {
+            subjectSelection.classList.remove('show');
+            if (lecturerInfo) lecturerInfo.style.display = 'none';
+            if (subjectSelect) {
+                subjectSelect.value = '';
+                subjectSelect.removeAttribute('required');
+            }
+        }
+    }
+    
+    // Show/hide AI helper
+    if (aiHelper) {
+        aiHelper.style.display = academicTypesWithAI.includes(value) ? "block" : "none";
+    }
+    if (aiBox) {
+        aiBox.classList.add("d-none");
+    }
+    
+    // Update next button state
+    updateNextButtonState();
+    
+    // Add bounce animation to icon when selected
+    const iconElement = event.currentTarget.querySelector('.request-option-icon');
+    if (iconElement) {
+        iconElement.style.animation = 'none';
+        setTimeout(() => {
+            iconElement.style.animation = 'bounce 0.5s';
+        }, 10);
+    }
+}
+
+// Update next button state based on form validation
+function updateNextButtonState() {
+    if (!nextStep1) return;
+    
+    const requestType = requestTypeSelect ? requestTypeSelect.value : '';
+    const isLecturerRequired = lecturerRequestTypes.includes(requestType);
+    const hasSelectedSubject = subjectSelect ? subjectSelect.value : '';
+    
+    // Enable button if:
+    // 1. Request type is selected AND
+    // 2. If lecturer is required, subject must be selected
+    const canProceed = requestType && (!isLecturerRequired || hasSelectedSubject);
+    
+    nextStep1.disabled = !canProceed;
+}
+
+function handleSubjectChange() {
+    const subject = subjectSelect.value;
+    console.log('Selected subject:', subject);
+    
+    if (!subject) {
+        if (lecturerInfo) lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
+        updateNextButtonState();
+        return;
+    }
+
+    // Get lecturer name from the selected option's data attribute
+    const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
+    const lecturerNameFromOption = selectedOption.getAttribute('data-lecturer');
+    
+    console.log('Lecturer from option:', lecturerNameFromOption);
+    
+    if (lecturerNameFromOption && lecturerNameFromOption !== 'None None' && lecturerNameFromOption.trim() !== '') {
+        selectedLecturerName = lecturerNameFromOption;
+        if (lecturerName) lecturerName.textContent = selectedLecturerName;
+        if (lecturerInfo) lecturerInfo.style.display = "block";
+    } else {
+        // Fallback to API call if data attribute is not available
+        fetchLecturerFromAPI(subject);
+    }
+    
+    updateNextButtonState();
+}
+
+async function fetchLecturerFromAPI(subject) {
+    try {
+        console.log('Fetching lecturer for subject:', subject);
+        
+        const response = await fetch(`/get-lecturer/?subject=${encodeURIComponent(subject)}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCSRFToken()
+            }
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('API response data:', data);
+
+        if (data.lecturer_name && data.lecturer_name.trim() !== '') {
+            selectedLecturerName = data.lecturer_name;
+            if (lecturerName) lecturerName.textContent = selectedLecturerName;
+            if (lecturerInfo) lecturerInfo.style.display = "block";
+        } else {
+            console.log('No lecturer found or empty lecturer name');
+            if (lecturerInfo) lecturerInfo.style.display = "none";
+            selectedLecturerName = "";
+        }
+    } catch (err) {
+        console.error("Failed to fetch lecturer:", err);
+        if (lecturerInfo) lecturerInfo.style.display = "none";
+        selectedLecturerName = "";
+        
+        // Show user-friendly error message
+        showNotification('שגיאה בטעינת פרטי המרצה. אנא נסה שוב או פנה לתמיכה.', 'error');
+    }
+}
+
+function handleTextInput() {
+    const count = requestText.value.length;
+    if (charCount) charCount.textContent = count;
+    if (nextStep2) nextStep2.disabled = count === 0;
+}
+
+function handleFileUpload() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if (fileName && fileNameText) {
+            fileNameText.textContent = file.name;
+            fileName.style.display = "block";
+        }
+        
+        // Validate file size (10MB limit)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            showNotification('גודל הקובץ גדול מדי. הגודל המקסימלי המותר הוא 10MB.', 'error');
+            fileInput.value = '';
+            if (fileName) fileName.style.display = "none";
+        }
+    } else {
+        if (fileName) fileName.style.display = "none";
+    }
+}
+
+// Validation functions
+function validateStep1() {
+    const requestType = requestTypeSelect ? requestTypeSelect.value : '';
+    const isLecturerRequired = lecturerRequestTypes.includes(requestType);
+    const hasSelectedSubject = subjectSelect ? subjectSelect.value : '';
+    
+    if (!requestType) {
+        showNotification('אנא בחר סוג בקשה', 'error');
+        return false;
+    }
+    
+    if (isLecturerRequired && !hasSelectedSubject) {
+        showNotification('אנא בחר קורס', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+function validateStep2() {
+    if (!requestText || requestText.value.trim() === "") {
+        showNotification('אנא תאר את בקשתך', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+// Navigation functions
+function goToStep2() {
+    if (!validateStep1()) {
+        return;
+    }
+    
+    if (step1) step1.style.display = "none";
+    if (step2) {
+        step2.style.display = "block";
+        step2.classList.add("animated-fade-in");
+    }
+    updateProgressSteps(1);
+}
+
+function goToStep1() {
+    if (step2) step2.style.display = "none";
+    if (step1) step1.style.display = "block";
+    updateProgressSteps(0);
+}
+
+function goToStep3() {
+    if (!validateStep2()) {
+        return;
+    }
+    
+    // Update review page
+    const reviewType = document.getElementById("review-type");
+    const reviewDetails = document.getElementById("review-details");
+    const reviewSubject = document.getElementById("review-subject");
+    const reviewLecturer = document.getElementById("review-lecturer");
+    const reviewSubjectSection = document.getElementById("review-subject-section");
+    const reviewLecturerSection = document.getElementById("review-lecturer-section");
+    
+    if (reviewType && requestTypeSelect) {
+        reviewType.textContent = requestTypeSelect.value;
+    }
+    if (reviewDetails && requestText) {
+        reviewDetails.textContent = requestText.value;
+    }
+    
+    // Show subject and lecturer info if applicable
+    const requestType = requestTypeSelect.value;
+    if (lecturerRequestTypes.includes(requestType) && subjectSelect && subjectSelect.value) {
+        if (reviewSubject) reviewSubject.textContent = subjectSelect.value;
+        if (reviewLecturer) reviewLecturer.textContent = selectedLecturerName;
+        if (reviewSubjectSection) reviewSubjectSection.style.display = "block";
+        if (reviewLecturerSection) reviewLecturerSection.style.display = "block";
+    } else {
+        if (reviewSubjectSection) reviewSubjectSection.style.display = "none";
+        if (reviewLecturerSection) reviewLecturerSection.style.display = "none";
+    }
+    
+    const attachmentSection = document.getElementById("review-attachment-section");
+    const reviewAttachmentName = document.getElementById("review-attachment-name");
+    
+    if (attachmentSection && reviewAttachmentName) {
+        if (fileInput && fileInput.files.length > 0) {
+            reviewAttachmentName.textContent = fileInput.files[0].name;
+            attachmentSection.style.display = "block";
+        } else {
+            attachmentSection.style.display = "none";
+        }
+    }
+    
+    if (step2) step2.style.display = "none";
+    if (step3) {
+        step3.style.display = "block";
+        step3.classList.add("animated-fade-in");
+    }
+    updateProgressSteps(2);
+}
+
+function goBackToStep2() {
+    if (step3) step3.style.display = "none";
+    if (step2) step2.style.display = "block";
+    updateProgressSteps(1);
+}
+
+// Update progress steps
+function updateProgressSteps(activeStep) {
+    if (!progressSteps) return;
+    
+    progressSteps.forEach((step, index) => {
+        step.classList.remove("active", "completed");
+        if (index === activeStep) {
+            step.classList.add("active");
+        } else if (index < activeStep) {
+            step.classList.add("completed");
+        }
+    });
+}
+
+// AI Template functions
+function generateAiSuggestion() {
+    if (!requestTypeSelect || !aiText || !aiBox) return;
+    
+    const type = requestTypeSelect.value;
+    aiText.innerText = suggestions[type] || "התחל בהצהרה ברורה על בקשתך וספק פרטים רלוונטיים.";
+    aiBox.classList.remove("d-none");
+    aiBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function useAiSuggestion() {
+    if (!requestText || !aiText || !charCount) return;
+    
+    requestText.value = aiText.innerText;
+    charCount.textContent = requestText.value.length;
+    if (nextStep2) nextStep2.disabled = false;
+    
+    // Scroll to textarea
+    requestText.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestText.focus();
+    
+    showNotification('התבנית נוספה בהצלחה! תוכל לערוך אותה לפי הצורך.', 'success');
+}
+
+function resetForm() {
+    const form = document.getElementById("academic-request-form");
+    if (form) form.reset();
+    
+    if (step1) step1.style.display = "block";
+    if (step2) step2.style.display = "none";
+    if (step3) step3.style.display = "none";
+    if (successMessage) successMessage.style.display = "none";
+    
+    updateProgressSteps(0);
+    
+    if (nextStep1) nextStep1.disabled = true;
+    if (nextStep2) nextStep2.disabled = true;
+    if (fileName) fileName.style.display = "none";
+    if (aiBox) aiBox.classList.add("d-none");
+    if (charCount) charCount.textContent = "0";
+    if (lecturerInfo) lecturerInfo.style.display = "none";
+    
+    selectedLecturerName = "";
+    
+    // Reset request option selection
+    if (requestOptions) {
+        requestOptions.forEach(opt => opt.classList.remove("selected"));
+    }
+    
+    // Reset subject selection
+    if (subjectSelection) {
+        subjectSelection.classList.remove('show');
+    }
+    
+    // Remove loading state from submit button
+    if (submitBtn) {
+        submitBtn.classList.remove('loading');
+    }
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification && notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Form submission
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    // Show loading state
+    if (!submitBtn) return;
+    
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+    
+    const form = new FormData(e.target);
+    
+    try {
+        const response = await fetch("/submit-request/", {
+            method: "POST",
+            body: form,
+            headers: {
+                "X-CSRFToken": getCSRFToken(),
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            // Hide form steps and show success message
+            if (step3) step3.style.display = "none";
+            if (successMessage) {
+                successMessage.style.display = "block";
+                successMessage.classList.add("animated-fade-in");
+            }
+            
+            // Mark all steps as completed
+            if (progressSteps) {
+                progressSteps.forEach(step => {
+                    step.classList.remove("active");
+                    step.classList.add("completed");
+                });
+            }
+            
+            showNotification('הבקשה הוגשה בהצלחה!', 'success');
+        } else {
+            throw new Error(result.message || 'שגיאה בהגשת הבקשה');
+        }
+        
+    } catch (error) {
+        console.error("שגיאה בהגשת הטופס:", error);
+        showNotification("הייתה שגיאה בהגשת הבקשה שלך. אנא נסה שוב.", 'error');
+        
+        // Restore button state
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDOMElements();
+    initializeEventListeners();
+    
+    console.log('Academic request form initialized with card-based design');
+});
+
+// Make functions globally available for onclick handlers
+window.generateAiSuggestion = generateAiSuggestion;
+window.useAiSuggestion = useAiSuggestion;
+window.resetForm = resetForm;
+</script>
+
+{% endblock %}

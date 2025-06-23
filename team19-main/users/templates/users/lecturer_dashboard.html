@@ -1,0 +1,1817 @@
+{% extends 'blog/base.html' %}
+{% csrf_token %}
+
+{% block content %}
+<style>
+    :root {
+            --primary: #8B5CF6;      /* Purple */
+            --primary-light: #C4B5FD; /* Light Purple */
+            --secondary: #7C3AED;    /* Violet */
+            --secondary-light: #E0E7FF; /* Very Light Purple */
+            --success: #10a55a;
+            --warning: #f8a826;
+            --danger: #dc3545;
+            --info: #3B82F6;
+            --light-gray: #f8f9fa;
+            --dark: #343a40;
+        }
+
+    /* Clean, modern card design */
+    .stat-card {
+        border-radius: 15px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 10px rgba(5, 150, 105, 0.1);
+        transition: all 0.3s ease;
+        height: 100px;
+        background-color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(5, 150, 105, 0.2);
+    }
+
+    .stat-card.pending {
+        border-right: 4px solid var(--warning);
+    }
+
+    .stat-card.approved {
+        border-right: 4px solid var(--success);
+    }
+
+    .stat-card.processing {
+        border-right: 4px solid var(--info);
+    }
+
+    .stat-card.rejected {
+        border-right: 4px solid var(--danger);
+    }
+    
+    .stat-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .stat-card-title {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 5px;
+    }
+
+    .stat-card-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-icon-container {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-card.pending .stat-icon-container {
+        background-color: rgba(248, 168, 38, 0.1);
+    }
+
+    .stat-card.approved .stat-icon-container {
+        background-color: rgba(16, 165, 90, 0.1);
+    }
+
+    .stat-card.processing .stat-icon-container {
+        background-color: rgba(59, 130, 246, 0.1);
+    }
+
+    .stat-card.rejected .stat-icon-container {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    .stat-card.pending .stat-card-value {
+        color: var(--warning);
+    }
+
+    .stat-card.approved .stat-card-value {
+        color: var(--success);
+    }
+
+    .stat-card.processing .stat-card-value {
+        color: var(--info);
+    }
+
+    .stat-card.rejected .stat-card-value {
+        color: var(--danger);
+    }
+
+    .stat-icon {
+        font-size: 22px;
+    }
+
+    .stat-card.pending .stat-icon {
+        color: var(--warning);
+    }
+
+    .stat-card.approved .stat-icon {
+        color: var(--success);
+    }
+
+    .stat-card.processing .stat-icon {
+        color: var(--info);
+    }
+
+    .stat-card.rejected .stat-icon {
+        color: var(--danger);
+    }
+
+    /* Header styling */
+    .dashboard-header {
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+    }
+
+    .dashboard-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .dashboard-subtitle {
+        opacity: 0.9;
+        font-size: 15px;
+    }
+
+    /* Cards and table styling */
+    .main-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.1);
+        border: none;
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+
+    .card-header {
+        background-color: white;
+        border-bottom: 1px solid rgba(5, 150, 105, 0.1);
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .card-title {
+        margin-bottom: 0;
+        font-weight: 600;
+        font-size: 18px;
+        color: #333;
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: rgba(5, 150, 105, 0.05);
+        font-weight: 600;
+        color: #495057;
+        border-top: none;
+        padding: 12px 15px;
+    }
+
+    .table td {
+        vertical-align: middle;
+        padding: 12px 15px;
+    }
+
+    .table tr:hover {
+        background-color: rgba(5, 150, 105, 0.05);
+    }
+
+    /* Status badge styling */
+    .badge {
+        padding: 7px 12px;
+        border-radius: 30px;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    /* Filter buttons */
+    .filter-container {
+        display: flex;
+        gap: 5px;
+    }
+
+    .filter-btn {
+        border-radius: 20px;
+        padding: 5px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: none !important;
+        transition: all 0.2s;
+    }
+
+    .btn-green {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .btn-green:hover {
+        background-color: var(--secondary);
+        border-color: var(--secondary);
+        color: white;
+    }
+
+    .btn-outline-green {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline-green:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    /* Recent requests styling */
+    .request-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid rgba(5, 150, 105, 0.1);
+        transition: all 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .request-item:hover {
+        background-color: rgba(5, 150, 105, 0.05);
+    }
+
+    .request-item:last-child {
+        border-bottom: none;
+    }
+
+    .request-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 15px;
+    }
+
+    .request-content {
+        flex: 1;
+    }
+
+    .request-title {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 3px;
+        color: #212529;
+    }
+
+    .request-subtitle {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 3px;
+    }
+
+    .request-status {
+        margin-right: auto;
+        text-align: end;
+    }
+
+    .request-date {
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 3px;
+    }
+
+   /* Enhanced Modal Styles */
+.modal-xl {
+    max-width: 1200px;
+}
+
+.modal-header {
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 20px 25px;
+    border-bottom: none;
+}
+
+.modal-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 25px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.info-section {
+    background: rgba(5, 150, 105, 0.03);
+    border: 1px solid rgba(5, 150, 105, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.info-section:hover {
+    background: rgba(5, 150, 105, 0.05);
+    border-color: rgba(5, 150, 105, 0.2);
+}
+
+.section-header {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(5, 150, 105, 0.1);
+}
+
+.section-title {
+    color: var(--primary);
+    font-weight: 600;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.info-row {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+}
+
+.info-value {
+    color: #212529;
+    font-size: 1rem;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+}
+
+.request-content-box {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    min-height: 80px;
+    line-height: 1.6;
+    color: #495057;
+    white-space: pre-wrap;
+}
+
+.file-upload-section {
+    border: 2px dashed rgba(5, 150, 105, 0.3);
+    border-radius: 10px;
+    padding: 25px;
+    text-align: center;
+    background: rgba(5, 150, 105, 0.02);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-upload-section:hover {
+    border-color: var(--primary);
+    background: rgba(5, 150, 105, 0.05);
+}
+
+.file-upload-icon {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.file-upload-label {
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.file-upload-hint {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.uploaded-files {
+    margin-top: 15px;
+}
+
+.uploaded-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.file-icon {
+    color: var(--primary);
+    margin-left: 10px;
+    font-size: 1.3rem;
+}
+
+.file-details {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    color: #212529;
+    margin-bottom: 2px;
+}
+
+.file-size {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.file-remove {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.file-remove:hover {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.communication-history {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.communication-item {
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(5, 150, 105, 0.05);
+    border-left: 3px solid var(--primary);
+}
+
+.communication-item:last-child {
+    margin-bottom: 0;
+}
+
+.communication-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.sender {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.timestamp {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.communication-content {
+    color: #495057;
+    line-height: 1.5;
+}
+
+.quick-reply-section {
+    margin-top: 15px;
+}
+
+.quick-reply-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.quick-reply-buttons .btn {
+    font-size: 0.85rem;
+    padding: 5px 12px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+/* Status badges in modal */
+.info-value .badge {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+}
+
+/* Form controls in modal */
+.modal-body .form-select,
+.modal-body .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 8px 12px;
+}
+
+.modal-body .form-select:focus,
+.modal-body .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-xl {
+        max-width: 95%;
+        margin: 1rem;
+    }
+    
+    .modal-body {
+        padding: 15px;
+    }
+    
+    .action-buttons {
+        justify-content: center;
+    }
+    
+    .quick-reply-buttons {
+        justify-content: center;
+    }
+}
+
+/* Loading states */
+.btn.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .empty-state i {
+        font-size: 40px;
+        color: #ddd;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        font-size: 15px;
+        margin-bottom: 0;
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="dashboard-title">שלום, {{ request.user.first_name }} {{ request.user.last_name }}</h1>
+                <p class="dashboard-subtitle">לוח בקרה למרצה {{ department_display }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                {% if stats.pending > 0 %}
+                <div class="alert alert-warning py-2 d-inline-block mb-0">
+                    <i class="fas fa-bell me-2"></i> יש לך {{ stats.pending }} בקשות ממתינות
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card pending">
+                <div class="stat-content">
+                    <div class="stat-card-title">ממתינות</div>
+                    <div class="stat-card-value">{{ stats.pending }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-clock stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card processing">
+                <div class="stat-content">
+                    <div class="stat-card-title">בטיפול</div>
+                    <div class="stat-card-value">{{ stats.in_progress }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-sync-alt stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card approved">
+                <div class="stat-content">
+                    <div class="stat-card-title">מאושרות</div>
+                    <div class="stat-card-value">{{ stats.approved }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-check-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="stat-card rejected">
+                <div class="stat-content">
+                    <div class="stat-card-title">נדחו</div>
+                    <div class="stat-card-value">{{ stats.rejected }}</div>
+                </div>
+                <div class="stat-icon-container">
+                    <i class="fas fa-times-circle stat-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+<div class="main-card">
+    <div class="card-header">
+        <h5 class="card-title">כל הבקשות</h5>
+        <div class="filter-container">
+            <button class="btn btn-purple active filter-btn" data-filter="all">הכל</button>
+            <button class="btn btn-outline-warning filter-btn" data-filter="pending">ממתינות</button>
+            <button class="btn btn-outline-info filter-btn" data-filter="in_progress">בטיפול</button>
+            <button class="btn btn-outline-purple filter-btn" data-filter="need_update">דורשות עדכון</button>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>סטודנט</th>
+                    <th>סוג בקשה</th>
+                    <th>נושא/תוכן</th>
+                    <th>תאריך יצירה</th>
+                    <th>סטטוס</th>
+                    <th>פעולות</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in filtered_requests %}
+                {% if request.status != 'approved' and request.status != 'rejected' %}
+                <tr class="request-row" 
+                    data-status="{{ request.status }}" 
+                    data-request-id="{{ request.id }}"
+         data-request-type="{% if request.subject %}academic{% elif request.request_type == 'schedule_change' or request.request_type == 'extension_request' or request.request_type == 'special_exam_date' or request.request_type == 'approved_absence' %}schedule{% else %}personal{% endif %}"
+>
+                    
+                    <td>{{ request.student.get_full_name|default:request.student.full_name}}</td>
+                    
+                    <!-- Request Type Column -->
+                    <td>
+                        {% if request.subject %}
+                            <!-- Academic Request -->
+                            <span class="badge bg-primary">אקדמית</span><br>
+                            <small>
+                                {% if request.request_type == 'enrollment_confirmation' %}
+                                    אישורי רישום או ציונים
+                                {% elif request.request_type == 'academic_appeal' %}
+                                    ערעורים אקדמיים
+                                {% elif request.request_type == 'exam_review' %}
+                                    בקשות לבדיקת מבחנים
+                                {% else %}
+                                    {{ request.request_type }}
+                                {% endif %}
+                            </small>
+                        {% elif request.request_type == 'schedule_change' or request.request_type == 'extension_request' or request.request_type == 'special_exam_date' or request.request_type == 'approved_absence' %}
+                            <!-- Schedule Request -->
+                            <span class="badge bg-info">מערכת שעות</span><br>
+                            <small>
+                                {% if request.request_type == 'schedule_change' %}
+                                    שינוי מערכת שעות
+                                {% elif request.request_type == 'extension_request' %}
+                                    בקשות הארכת זמן
+                                {% elif request.request_type == 'special_exam_date' %}
+                                    בקשה למועד מיוחד
+                                {% elif request.request_type == 'approved_absence' %}
+                                    בקשת היעדרות מאושרת
+                                {% else %}
+                                    {{ request.request_type }}
+                                {% endif %}
+                            </small>
+                        {% else %}
+                            <!-- Personal Request -->
+                            <span class="badge bg-success">אישית</span><br>
+                            <small>
+                                {% if request.request_type == 'recommendation_letter' %}
+                                    בקשה למכתבי המלצה
+                                {% elif request.request_type == 'personal_details_update' %}
+                                    עדכון פרטים אישיים
+                                {% elif request.request_type == 'certificates_confirmations' %}
+                                    בקשת תעודות ואישורים
+                                {% elif request.request_type == 'scholarships_financial_aid' %}
+                                    בקשות מלגות וסיוע כלכלי
+                                {% elif request.request_type == 'academic_status_change' %}
+                                    בקשת שינוי סטטוס אקדמי
+                                {% elif request.request_type == 'general_manager_inquiry' %}
+                                    פניה כללית למנהל
+                                {% else %}
+                                    {{ request.request_type }}
+                                {% endif %}
+                            </small>
+                        {% endif %}
+                    </td>
+                    
+                    <!-- Subject/Content Column -->
+                    <td>
+                        {% if request.subject %}
+                            {{ request.subject }}
+                        {% else %}
+                            {{ request.request_text|truncatechars:50 }}
+                        {% endif %}
+                    </td>
+                    
+                    <td>{{ request.created_at|date:"d/m/Y" }}</td>
+                    
+                    <!-- Status Column with Proper Data Attributes -->
+                    <td>
+                        <select class="form-select form-select-sm status-select" 
+                                data-request-id="{{ request.id }}" 
+                                data-request-type="{% if request.subject %}academic{% elif request.request_type == 'schedule_change' or request.request_type == 'extension_request' or request.request_type == 'special_exam_date' or request.request_type == 'approved_absence' %}schedule{% else %}personal{% endif %}">
+                            <option value="pending" {% if request.status == 'pending' %}selected{% endif %}>ממתין</option>
+                            <option value="in_progress" {% if request.status == 'in_progress' %}selected{% endif %}>בטיפול</option>
+                            <option value="need_update" {% if request.status == 'need_update' %}selected{% endif %}>נדרש עדכון</option>
+                            <option value="approved" {% if request.status == 'approved' %}selected{% endif %}>אושר</option>
+                            <option value="rejected" {% if request.status == 'rejected' %}selected{% endif %}>נדחה</option>
+                        </select>
+                    </td>
+                    
+                    <td>
+                        <button class="btn btn-purple btn-sm view-request" 
+                                data-id="{{ request.id }}" 
+                                data-type="{% if request.subject %}academic{% elif request.request_type == 'schedule_change' or request.request_type == 'extension_request' or request.request_type == 'special_exam_date' or request.request_type == 'approved_absence' %}schedule{% else %}personal{% endif %}"
+                                data-bs-toggle="modal" data-bs-target="#requestModal">
+                            <i class="fas fa-eye"></i> צפה
+                        </button>
+                    </td>
+                </tr>
+                {% endif %}
+                {% empty %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>אין בקשות להצגה</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Enhanced Modal for Request Details (Lecturer Version) -->
+<div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestModalLabel">
+                    <i class="fas fa-file-alt me-2"></i>פרטי בקשה מפורטים
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <input type="hidden" id="modal_request_id" name="request_id">
+                <input type="hidden" id="modal_request_type" name="request_type">
+                
+                <!-- Request Information Section -->
+                <div class="info-section">
+                    <div class="section-header">
+                        <h6 class="section-title">
+                            <i class="fas fa-info-circle me-2"></i>פרטי הבקשה
+                        </h6>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-user me-1"></i>שם הסטודנט
+                                </div>
+                                <div class="info-value" id="modalStudent"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-id-badge me-1"></i>מזהה סטודנט
+                                </div>
+                                <div class="info-value" id="modalStudentId"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-building me-1"></i>מחלקה
+                                </div>
+                                <div class="info-value" id="modalDepartment"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-calendar me-1"></i>תאריך יצירה
+                                </div>
+                                <div class="info-value" id="modalCreated"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-tag me-1"></i>סוג בקשה
+                                </div>
+                                <div class="info-value" id="modalType"></div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-traffic-light me-1"></i>סטטוס נוכחי
+                                </div>
+                                <div class="info-value" id="modalStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subject row (only for academic requests) -->
+                    <div class="row" id="subjectRow" style="display: none;">
+                        <div class="col-12">
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-book me-1"></i>קורס/נושא
+                                </div>
+                                <div class="info-value" id="modalSubject"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Request Content Section -->
+                <div class="info-section">
+                    <div class="section-header">
+                        <h6 class="section-title">
+                            <i class="fas fa-file-text me-2"></i>תוכן הבקשה
+                        </h6>
+                    </div>
+                    <div class="request-content-box" id="modalContent">
+                        <!-- Content will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Attachment Section -->
+                <div class="info-section" id="attachmentSection" style="display: none;">
+                    <div class="section-header">
+                        <h6 class="section-title">
+                            <i class="fas fa-paperclip me-2"></i>קבצים מצורפים
+                        </h6>
+                    </div>
+                    <div id="modalAttachments">
+                        <!-- Attachments will be loaded here -->
+                    </div>
+                </div>
+                
+                <!-- Lecturer Actions Section -->
+                <div class="info-section">
+                    <div class="section-header">
+                        <h6 class="section-title">
+                            <i class="fas fa-chalkboard-teacher me-2"></i>פעולות מרצה
+                        </h6>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="modalStatusSelect" class="form-label">
+                                    <i class="fas fa-edit me-1"></i>עדכון סטטוס
+                                </label>
+                                <select class="form-select" id="modalStatusSelect" name="status">
+                                    <option value="pending">ממתין לטיפול</option>
+                                    <option value="in_progress">בטיפול</option>
+                                    <option value="need_update">דורש עדכון מהסטודנט</option>
+                                    <option value="approved">אושר</option>
+                                    <option value="rejected">נדחה</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6" id="deadlineContainer" style="display: none;">
+                            <div class="mb-3">
+                                <label for="update_deadline" class="form-label">
+                                    <i class="fas fa-clock me-1"></i>דדליין לעדכון
+                                </label>
+                                <input type="date" class="form-control" id="update_deadline" name="update_deadline">
+                                <small class="text-muted">מתי הסטודנט צריך לספק מידע נוסף</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="lecturer_note" class="form-label">
+                            <i class="fas fa-sticky-note me-1"></i>הערות והוראות לסטודנט
+                        </label>
+                        <textarea class="form-control" id="lecturer_note" name="lecturer_note" rows="4" 
+                                  placeholder="הוסף הערות, הוראות או הודעות לסטודנט..."></textarea>
+                        <small class="text-muted">הערות אלו יישלחו לסטודנט יחד עם עדכון הסטטוס</small>
+                    </div>
+                </div>
+                
+                <!-- Communication History Section -->
+                <div class="info-section" id="communicationSection">
+                    <div class="section-header">
+                        <h6 class="section-title">
+                            <i class="fas fa-comments me-2"></i>היסטוריית תקשורת
+                        </h6>
+                    </div>
+                    
+                    <div class="communication-history" id="communicationHistory">
+                        <div class="communication-item">
+                            <div class="communication-header">
+                                <span class="sender">סטודנט</span>
+                                <span class="timestamp">22/06/2025 14:30</span>
+                            </div>
+                            <div class="communication-content">
+                                הבקשה הראשונית הוגשה
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <div class="row w-100">
+                    <div class="col-md-12 text-end">
+                        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>סגור
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveChanges">
+                            <i class="fas fa-save me-2"></i>שמור שינויים
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+// Lecturer Dashboard JavaScript - Similar to Secretary but for lecturer-specific functionality
+document.getElementById('saveChanges').addEventListener('click', function() {
+    console.log('Save button clicked');
+    
+    const requestId = document.getElementById('modal_request_id').value;
+    const status = document.getElementById('modalStatusSelect').value;
+    const lecturerNote = document.getElementById('lecturer_note').value;
+    const deadline = document.getElementById('update_deadline').value;
+    
+    console.log('Data to save:', {
+        requestId: requestId,
+        status: status,
+        lecturer_note: lecturerNote,
+        deadline: deadline
+    });
+    
+    // Your actual save code should be here
+});
+document.addEventListener('DOMContentLoaded', function() {
+    let currentRequestId = null;
+    let currentRequestData = null;
+    let selectedLecturerFiles = [];
+    
+    console.log('🎓 Lecturer Dashboard: DOM loaded, initializing...');
+
+    // ============================================================================
+    // STATUS UPDATE FUNCTIONALITY - Enhanced with debugging
+    // ============================================================================
+    
+   
+function updateRequestStatus(requestId, newStatus, requestType = '') {
+    console.log('=== LECTURER STATUS UPDATE DEBUG START ===');
+    console.log('🔄 Request ID:', requestId);
+    console.log('🔄 Request Type:', requestType);
+    console.log('🔄 New Status:', newStatus);
+    
+    // Validate inputs
+    if (!requestId || !newStatus) {
+        console.error('❌ ERROR: Missing request ID or status');
+        alert('שגיאה: מזהה בקשה או סטטוס חסר');
+        return;
+    }
+    
+    // Get CSRF token
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (!csrfToken) {
+        console.error('❌ ERROR: CSRF token not found');
+        alert('שגיאה: אסימון אבטחה לא נמצא');
+        return;
+    }
+    
+    // Get lecturer note and deadline
+    const lecturerNoteField = document.getElementById('lecturer_note');
+    const lecturerNote = lecturerNoteField ? lecturerNoteField.value : '';
+    const updateDeadlineField = document.getElementById('update_deadline');
+    const updateDeadline = updateDeadlineField ? updateDeadlineField.value : '';
+    
+    // IMPORTANT: Use the lecturer-specific URL to avoid conflict with secretary
+    const updateUrl = `/users/lecturer/update-request-status/${requestId}/`;
+    
+    console.log('📡 Using lecturer-specific URL:', updateUrl);
+    
+    // Build request body
+    const requestBody = new URLSearchParams({
+        'status': newStatus,
+        'request_type': requestType || '',
+        'lecturer_note': lecturerNote,
+        'update_deadline': updateDeadline
+    });
+    
+    console.log('📦 Request Body:', requestBody.toString());
+    
+    // Show loading state
+    const statusSelect = document.querySelector(`[data-request-id="${requestId}"]`);
+    if (statusSelect) {
+        statusSelect.disabled = true;
+        console.log('🔒 Status select disabled during update');
+    }
+    
+    // Make the AJAX request
+    fetch(updateUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: requestBody
+    })
+    .then(response => {
+        console.log('📡 Response received:');
+        console.log('📡 Status:', response.status);
+        console.log('📡 Status Text:', response.statusText);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return response.text().then(text => {
+            console.log('📡 Raw Response Text:', text);
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('❌ JSON Parse Error:', e);
+                console.error('❌ Response was not valid JSON:', text);
+                throw new Error('תגובה לא תקינה מהשרת');
+            }
+        });
+    })
+    .then(data => {
+        console.log('📡 Parsed Response Data:', data);
+        
+        if (data.success) {
+            console.log('✅ Status update successful!');
+            
+            // Show success message
+            showSuccessMessage(`סטטוס עודכן בהצלחה ל-${newStatus}`);
+            
+            // Update the UI
+            updateRowStatus(requestId, newStatus);
+            
+            // Close modal if open
+            const modal = bootstrap.Modal.getInstance(document.getElementById('requestModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+        } else {
+            console.error('❌ Server returned error:', data.message || 'Unknown error');
+            alert('שגיאה מהשרת: ' + (data.message || 'שגיאה לא ידועה'));
+        }
+    })
+    .catch(error => {
+        console.error('❌ AJAX Error occurred:', error);
+        
+        // Show user-friendly error message
+        let errorMessage = 'שגיאה בעדכון הסטטוס';
+        if (error.message.includes('Failed to fetch')) {
+            errorMessage = 'שגיאת רשת - בדוק את החיבור לאינטרנט';
+        } else if (error.message.includes('HTTP 404')) {
+            errorMessage = 'שגיאה: נתיב לא נמצא - בדוק את הגדרות ה-URL';
+        } else if (error.message.includes('HTTP 403')) {
+            errorMessage = 'שגיאה: אין הרשאה לעדכון';
+        } else if (error.message.includes('HTTP 500')) {
+            errorMessage = 'שגיאת שרת פנימית';
+        }
+        
+        alert(errorMessage + '\n\nפרטי השגיאה: ' + error.message);
+    })
+    .finally(() => {
+        // Re-enable the status select
+        if (statusSelect) {
+            statusSelect.disabled = false;
+            console.log('🔓 Status select re-enabled');
+        }
+        console.log('=== LECTURER STATUS UPDATE DEBUG END ===');
+    });
+}
+    
+    // ============================================================================
+    // LOAD REQUEST DATA DYNAMICALLY
+    // ============================================================================
+    
+    function loadRequestData(requestId, requestType) {
+        console.log('📋 Loading lecturer request data for ID:', requestId, 'Type:', requestType);
+        
+        // Show loading state
+        document.getElementById('modalContent').innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> טוען...</div>';
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            console.error('❌ ERROR: CSRF token not found!');
+            return;
+        }
+        
+        // Fetch request details from server
+        fetch(`/lecturer_get_request_details/${requestId}/`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('📡 Received lecturer request data:', data);
+            
+            if (data.success === false) {
+                throw new Error(data.error || 'Failed to load request data');
+            }
+            
+            // Store current request data
+            currentRequestData = data;
+            
+            // Populate modal with real data
+            populateModalWithData(data);
+        })
+        .catch(error => {
+            console.error('❌ Error loading lecturer request data:', error);
+            document.getElementById('modalContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    שגיאה בטעינת נתוני הבקשה: ${error.message}
+                </div>
+            `;
+        });
+    }
+    
+    function populateModalWithData(data) {
+        console.log('📝 Populating lecturer modal with data:', data);
+        
+        // Populate basic fields
+        document.getElementById('modalStudent').textContent = data.student_name;
+        document.getElementById('modalStudentId').textContent = data.student_id;
+        document.getElementById('modalDepartment').textContent = data.department;
+        document.getElementById('modalCreated').textContent = data.created_at;
+        document.getElementById('modalContent').textContent = data.request_text;
+        
+        // Set request type display
+        let typeBadgeClass = '';
+        if (data.model_name === 'academic') {
+            typeBadgeClass = 'bg-primary';
+            document.getElementById('subjectRow').style.display = 'block';
+            document.getElementById('modalSubject').textContent = data.subject || 'לא צוין';
+        } else if (data.model_name === 'personal') {
+            typeBadgeClass = 'bg-success';
+            document.getElementById('subjectRow').style.display = 'none';
+        }
+        
+        document.getElementById('modalType').innerHTML = `<span class="badge ${typeBadgeClass}">${data.request_type_display}</span>`;
+        
+        // Set status badge
+        const statusBadge = document.getElementById('modalStatus');
+        statusBadge.className = 'badge';
+        const statusMappings = {
+            'pending': { class: 'bg-warning text-dark', text: 'ממתין לטיפול' },
+            'in_progress': { class: 'bg-info', text: 'בטיפול' },
+            'need_update': { class: 'bg-primary', text: 'דורש עדכון' },
+            'approved': { class: 'bg-success', text: 'אושר' },
+            'rejected': { class: 'bg-danger', text: 'נדחה' }
+        };
+        
+        const statusMapping = statusMappings[data.status] || { class: 'bg-secondary', text: data.status };
+        statusBadge.classList.add(...statusMapping.class.split(' '));
+        statusBadge.textContent = statusMapping.text;
+        
+        // Set current status in select
+        const modalStatusSelect = document.getElementById('modalStatusSelect');
+        modalStatusSelect.value = data.status;
+        
+        // Show deadline container if needed
+        const deadlineContainer = document.getElementById('deadlineContainer');
+        if (data.status === 'need_update') {
+            deadlineContainer.style.display = 'block';
+            if (data.update_deadline) {
+                document.getElementById('update_deadline').value = data.update_deadline;
+            }
+        } else {
+            deadlineContainer.style.display = 'none';
+        }
+        
+        // Set lecturer note
+        const lecturerNoteElement = document.getElementById('lecturer_note');
+if (lecturerNoteElement) {
+    lecturerNoteElement.value = data.lecturer_note || '';
+}
+        
+        // Handle attachments
+        const attachmentSection = document.getElementById('attachmentSection');
+        if (data.attachment) {
+            attachmentSection.style.display = 'block';
+            document.getElementById('modalAttachments').innerHTML = `
+                <div class="uploaded-file">
+                    <div class="file-info">
+                        <i class="fas fa-file-pdf file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name">${data.attachment_name || 'קובץ מצורף'}</div>
+                            <div class="file-size">קובץ מצורף</div>
+                        </div>
+                    </div>
+                    <a href="${data.attachment}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-download"></i> הורד
+                    </a>
+                </div>
+            `;
+        } else {
+            attachmentSection.style.display = 'none';
+        }
+        
+        // Update communication history
+        updateCommunicationHistory(data);
+    }
+    
+    function updateCommunicationHistory(data) {
+        const communicationHistory = document.getElementById('communicationHistory');
+        
+        // Build communication history based on request data
+        const history = [
+            {
+                sender: 'סטודנט',
+                timestamp: data.created_at,
+                content: 'הבקשה הוגשה במערכת'
+            }
+        ];
+        
+        // Add note if exists
+        if (data.lecturer_note) {
+            history.push({
+                sender: 'מרצה',
+                timestamp: new Date().toLocaleDateString('he-IL'),
+                content: data.lecturer_note
+            });
+        }
+        
+        if (communicationHistory) {
+            communicationHistory.innerHTML = '';
+            
+            history.forEach(item => {
+                const commItem = document.createElement('div');
+                commItem.className = 'communication-item';
+                commItem.innerHTML = `
+                    <div class="communication-header">
+                        <span class="sender">${item.sender}</span>
+                        <span class="timestamp">${item.timestamp}</span>
+                    </div>
+                    <div class="communication-content">${item.content}</div>
+                `;
+                communicationHistory.appendChild(commItem);
+            });
+        }
+    }
+    
+    // ============================================================================
+    // HELPER FUNCTIONS
+    // ============================================================================
+    
+    function showSuccessMessage(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv && alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 4000);
+    }
+    
+    function updateRowStatus(requestId, newStatus) {
+        const row = document.querySelector(`tr[data-request-id="${requestId}"]`);
+        if (row) {
+            row.setAttribute('data-status', newStatus);
+            console.log('✅ Row status updated in DOM');
+        }
+    }
+    
+    function hideCompletedRequest(requestId) {
+        const row = document.querySelector(`tr[data-request-id="${requestId}"]`);
+        if (row) {
+            row.style.transition = 'opacity 0.5s';
+            row.style.opacity = '0';
+            setTimeout(() => {
+                row.remove();
+                console.log('✅ Completed request row removed');
+            }, 500);
+        }
+    }
+
+    // ============================================================================
+    // EVENT LISTENERS FOR STATUS CHANGES
+    // ============================================================================
+    
+    console.log('🎯 Setting up event listeners for lecturer status changes...');
+    
+    // Event delegation for status changes (works for all request types)
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('status-select')) {
+            const requestId = e.target.getAttribute('data-request-id');
+            const requestType = e.target.getAttribute('data-request-type');
+            const newStatus = e.target.value;
+            
+            console.log('🎯 Lecturer status change detected:', {
+                requestId,
+                requestType,
+                newStatus
+            });
+            
+            if (requestId && newStatus) {
+                updateRequestStatus(requestId, newStatus, requestType);
+            }
+        }
+    });
+
+    // ============================================================================
+    // MODAL FUNCTIONALITY
+    // ============================================================================
+    
+    // Handle modal show event
+    const requestModal = document.getElementById('requestModal');
+    if (requestModal) {
+        requestModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const requestId = button.getAttribute('data-id');
+            const requestType = button.getAttribute('data-type');
+            
+            console.log('📋 Opening lecturer modal for request:', requestId, 'type:', requestType);
+            
+            // Clear previous data
+            selectedLecturerFiles = [];
+            const uploadedLecturerFiles = document.getElementById('uploadedLecturerFiles');
+            if (uploadedLecturerFiles) uploadedLecturerFiles.innerHTML = '';
+            
+            // Set request info
+            document.getElementById('modal_request_id').value = requestId;
+            document.getElementById('modal_request_type').value = requestType;
+            
+            // Store current request info
+            currentRequestId = requestId;
+            
+            // Load request data dynamically
+            loadRequestData(requestId, requestType);
+        });
+    }
+    
+    // Modal status select change handler
+    const modalStatusSelect = document.getElementById('modalStatusSelect');
+    const deadlineContainer = document.getElementById('deadlineContainer');
+    
+    if (modalStatusSelect && deadlineContainer) {
+        modalStatusSelect.addEventListener('change', function() {
+            if (this.value === 'need_update') {
+                deadlineContainer.style.display = 'block';
+            } else {
+                deadlineContainer.style.display = 'none';
+            }
+        });
+    }
+    
+    // Action buttons
+    const approveButton = document.getElementById('approveRequest');
+    const requestUpdateButton = document.getElementById('requestUpdate');
+    const rejectButton = document.getElementById('rejectRequest');
+    const saveChangesButton = document.getElementById('saveChanges');
+    
+    if (approveButton) {
+        approveButton.addEventListener('click', function() {
+            modalStatusSelect.value = 'approved';
+            addQuickReply('הבקשה אושרה בהצלחה!');
+        });
+    }
+    
+    if (requestUpdateButton) {
+        requestUpdateButton.addEventListener('click', function() {
+            modalStatusSelect.value = 'need_update';
+            deadlineContainer.style.display = 'block';
+            addQuickReply('נדרש מידע נוסף לטיפול בבקשה. אנא העלה את המסמכים הנדרשים עד לתאריך הנקוב.');
+        });
+    }
+    
+    if (rejectButton) {
+        rejectButton.addEventListener('click', function() {
+            modalStatusSelect.value = 'rejected';
+            addQuickReply('הבקשה נדחתה. לפרטים נוספים אנא פנה למרצה.');
+        });
+    }
+    
+    if (saveChangesButton) {
+        saveChangesButton.addEventListener('click', function() {
+            saveRequestChanges();
+        });
+    }
+    
+    function saveRequestChanges() {
+        const requestId = document.getElementById('modal_request_id').value;
+        const requestType = document.getElementById('modal_request_type').value;
+        const newStatus = modalStatusSelect.value;
+        const lecturerNote = document.getElementById('lecturer_note').value;
+        const updateDeadline = document.getElementById('update_deadline').value;
+        
+        if (!requestId) {
+            alert('שגיאה: מזהה בקשה חסר');
+            return;
+        }
+        
+        // Show loading state
+        saveChangesButton.classList.add('loading');
+        saveChangesButton.disabled = true;
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('status', newStatus);
+        formData.append('lecturer_note', lecturerNote);
+        formData.append('request_type', requestType);
+        
+        if (updateDeadline && newStatus === 'need_update') {
+            formData.append('update_deadline', updateDeadline);
+        }
+        
+        // Add selected files
+        selectedLecturerFiles.forEach(file => {
+            formData.append('lecturer_files', file);
+        });
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        // Save changes
+        fetch(`/update_request_status/${requestId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                showSuccessMessage('השינויים נשמרו בהצלחה!');
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('requestModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Update the table row status
+                updateRowStatus(requestId, newStatus);
+                
+            } else {
+                alert('שגיאה בשמירת השינויים: ' + (data.message || 'שגיאה לא ידועה'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('שגיאה בשמירת השינויים');
+        })
+        .finally(() => {
+            // Remove loading state
+            saveChangesButton.classList.remove('loading');
+            saveChangesButton.disabled = false;
+        });
+    }
+    
+    // Quick Reply Functions
+    window.addQuickReply = function(message) {
+        const lecturerNote = document.getElementById('lecturer_note');
+        if (lecturerNote) {
+            if (lecturerNote.value.trim()) {
+                lecturerNote.value += '\n\n' + message;
+            } else {
+                lecturerNote.value = message;
+            }
+        }
+    };
+    
+    // ============================================================================
+    // FILE UPLOAD FUNCTIONALITY
+    // ============================================================================
+    
+    const lecturerFileInput = document.getElementById('lecturerFileInput');
+    const fileUploadSection = document.getElementById('fileUploadSection');
+    const uploadedLecturerFiles = document.getElementById('uploadedLecturerFiles');
+    
+    // File Upload for Lecturer
+    if (lecturerFileInput) {
+        lecturerFileInput.addEventListener('change', function(e) {
+            handleLecturerFileSelection(Array.from(e.target.files));
+        });
+    }
+    
+    if (fileUploadSection) {
+        // Drag and drop functionality
+        fileUploadSection.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--primary)';
+            this.style.background = 'rgba(5, 150, 105, 0.1)';
+        });
+        
+        fileUploadSection.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(5, 150, 105, 0.3)';
+            this.style.background = 'rgba(5, 150, 105, 0.02)';
+        });
+        
+        fileUploadSection.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'rgba(5, 150, 105, 0.3)';
+            this.style.background = 'rgba(5, 150, 105, 0.02)';
+            
+            const files = Array.from(e.dataTransfer.files);
+            handleLecturerFileSelection(files);
+        });
+    }
+    
+    function handleLecturerFileSelection(files) {
+        files.forEach(file => {
+            // Validate file type
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg',
+                'image/png'
+            ];
+            
+            if (!allowedTypes.includes(file.type)) {
+                alert('סוג קובץ לא נתמך: ' + file.name);
+                return;
+            }
+            
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('הקובץ גדול מדי: ' + file.name + ' (מקסימום 10MB)');
+                return;
+            }
+            
+            // Check if file already selected
+            if (selectedLecturerFiles.some(f => f.name === file.name && f.size === file.size)) {
+                alert('הקובץ כבר נבחר: ' + file.name);
+                return;
+            }
+            
+            selectedLecturerFiles.push(file);
+            displayLecturerFile(file);
+        });
+    }
+    
+    function displayLecturerFile(file) {
+        if (!uploadedLecturerFiles) return;
+        
+        const fileElement = document.createElement('div');
+        fileElement.className = 'uploaded-file';
+        fileElement.innerHTML = `
+            <div class="file-info">
+                <i class="fas ${getFileIcon(file.type)} file-icon"></i>
+                <div class="file-details">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-size">${formatFileSize(file.size)}</div>
+                </div>
+            </div>
+            <button type="button" class="file-remove" onclick="removeLecturerFile('${file.name}')">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        uploadedLecturerFiles.appendChild(fileElement);
+    }
+    
+    window.removeLecturerFile = function(fileName) {
+        selectedLecturerFiles = selectedLecturerFiles.filter(file => file.name !== fileName);
+        // Remove from display
+        if (uploadedLecturerFiles) {
+            const fileElements = uploadedLecturerFiles.querySelectorAll('.uploaded-file');
+            fileElements.forEach(element => {
+                if (element.querySelector('.file-name').textContent === fileName) {
+                    element.remove();
+                }
+            });
+        }
+    };
+    
+    function getFileIcon(fileType) {
+        if (fileType.includes('pdf')) return 'fa-file-pdf';
+        if (fileType.includes('word') || fileType.includes('document')) return 'fa-file-word';
+        if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'fa-file-excel';
+        if (fileType.includes('image')) return 'fa-file-image';
+        return 'fa-file';
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // ============================================================================
+    // FILTER FUNCTIONALITY
+    // ============================================================================
+    
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const requestRows = document.querySelectorAll('.request-row');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('btn-green', 'btn-warning', 'btn-info', 'btn-success', 'btn-danger');
+                
+                if (btn.getAttribute('data-filter') === 'all') {
+                    btn.classList.add('btn-outline-green');
+                } else if (btn.getAttribute('data-filter') === 'pending') {
+                    btn.classList.add('btn-outline-warning');
+                } else if (btn.getAttribute('data-filter') === 'in_progress') {
+                    btn.classList.add('btn-outline-info');
+                } else if (btn.getAttribute('data-filter') === 'need_update') {
+                    btn.classList.add('btn-outline-green');
+                } else if (btn.getAttribute('data-filter') === 'approved') {
+                    btn.classList.add('btn-outline-success');
+                } else if (btn.getAttribute('data-filter') === 'rejected') {
+                    btn.classList.add('btn-outline-danger');
+                }
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            this.classList.remove('btn-outline-green', 'btn-outline-warning', 'btn-outline-info', 'btn-outline-success', 'btn-outline-danger');
+            
+            const filter = this.getAttribute('data-filter');
+            if (filter === 'all') {
+                this.classList.add('btn-green');
+            } else if (filter === 'pending') {
+                this.classList.add('btn-warning');
+            } else if (filter === 'in_progress') {
+                this.classList.add('btn-info');
+            } else if (filter === 'need_update') {
+                this.classList.add('btn-green');
+            } else if (filter === 'approved') {
+                this.classList.add('btn-success');
+            } else if (filter === 'rejected') {
+                this.classList.add('btn-danger');
+            }
+            
+            // Filter table rows
+            const filterValue = this.getAttribute('data-filter');
+            requestRows.forEach(row => {
+                if (filterValue === 'all' || row.getAttribute('data-status') === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // ============================================================================
+    // TEST FUNCTION - For debugging purposes
+    // ============================================================================
+    
+    // Add a test function to window for manual testing
+    window.testLecturerStatusUpdate = function(requestId, status, type) {
+        console.log('🧪 Testing lecturer status update manually...');
+        updateRequestStatus(requestId, status, type || 'academic');
+    };
+    
+    console.log('🧪 Lecturer test function added: window.testLecturerStatusUpdate(requestId, status, type)');
+    console.log('🧪 Example: window.testLecturerStatusUpdate(1, "in_progress", "academic")');
+
+    // ============================================================================
+    // INITIALIZATION COMPLETE
+    // ============================================================================
+    
+    console.log('✅ Lecturer Dashboard: Initialization complete!');
+    
+    // Log current page info
+    console.log('📍 Current lecturer page info:', {
+        url: window.location.href,
+        csrfToken: document.querySelector('[name=csrfmiddlewaretoken]') ? 'Present' : 'Missing',
+        statusSelects: document.querySelectorAll('.status-select').length
+    });
+});
+</script>
+{% endblock %}

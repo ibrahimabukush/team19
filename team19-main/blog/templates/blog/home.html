@@ -1,0 +1,888 @@
+{% extends "blog/base.html" %}
+{% load static %}
+
+{% block additional_css %}
+<style>
+    /* Global styles & Hebrew font */
+    body {
+        font-family: 'Rubik', 'Assistant', sans-serif;
+        direction: rtl;
+        text-align: right;
+        overflow-x: hidden;
+    }
+    
+    /* Animated Hero Section */
+    .hero-section {
+        position: relative;
+        height: 90vh;
+        width: 100%;
+        overflow: hidden;
+        margin-top: -80px;
+    }
+    
+    .hero-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("{% static 'blog/images/isendheader.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.7) saturate(1.2);
+    }
+    
+    .hero-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+    
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(41, 53, 86, 0.8) 0%, rgba(91, 134, 229, 0.6) 100%);
+        z-index: 1;
+    }
+    
+    .hero-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        width: 90%;
+        z-index: 5;
+    }
+    
+    .logo-text {
+        font-size: 7rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 30px;
+        text-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        transform-style: preserve-3d;
+        animation: floatLogo 6s ease-in-out infinite;
+    }
+    
+    @keyframes floatLogo {
+        0%, 100% { transform: translateY(0) rotateY(0); }
+        50% { transform: translateY(-15px) rotateY(3deg); }
+    }
+    
+    .hero-tagline {
+        font-size: 1.8rem;
+        color: white;
+        margin-bottom: 40px;
+        opacity: 0;
+        animation: fadeInUp 1s ease forwards 0.5s;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .hero-btn {
+        padding: 15px 40px;
+        border-radius: 50px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none;
+        display: inline-block;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .hero-btn:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: all 0.4s cubic-bezier(0.42, 0, 0.58, 1);
+        z-index: -1;
+    }
+    
+    .hero-btn:hover:before {
+        width: 100%;
+    }
+    
+    .hero-btn-primary {
+        background: linear-gradient(45deg, #6b5ce7, #4a9aff);
+        color: white;
+        border: none;
+        box-shadow: 0 10px 20px rgba(106, 92, 231, 0.3);
+    }
+    
+    .hero-btn-primary:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 15px 30px rgba(106, 92, 231, 0.4);
+    }
+    
+    .hero-btn-secondary {
+        background: rgba(255, 255, 255, 0.9);
+        color: #333;
+        border: none;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .hero-btn-secondary:hover {
+        transform: translateY(-5px) scale(1.03);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Ticker Animation */
+    .ticker-wrap {
+        width: 100%;
+        overflow: hidden;
+        background: linear-gradient(90deg, #291f71 0%, #5b2a93 100%);
+        padding: 18px 0;
+        position: relative;
+    }
+    
+    .ticker {
+        display: flex;
+        white-space: nowrap;
+        animation: ticker 20s linear infinite;
+    }
+    
+    @keyframes ticker {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    
+    .ticker-item {
+        display: inline-flex;
+        align-items: center;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 500;
+        padding: 0 2rem;
+    }
+    
+    .ticker-star {
+        color: #f9ca24;
+        font-size: 1.6rem;
+        margin: 0 15px;
+        animation: rotateStar 3s linear infinite;
+        display: inline-block;
+    }
+    
+    @keyframes rotateStar {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Welcome section with animated cards */
+    .welcome-section {
+        padding: 90px 0;
+        background-color: #f8f9fd;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .welcome-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%236c63ff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+        opacity: 0.7;
+    }
+    
+    .welcome-section h1 {
+        color: #2d3748;
+        font-size: 3.2rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(45deg, #3f4c6b, #6a11cb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .welcome-section h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(45deg, #3f4c6b, #6a11cb);
+        border-radius: 2px;
+    }
+    
+    .welcome-section .subtitle {
+        color: #4a5568;
+        font-size: 1.5rem;
+        margin-bottom: 50px;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeUp 1s ease forwards 0.3s;
+    }
+    
+    @keyframes fadeUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .welcome-text {
+        max-width: 900px;
+        margin: 0 auto;
+        line-height: 1.8;
+        color: #4a5568;
+        font-size: 1.1rem;
+        text-align: right;
+        position: relative;
+        padding: 2rem;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+        transform: translateY(30px);
+        opacity: 0;
+        animation: fadeUp 1s ease forwards 0.5s;
+    }
+    
+    /* Features section with animated cards */
+    .features-section {
+        padding: 90px 0;
+        background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .features-title {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 30px;
+        text-align: center;
+        background: linear-gradient(45deg, #3b578f, #5e72eb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .features-subtitle {
+        color: #4a5568;
+        font-size: 1.4rem;
+        margin-bottom: 60px;
+        text-align: center;
+    }
+    
+    .feature-card {
+        text-align: center;
+        padding: 40px 30px;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        transform: translateY(50px);
+        opacity: 0;
+        animation: fadeUp 0.8s ease forwards;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-15px) scale(1.03);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 0;
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.05), rgba(37, 117, 252, 0.05));
+        transition: all 0.5s ease;
+        z-index: -1;
+    }
+    
+    .feature-card:hover::before {
+        height: 100%;
+    }
+    
+    .feature-icon {
+        font-size: 3.5rem;
+        margin-bottom: 25px;
+        display: inline-block;
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: all 0.5s ease;
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: scale(1.2) rotate(-5deg);
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #2d3748;
+    }
+    
+    /* Service Cards with 3D hover effects */
+    .services-section {
+        padding: 100px 0;
+        background-color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .services-title {
+        color: #2d3748;
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        text-align: center;
+        background: linear-gradient(45deg, #3f4c6b, #6a11cb);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .services-description {
+        max-width: 900px;
+        margin: 0 auto 60px;
+        line-height: 1.8;
+        color: #4a5568;
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
+    .service-card {
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        background-color: white;
+        transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        margin-bottom: 30px;
+    }
+    
+    .service-card:hover {
+        transform: translateY(-15px) rotateY(5deg);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.1);
+    }
+    
+    .service-header {
+        padding: 40px 20px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 180px;
+    }
+    
+    .service-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 6s infinite;
+        pointer-events: none;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) rotate(45deg); }
+    }
+    
+    .service-logo {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: white;
+        border-radius: 50%;
+        box-shadow: 0 10px 20px rgba(106, 17, 203, 0.3);
+        transition: all 0.5s ease;
+        z-index: 1;
+    }
+    
+    .service-card:hover .service-logo {
+        transform: scale(1.15) translateZ(30px);
+        box-shadow: 0 15px 30px rgba(106, 17, 203, 0.4);
+    }
+    
+    .service-title-small {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #2d3748;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+    
+    .service-card:hover .service-title-small {
+        transform: translateZ(20px);
+    }
+    
+    .service-content {
+        padding: 30px;
+        background-color: white;
+        flex-grow: 1;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .service-intro {
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+    }
+    
+    .service-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+    
+    .service-list li {
+        position: relative;
+        padding-right: 25px;
+        margin-bottom: 15px;
+        line-height: 1.5;
+        color: #4a5568;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .service-list li:before {
+        content: "✓";
+        position: absolute;
+        right: 0;
+        color: #6a11cb;
+        font-weight: bold;
+    }
+    
+    .service-card:hover .service-list li {
+        transform: translateX(-5px);
+    }
+    
+    /* Floating elements animation */
+    .floating-element {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.2), rgba(37, 117, 252, 0.2));
+        filter: blur(10px);
+        z-index: 0;
+        animation: float 15s infinite alternate ease-in-out;
+    }
+    
+    @keyframes float {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        100% { transform: translate(100px, 50px) rotate(180deg); }
+    }
+    
+    /* Scroll animations */
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: all 1s ease;
+    }
+    
+    .fade-in.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .logo-text {
+            font-size: 5rem;
+        }
+        
+        .hero-tagline {
+            font-size: 1.4rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .logo-text {
+            font-size: 4rem;
+        }
+        
+        .hero-tagline {
+            font-size: 1.2rem;
+        }
+        
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .hero-btn {
+            width: 80%;
+            margin-bottom: 15px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .logo-text {
+            font-size: 3rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+// Load Hebrew Google Fonts
+document.addEventListener('DOMContentLoaded', function() {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;600;700;800&family=Rubik:wght@300;400;500;700;900&display=swap';
+    document.head.appendChild(link);
+    
+    // Initialize particles.js
+    if (typeof particlesJS !== 'undefined') {
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                },
+                "opacity": {
+                    "value": 0.5,
+                    "random": false,
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.4,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                }
+            },
+            "retina_detect": true
+        });
+    }
+    
+    // Scroll animations
+    const scrollElements = document.querySelectorAll('.fade-in');
+    
+    const elementInView = (el, dividend = 1) => {
+        const elementTop = el.getBoundingClientRect().top;
+        return (
+            elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
+        );
+    };
+    
+    const displayScrollElement = (element) => {
+        element.classList.add('visible');
+    };
+    
+    const handleScrollAnimation = () => {
+        scrollElements.forEach((el) => {
+            if (elementInView(el, 1.25)) {
+                displayScrollElement(el);
+            }
+        });
+    };
+    
+    window.addEventListener('scroll', () => {
+        handleScrollAnimation();
+    });
+    
+    // Add floating elements
+    const addFloatingElements = () => {
+        const sections = document.querySelectorAll('.welcome-section, .features-section, .services-section');
+        
+        sections.forEach(section => {
+            for (let i = 0; i < 5; i++) {
+                const element = document.createElement('div');
+                element.classList.add('floating-element');
+                
+                // Random size between 50px and 200px
+                const size = Math.random() * 150 + 50;
+                element.style.width = `${size}px`;
+                element.style.height = `${size}px`;
+                
+                // Random position
+                const xPos = Math.random() * 100;
+                const yPos = Math.random() * 100;
+                element.style.top = `${yPos}%`;
+                element.style.left = `${xPos}%`;
+                
+                // Random animation delay
+                element.style.animationDelay = `${Math.random() * 5}s`;
+                
+                section.appendChild(element);
+            }
+        });
+    };
+    
+    addFloatingElements();
+    handleScrollAnimation();
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+{% endblock %}
+
+{% block full_width_content %}
+<div class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="hero-background"></div>
+    <div id="particles-js" class="hero-particles"></div>
+    
+    <div class="hero-content">
+        <h1 class="logo-text">ISEND</h1>
+        <p class="hero-tagline">בואו נייעל את חווית הסטודנט שלכם</p>
+        <div class="hero-buttons">
+            <a href="#services" class="hero-btn hero-btn-primary">השירותים שלנו</a>
+            <a href="#contact" class="hero-btn hero-btn-secondary">צור קשר</a>
+        </div>
+    </div>
+</div>
+
+<!-- Ticker Section -->
+<div class="ticker-wrap">
+    <div class="ticker">
+        <div class="ticker-item">בואו נייעל את חווית הסטודנט שלכם</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">הפתרון המושלם לסטודנטים</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">מערכת חדשנית לניהול פניות</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">התחילו עכשיו וחסכו זמן יקר</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">בואו נייעל את חווית הסטודנט שלכם</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">הפתרון המושלם לסטודנטים</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">מערכת חדשנית לניהול פניות</div>
+        <div class="ticker-star">✧</div>
+        <div class="ticker-item">התחילו עכשיו וחסכו זמן יקר</div>
+        <div class="ticker-star">✧        </div>
+    </div>
+</div>
+
+
+
+<!-- Services Section -->
+<div class="services-section" id="services">
+    <div class="container">
+        <h2 class="services-title fade-in">השירותים שאנו מספקים ב-ISEND</h2>
+        
+        <p class="services-description fade-in">
+            מההתקנה הראשונית ועד לתמיכה מתמשכת, אנו שותפים עם מוסדות חינוכיים ליצירת מערכת ניהול בקשות חלקה 
+            המותאמת למטרותיכם. חוו פתרונות מותאמים אישית שבהם כל תכונה מתוכננת לשפר את האינטראקציה עם הסטודנטים ואת 
+            היעילות האדמיניסטרטיבית.
+        </p>
+        
+        <div class="row mt-5">
+            <div class="col-md-4 mb-4">
+                <div class="service-card fade-in" style="animation-delay: 0.1s;">
+                    <a href="{% url 'academic-request' %}" style="text-decoration: none; color: inherit;">
+                        <div class="service-header">
+                            <div class="service-logo">
+                                <i class="fas fa-book-reader"></i>
+                            </div>
+                            <div class="service-title-small">בקשות אקדמיות</div>
+                        </div>
+                        <div class="service-content">
+                            <p class="service-intro">שירותים שתוכלו לקבל:</p>
+                            <ul class="service-list">
+                                <li>קבלת אישורי הרשמה או ציונים</li>
+                                <li>הגשת ערעורים אקדמיים</li>
+                                <li>בקשה לסקירת מבחנים</li>
+                            </ul>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="service-card fade-in" style="animation-delay: 0.3s;">
+                    <a href="{% url 'schedule_requests' %}" style="text-decoration: none; color: inherit;">
+                        <div class="service-header">
+                            <div class="service-logo">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="service-title-small">בקשות מערכת וקורסים</div>
+                        </div>
+                        <div class="service-content">
+                            <p class="service-intro">שירותים שתוכלו לקבל:</p>
+                            <ul class="service-list">
+                                <li>שינויים במערכת שעות</li>
+                                <li>בקשות הארכה</li>
+                                <li>שינויי קורסים וקבוצות</li>
+                            </ul>
+                        </div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="service-card fade-in" style="animation-delay: 0.5s;">
+         <a href="{% url 'personal_requests' %}" style="text-decoration: none; color: inherit;">
+
+                    <div class="service-header">
+                        <div class="service-logo">
+                            <i class="fas fa-id-card"></i>
+                        </div>
+                        <div class="service-title-small">בקשות אישיות וכלליות</div>
+                    </div>
+                    <div class="service-content">
+                        <p class="service-intro">שירותים שתוכלו לקבל:</p>
+                        <ul class="service-list">
+                            <li>בקשות למכתבי המלצה</li>
+                            <li>עדכון פרטים אישיים</li>
+                            <li>פניות כלליות למנהל הסטודנטים</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Second row of service cards -->
+          
+            
+        
+            
+        
+        </div>
+    </div>
+</div>
+
+<!-- Contact Section -->
+<div class="contact-section py-5" id="contact" style="background: linear-gradient(135deg, #f6f9fc 0%, #f0f4f8 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="mb-4 fade-in" style="color: #2d3748; font-size: 2.5rem; font-weight: 800;">צור קשר</h2>
+                <p class="lead mb-5 fade-in" style="color: #4a5568;">יש לך שאלות? אנחנו כאן לעזור! שלח לנו הודעה ונחזור אליך בהקדם.</p>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="contact-card p-4 rounded-lg shadow-sm bg-white fade-in" style="transition: all 0.3s ease;">
+                            <i class="fas fa-envelope fa-3x mb-3" style="color: #6a11cb;"></i>
+                            <h4 style="color: #2d3748;">דוא"ל</h4>
+                            <p style="color: #4a5568;">info@isend.edu</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="contact-card p-4 rounded-lg shadow-sm bg-white fade-in" style="transition: all 0.3s ease;">
+                            <i class="fas fa-phone fa-3x mb-3" style="color: #6a11cb;"></i>
+                            <h4 style="color: #2d3748;">טלפון</h4>
+                            <p style="color: #4a5568;">03-1234567</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+    <div class="container">
+        <h1 class="fade-in">ברוכים הבאים ל-ISEND</h1>
+        <p class="subtitle fade-in">מייעלים את ניהול פניות הסטודנטים לחוויה אקדמית טובה יותר</p>
+        
+        <div class="welcome-text fade-in">
+            <p>ב-ISEND, אנו מבינים את החשיבות של ניהול יעיל בסביבה האקדמית. הפלטפורמה שלנו מוקדשת לפישוט תהליך הטיפול בבקשות סטודנטים, תוך הבטחה שכל פנייה מטופלת במהירות וביעילות. עם ממשק ידידותי למשתמש ומחויבות לחדשנות, אנו מעצימים מוסדות לשנות את שירותי הסטודנטים שלהם לשביעות רצון מיטבית.</p>
+            
+            <p>בין אם אתם מחפשים לשפר את התקשורת, לייעל תהליכי עבודה או לשפר זמני תגובה, ISEND כאן לתמוך בצרכים שלכם. גלו את היתרונות של מערכת ניהול מלוכדת שנותנת עדיפות למעורבות סטודנטים ולמצוינות אקדמי

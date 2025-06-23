@@ -1,0 +1,738 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+        <div class="content-section register-form-container">
+            <div class="register-header text-center mb-4">
+                <h2 class="register-title">הרשמה למערכת</h2>
+                <div class="register-divider">
+                    <span class="register-divider-line"></span>
+                </div>
+            </div>
+            
+            <form method="POST" id="registerForm">
+                {% csrf_token %}
+                
+                <!-- Role Selection -->
+                <div class="role-selector-container mb-4">
+                    <h4 class="role-title text-center mb-3">בחר את התפקיד שלך</h4>
+                    
+                    <div class="role-options">
+                        <label class="role-option">
+                            <input type="radio" name="role_selection" id="student-role" value="student">
+                            <div class="role-card" id="student-card">
+                                <div class="role-icon">
+                                    <i class="fas fa-user-graduate"></i>
+                                </div>
+                                <h5 class="role-name">סטודנט</h5>
+                                <div class="checkmark">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
+                        
+                        <label class="role-option">
+                            <input type="radio" name="role_selection" id="lecturer-role" value="lecturer">
+                            <div class="role-card" id="lecturer-card">
+                                <div class="role-icon">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                                <h5 class="role-name">מרצה</h5>
+                                <div class="checkmark">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Show error messages -->
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {% for field in form %}
+                        {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <!-- Form Fields -->
+                <div class="form-group mb-3">
+                    <label for="id_username" class="form-label">שם משתמש</label>
+                    {{ form.username|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ form.full_name|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ form.email|as_crispy_field }}
+                    <small class="form-text text-muted domain-hint student-hint" style="display:none;">
+                        סטודנטים חייבים להשתמש בכתובת דוא"ל המסתיימת ב-@ac.sce.ac.il
+                    </small>
+                    <small class="form-text text-muted domain-hint lecturer-hint" style="display:none;">
+                        מרצים חייבים להשתמש בכתובת דוא"ל המסתיימת ב-@sce.ac.il
+                    </small>
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ form.password1|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {{ form.password2|as_crispy_field }}
+                </div>
+                
+                <!-- Department and Year Fields (Initially Hidden) -->
+                <div class="role-specific-fields" style="display: none;">
+                    <div class="form-group mb-3">
+                        <label for="id_department" class="form-label"></label>
+                        {{ form.department|as_crispy_field }}
+                    </div>
+                    
+                    <div class="form-group mb-3 year-field" style="display: none;">
+                        <label for="id_year" class="form-label"></label>
+                        {{ form.year|as_crispy_field }}
+                    </div>
+                    
+                    <!-- Hidden courses field -->
+                    {{ form.courses }}
+                    
+                    <!-- Visible course fields section -->
+                    <div class="form-group mb-3 courses-section" style="display: none;">
+                        <label class="form-label">קורסים שאתה מלמד</label>
+                        <div id="courses-container">
+                            <div class="course-input-group mb-2">
+                                <div class="d-flex align-items-center">
+                                    <input type="text" class="form-control course-input me-2" placeholder="שם הקורס">
+                                    <button type="button" class="btn btn-danger btn-sm remove-course-btn" style="display: none;">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success btn-sm mt-2" id="add-course-btn">
+                            <i class="fas fa-plus me-1"></i>הוסף קורס נוסף
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Hidden fields for role selection -->
+                <input type="hidden" name="is_student" id="hidden_is_student" value="False">
+                <input type="hidden" name="is_lecturer" id="hidden_is_lecturer" value="False">
+                
+                <div class="form-group text-center mt-4">
+                    <button class="btn btn-isend register-btn" type="submit">
+                        <i class="fas fa-user-plus me-1"></i> הירשם
+                    </button>
+                </div>
+            </form>
+            
+            <div class="login-link text-center mt-4 pt-3 border-top">
+                <p>כבר יש לך חשבון? <a href="{% url 'login' %}" class="login-link-text">התחבר כאן</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block additional_css %}
+<style>
+    /* Color Variables */
+    /* Color Variables - Dark Purple Theme */
+:root {
+    --primary-purple: #6B46C1;    /* Rich Purple */
+    --light-purple: #E9D5FF;      /* Light Lavender */
+    --dark-purple: #553C9A;       /* Darker Purple for hover states */
+    --text-dark: #2C3E50;         /* Dark text */
+    --text-light: #5A6C7D;        /* Light text */
+    --white: #FFFFFF;
+    --gray-light: #F8F9FA;
+    --border-light: #E5E7EB;
+}
+
+/* Register Page Styling with Dark Purple Color Scheme */
+.register-form-container {
+    background-color: var(--white);
+    border-radius: 15px;
+    box-shadow: 0 5px 30px rgba(107, 70, 193, 0.15);
+    padding: 40px 30px;
+    transition: all 0.3s ease;
+    margin-top: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+}
+
+.register-title {
+    color: var(--primary-purple);
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.register-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0 30px;
+}
+
+.register-divider-line {
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-purple), var(--light-purple));
+    border-radius: 2px;
+}
+
+/* Role Selector Styling */
+.role-title {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.role-options {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.role-option {
+    cursor: pointer;
+    position: relative;
+}
+
+.role-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.role-card {
+    width: 160px;
+    height: 160px;
+    border-radius: 12px;
+    background-color: var(--gray-light);
+    border: 2px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.role-icon {
+    font-size: 3rem;
+    color: var(--primary-purple);
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.role-name {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.checkmark {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 25px;
+    height: 25px;
+    background: var(--primary-purple);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Effects when selected */
+.role-option input:checked + .role-card {
+    border-color: var(--primary-purple);
+    background-color: var(--light-purple);
+    box-shadow: 0 10px 20px rgba(107, 70, 193, 0.2);
+    transform: translateY(-5px);
+}
+
+.role-option input:checked + .role-card .role-icon {
+    transform: scale(1.2);
+    color: var(--dark-purple);
+}
+
+.role-option input:checked + .role-card .checkmark {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Courses Section Styling */
+.courses-section {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--light-purple);
+    border-radius: 10px;
+    border: 1px solid var(--primary-purple);
+}
+
+.course-input-group {
+    margin-bottom: 10px;
+}
+
+.course-input {
+    flex: 1;
+}
+
+#add-course-btn {
+    background-color: var(--primary-purple);
+    border-color: var(--primary-purple);
+}
+
+#add-course-btn:hover {
+    background-color: var(--dark-purple);
+    border-color: var(--dark-purple);
+}
+
+.remove-course-btn {
+    min-width: 40px;
+}
+
+/* Animated effects */
+.role-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(107, 70, 193, 0.1);
+    border-color: var(--primary-purple);
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.6s ease;
+}
+
+.role-card:hover::before {
+    left: 100%;
+}
+
+/* Form styling */
+.register-form-container label {
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+    font-size: 1rem;
+}
+
+.register-form-container .form-control {
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid var(--border-light);
+    background-color: var(--gray-light);
+    transition: all 0.3s ease;
+}
+
+.register-form-container .form-control:focus {
+    border-color: var(--primary-purple);
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.15);
+    background-color: white;
+}
+
+/* Button styling */
+.register-btn {
+    width: 60%;
+    padding: 12px !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    border-radius: 10px !important;
+    transition: all 0.3s ease !important;
+    background-color: var(--primary-purple) !important;
+    border-color: var(--primary-purple) !important;
+    color: white !important;
+}
+
+.register-btn:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 20px rgba(107, 70, 193, 0.25) !important;
+    background-color: var(--dark-purple) !important;
+    border-color: var(--dark-purple) !important;
+}
+
+.register-btn:active, .register-btn:focus {
+    background-color: var(--primary-purple) !important;
+    border-color: var(--primary-purple) !important;
+    box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.3) !important;
+}
+
+/* Links */
+.login-link-text {
+    color: var(--primary-purple);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.login-link-text:hover {
+    color: var(--dark-purple);
+    text-decoration: underline;
+}
+
+/* Alert styling */
+.alert-danger {
+    background-color: #FFF5F5;
+    color: #E53E3E;
+    border-color: #FED7D7;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+    40%, 60% { transform: translate3d(3px, 0, 0); }
+}
+
+/* Form hints */
+.form-text.text-muted {
+    color: var(--text-light) !important;
+    font-size: 0.875rem;
+}
+
+.domain-hint {
+    background-color: var(--light-purple);
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border-left: 3px solid var(--primary-purple);
+}
+
+/* Role-specific fields */
+.role-specific-fields {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.register-form-container {
+    animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+#student-card .role-icon {
+    animation: pulse 2s infinite;
+    animation-delay: 0.5s;
+}
+
+#lecturer-card .role-icon {
+    animation: pulse 2s infinite;
+    animation-delay: 1s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .register-form-container {
+        padding: 30px 20px;
+    }
+    
+    .register-title {
+        font-size: 1.7rem;
+    }
+    
+    .register-btn {
+        width: 80%;
+    }
+    
+    .role-options {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+}
+</style>
+{% endblock additional_css %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the role radio buttons
+        const studentRadio = document.getElementById('student-role');
+        const lecturerRadio = document.getElementById('lecturer-role');
+        
+        // Get the hidden form fields
+        const hiddenStudentField = document.getElementById('hidden_is_student');
+        const hiddenLecturerField = document.getElementById('hidden_is_lecturer');
+        
+        // Get the domain hint elements
+        const studentHint = document.querySelector('.student-hint');
+        const lecturerHint = document.querySelector('.lecturer-hint');
+        
+        // Get role-specific fields
+        const roleSpecificFields = document.querySelector('.role-specific-fields');
+        const yearField = document.querySelector('.year-field');
+        const coursesSection = document.querySelector('.courses-section');
+        
+        // Course field management
+        const addCourseBtn = document.getElementById('add-course-btn');
+        const coursesContainer = document.getElementById('courses-container');
+        const hiddenCoursesField = document.getElementById('id_courses');
+        
+        // Function to update the hidden courses field
+        function updateHiddenCoursesField() {
+            const courseInputs = document.querySelectorAll('.course-input');
+            const courses = [];
+            
+            courseInputs.forEach(input => {
+                if (input.value.trim()) {
+                    courses.push(input.value.trim());
+                }
+            });
+            
+            if (hiddenCoursesField) {
+                hiddenCoursesField.value = JSON.stringify(courses);
+            }
+        }
+        
+        // Function to update the form based on role selection
+        function updateFormByRole() {
+            // Update hidden fields based on selection
+            hiddenStudentField.value = studentRadio.checked ? 'True' : 'False';
+            hiddenLecturerField.value = lecturerRadio.checked ? 'True' : 'False';
+            
+            // Show/hide appropriate hints
+            studentHint.style.display = studentRadio.checked ? 'block' : 'none';
+            lecturerHint.style.display = lecturerRadio.checked ? 'block' : 'none';
+            
+            // Show/hide role-specific fields
+            if (studentRadio.checked || lecturerRadio.checked) {
+                roleSpecificFields.style.display = 'block';
+                
+                // Show year field only for students
+                yearField.style.display = studentRadio.checked ? 'block' : 'none';
+                
+                // Show courses section only for lecturers
+                coursesSection.style.display = lecturerRadio.checked ? 'block' : 'none';
+                
+                // Clear fields based on role
+                if (lecturerRadio.checked) {
+                    const yearSelect = document.getElementById('id_year');
+                    if (yearSelect) {
+                        yearSelect.value = '';
+                    }
+                } else {
+                    // Clear all course inputs when switching away from lecturer
+                    const courseInputs = document.querySelectorAll('.course-input');
+                    courseInputs.forEach(input => input.value = '');
+                    updateHiddenCoursesField();
+                }
+            } else {
+                roleSpecificFields.style.display = 'none';
+            }
+            
+            // Add bounce animation to icon when selected
+            if (studentRadio.checked) {
+                const iconElement = document.querySelector('#student-card .role-icon');
+                iconElement.style.animation = 'none';
+                setTimeout(() => {
+                    iconElement.style.animation = 'bounce 0.5s';
+                }, 10);
+            } else if (lecturerRadio.checked) {
+                const iconElement = document.querySelector('#lecturer-card .role-icon');
+                iconElement.style.animation = 'none';
+                setTimeout(() => {
+                    iconElement.style.animation = 'bounce 0.5s';
+                }, 10);
+            }
+        }
+        
+        // Add event listeners to role radio buttons
+        studentRadio.addEventListener('change', updateFormByRole);
+        lecturerRadio.addEventListener('change', updateFormByRole);
+        
+        // Add event listeners to existing course inputs
+        document.querySelectorAll('.course-input').forEach(input => {
+            input.addEventListener('input', updateHiddenCoursesField);
+        });
+        
+        // Add new course input field
+        if (addCourseBtn) {
+            addCourseBtn.addEventListener('click', function() {
+                const newCourseGroup = document.createElement('div');
+                newCourseGroup.className = 'course-input-group mb-2';
+                newCourseGroup.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <input type="text" class="form-control course-input me-2" placeholder="שם הקורס">
+                        <button type="button" class="btn btn-danger btn-sm remove-course-btn">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                `;
+                
+                coursesContainer.appendChild(newCourseGroup);
+                
+                // Add event listener to new input
+                const newInput = newCourseGroup.querySelector('.course-input');
+                newInput.addEventListener('input', updateHiddenCoursesField);
+                
+                // Add remove functionality
+                const removeBtn = newCourseGroup.querySelector('.remove-course-btn');
+                removeBtn.addEventListener('click', function() {
+                    newCourseGroup.remove();
+                    updateHiddenCoursesField();
+                    updateRemoveButtons();
+                });
+                
+                updateRemoveButtons();
+            });
+        }
+        
+        // Update remove buttons visibility
+        function updateRemoveButtons() {
+            const courseGroups = document.querySelectorAll('.course-input-group');
+            courseGroups.forEach((group, index) => {
+                const removeBtn = group.querySelector('.remove-course-btn');
+                if (courseGroups.length > 1) {
+                    removeBtn.style.display = 'block';
+                } else {
+                    removeBtn.style.display = 'none';
+                }
+            });
+        }
+        
+        // Add bounce animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+                40% {transform: translateY(-20px);}
+                60% {transform: translateY(-10px);}
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Set initial state if there's an error and form reloads
+        updateFormByRole();
+        updateRemoveButtons();
+        
+        // Form validation
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            // Role validation
+            if (!studentRadio.checked && !lecturerRadio.checked) {
+                e.preventDefault();
+                
+                // Create alert for role selection
+                const roleAlert = document.createElement('div');
+                roleAlert.className = 'alert alert-danger';
+                roleAlert.textContent = 'אנא בחר תפקיד אחד (סטודנט או מרצה)';
+                
+                // Add the alert to the form
+                const roleContainer = document.querySelector('.role-selector-container');
+                if (!roleContainer.querySelector('.alert')) {
+                    roleContainer.appendChild(roleAlert);
+                    
+                    // Scroll to the alert
+                    roleAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+            
+            // Full name validation
+            const fullNameInput = document.getElementById('id_full_name');
+            if (!fullNameInput.value.trim()) {
+                e.preventDefault();
+                fullNameInput.focus();
+                return;
+            }
+            
+            // Course validation for lecturers
+            if (lecturerRadio.checked) {
+                updateHiddenCoursesField(); // Ensure the hidden field is updated
+                
+                const courseInputs = document.querySelectorAll('.course-input');
+                let hasValidCourse = false;
+                
+                courseInputs.forEach(input => {
+                    if (input.value.trim()) {
+                        hasValidCourse = true;
+                    }
+                });
+                
+                if (!hasValidCourse) {
+                    e.preventDefault();
+                    
+                    // Create alert for courses
+                    const courseAlert = document.createElement('div');
+                    courseAlert.className = 'alert alert-danger';
+                    courseAlert.textContent = 'מרצים חייבים להזין לפחות קורס אחד';
+                    
+                    // Add the alert to the courses section
+                    const coursesSection = document.querySelector('.courses-section');
+                    if (!coursesSection.querySelector('.alert')) {
+                        coursesSection.insertBefore(courseAlert, coursesSection.firstChild);
+                        
+                        // Scroll to the alert
+                        courseAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock additional_js %}

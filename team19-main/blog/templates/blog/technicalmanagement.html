@@ -1,0 +1,1095 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* Enhanced Wide Error Report Styling */
+    :root {
+        --gradient-primary: linear-gradient(45deg, #6a11cb, #2575fc);
+        --purple-dark: #6a11cb;
+        --blue-main: #2575fc;
+        --purple-light: #8a52ff;
+        --blue-light: #4d8cff;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --white: #ffffff;
+        --red-500: #ef4444;
+        --green-500: #10b981;
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+        background: linear-gradient(135deg, #e0f2fe 0%, var(--gray-100) 50%, rgba(37, 117, 252, 0.1) 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .error-report-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 1rem;
+        direction: rtl;
+    }
+
+    /* Main Layout Grid */
+    .error-report-layout {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 2rem;
+        min-height: 80vh;
+    }
+
+    /* Left Sidebar - Info & Tips */
+    .error-info-sidebar {
+        background: var(--white);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .sidebar-header {
+        background: var(--gradient-primary);
+        padding: 2rem 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidebar-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="4"/></g></svg>');
+        animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .error-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: var(--white);
+        backdrop-filter: blur(10px);
+        position: relative;
+        z-index: 10;
+    }
+
+    .sidebar-title {
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Tips Section */
+    .tips-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .tips-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .tip-item {
+        background: var(--gray-50);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--blue-main);
+        transition: all 0.3s ease;
+    }
+
+    .tip-item:hover {
+        background: var(--white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .tip-icon {
+        color: var(--blue-main);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tip-title {
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .tip-description {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Main Form Area */
+    .error-report-main {
+        background: var(--white);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .error-report-main:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
+    /* Form Header */
+    .form-header {
+        background: linear-gradient(135deg, var(--gray-50) 0%, rgba(37, 117, 252, 0.05) 100%);
+        padding: 2rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .form-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .form-title::before {
+        content: '';
+        width: 4px;
+        height: 32px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    .form-subtitle {
+        color: var(--gray-600);
+        font-size: 1.1rem;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Form Container */
+    .form-container {
+        padding: 2.5rem 2rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-section {
+        background: var(--gray-50);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section:hover {
+        background: var(--white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(37, 117, 252, 0.05), transparent);
+        transition: left 0.5s;
+    }
+
+    .form-section:hover::before {
+        left: 100%;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-title i {
+        color: var(--blue-main);
+        font-size: 1.1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.75rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        font-size: 1rem;
+        position: relative;
+    }
+
+    .form-group label::before {
+        content: '';
+        position: absolute;
+        right: -12px;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    /* Input Styling */
+    .modern-input, .modern-select, .modern-textarea {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: var(--white);
+        direction: rtl;
+        font-family: inherit;
+    }
+
+    .modern-input:focus,
+    .modern-select:focus,
+    .modern-textarea:focus {
+        outline: none;
+        border-color: var(--blue-main);
+        box-shadow: 0 0 0 4px rgba(37, 117, 252, 0.1);
+        transform: translateY(-1px);
+    }
+
+    .modern-textarea {
+        min-height: 150px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .modern-select {
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: left 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+        padding-left: 2.5rem;
+    }
+
+    /* File Upload Section */
+    .upload-section {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, rgba(37, 117, 252, 0.05), rgba(106, 17, 203, 0.02));
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid rgba(37, 117, 252, 0.2);
+    }
+
+    .media-upload-container {
+        border: 2px dashed var(--gray-300);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        background: var(--white);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .media-upload-container:hover {
+        border-color: var(--blue-main);
+        background: linear-gradient(45deg, rgba(37, 117, 252, 0.02), rgba(106, 17, 203, 0.01));
+    }
+
+    .media-upload-container.dragover {
+        border-color: var(--purple-dark);
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.05));
+        transform: scale(1.02);
+    }
+
+    .upload-area-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, rgba(106, 17, 203, 0.1), rgba(37, 117, 252, 0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: var(--blue-main);
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        color: var(--gray-700);
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-hint {
+        color: var(--gray-500);
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .custom-file-upload {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: 1rem 2rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: none;
+        box-shadow: 0 4px 14px 0 rgba(106, 17, 203, 0.4);
+    }
+
+    .custom-file-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px 0 rgba(106, 17, 203, 0.5);
+    }
+
+    .media-upload-container input[type="file"] {
+        display: none;
+    }
+
+    /* File Preview */
+    .file-preview-section {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: 12px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .file-preview {
+        max-width: 300px;
+        max-height: 200px;
+        margin: 1rem auto;
+        border-radius: 12px;
+        border: 2px solid var(--gray-200);
+        box-shadow: var(--shadow-lg);
+        display: block;
+    }
+
+    .remove-btn {
+        background: var(--red-500);
+        color: var(--white);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: translateY(-1px);
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .submit-btn {
+        background: var(--gradient-primary);
+        color: var(--white);
+        border: none;
+        padding: 1.25rem 3rem;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 1.2rem;
+        font-weight: 700;
+        min-width: 250px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 25px 0 rgba(106, 17, 203, 0.4);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .submit-btn:hover::before {
+        left: 100%;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 35px 0 rgba(106, 17, 203, 0.6);
+    }
+
+    .reset-btn {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 2px solid var(--gray-200);
+        padding: 1.25rem 2rem;
+        border-radius: 16px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .reset-btn:hover {
+        background: var(--gray-200);
+        transform: translateY(-2px);
+    }
+
+    /* Error Messages */
+    .error-message {
+        color: var(--red-500);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Success Message */
+    .success-message {
+        background: linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+        border: 2px solid var(--green-500);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-top: 2rem;
+        animation: slideInUp 0.5s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-message h3 {
+        color: var(--green-500);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    .success-message p {
+        color: var(--gray-700);
+        margin: 0;
+        line-height: 1.6;
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .error-report-layout {
+            grid-template-columns: 350px 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .error-report-layout {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .error-info-sidebar {
+            position: static;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .form-container {
+            padding: 2rem 1rem;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .submit-btn {
+            width: 100%;
+        }
+    }
+
+    /* Loading State */
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--white);
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+
+<div class="error-report-container">
+    <div class="error-report-layout">
+        <!-- Left Sidebar - Info & Tips -->
+        <div class="error-info-sidebar">
+            <div class="sidebar-header">
+                <div class="error-icon">
+                    <i class="fas fa-bug"></i>
+                </div>
+                <h2 class="sidebar-title">דיווח תקלות</h2>
+            </div>
+            
+            <div class="tips-section">
+                <h3 class="tips-title">
+                    <i class="fas fa-lightbulb"></i>
+                    טיפים לדיווח יעיל
+                </h3>
+                
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <div class="tip-title">צרף צילום מסך</div>
+                    <p class="tip-description">תמונה של השגיאה עוזרת לנו להבין את הבעיה מהר יותר</p>
+                </div>
+                
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <div class="tip-title">תאר את השלבים</div>
+                    <p class="tip-description">איך הגעת לשגיאה? מה עשית לפני שהיא קרתה?</p>
+                </div>
+                
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="tip-title">מתי זה קרה?</div>
+                    <p class="tip-description">האם זה קורה תמיד או רק במקרים מסוימים?</p>
+                </div>
+                
+                <div class="tip-item">
+                    <div class="tip-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="tip-title">מה הדפדפן שלך?</div>
+                    <p class="tip-description">Chrome, Firefox, Safari? גרסה ישנה עלולה לגרום לבעיות</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form Area -->
+        <div class="error-report-main">
+            <div class="form-header">
+                <h1 class="form-title">דווח על תקלה בקוד</h1>
+                <p class="form-subtitle">ראית בעיה? ספר לנו ונסייע לפתור אותה במהירות!</p>
+            </div>
+            
+            <div class="form-container">
+                <form id="errorReportForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-grid">
+                        <!-- Personal Information Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user"></i>
+                                פרטים אישיים
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label for="reporterName">שם מלא:</label>
+                                <input type="text" id="reporterName" name="reporterName" required 
+                                       class="modern-input" placeholder="הזן את שמך המלא">
+                                <div id="nameError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="reporterEmail">אימייל:</label>
+                                <input type="email" id="reporterEmail" name="reporterEmail" required 
+                                       class="modern-input" placeholder="הזן את האימייל שלך">
+                                <div id="emailError" class="error-message"></div>
+                            </div>
+                        </div>
+
+                        <!-- Error Details Section -->
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                פרטי השגיאה
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label for="errorType">סוג השגיאה:</label>
+                                <select id="errorType" name="errorType" required class="modern-select">
+                                    <option value="">בחר סוג שגיאה</option>
+                                    <option value="syntax">שגיאת תחביר (Syntax)</option>
+                                    <option value="logic">שגיאה לוגית</option>
+                                    <option value="runtime">שגיאת ריצה</option>
+                                    <option value="ui">בעיה בממשק משתמש (UI/UX)</option>
+                                    <option value="performance">בעיית ביצועים</option>
+                                    <option value="login">בעיית התחברות</option>
+                                    <option value="notification">התראות לא נשלחות</option>
+                                    <option value="database">בעיית מסד נתונים</option>
+                                    <option value="security">בעיית אבטחה</option>
+                                    <option value="other">אחר</option>
+                                </select>
+                                <div id="typeError" class="error-message"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="priority">עדיפות:</label>
+                                <select id="priority" name="priority" required class="modern-select">
+                                    <option value="">בחר עדיפות</option>
+                                    <option value="low">נמוכה - לא דחוף</option>
+                                    <option value="medium">בינונית - יש זמן</option>
+                                    <option value="high">גבוהה - דחוף</option>
+                                    <option value="critical">קריטי - חוסם עבודה</option>
+                                </select>
+                                <div id="priorityError" class="error-message"></div>
+                            </div>
+                        </div>
+
+                        <!-- Description Section -->
+                        <div class="form-section" style="grid-column: 1 / -1;">
+                            <h3 class="section-title">
+                                <i class="fas fa-edit"></i>
+                                תיאור מפורט של השגיאה
+                            </h3>
+                            
+                            <div class="form-group">
+                                <label for="errorDescription">תיאור השגיאה:</label>
+                                <textarea id="errorDescription" name="errorDescription" required class="modern-textarea"
+                                          placeholder="נא לתאר את השגיאה בפירוט:&#10;• מה עשית בדיוק?&#10;• מה קרה?&#10;• מה ציפית שיקרה?&#10;• איך ניתן לשחזר את הבעיה?"></textarea>
+                                <div id="descriptionError" class="error-message"></div>
+                            </div>
+                        </div>
+
+                        <!-- Media Upload Section -->
+                        <div class="upload-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                תיעוד השגיאה (מומלץ)
+                            </h3>
+                            
+                            <div class="media-upload-container" id="uploadContainer">
+                                <div class="upload-area-content">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="upload-text">גרור קבצים כאן או לחץ לבחירה</div>
+                                    <div class="upload-hint">תמונות, וידאו, קבצי לוג - עד 20MB</div>
+                                    <input type="file" id="errorMedia" name="errorMedia" accept="image/*, video/*, .log, .txt, .pdf">
+                                    <label for="errorMedia" class="custom-file-upload">
+                                        <i class="fas fa-file-upload"></i>
+                                        בחר קובץ
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="file-chosen" style="display: none;">
+                                <div class="file-preview-section">
+                                    <div id="mediaPreview"></div>
+                                    <div style="text-align: center;">
+                                        <strong id="fileName"></strong>
+                                        <button type="button" id="removeMedia" class="remove-btn">
+                                            <i class="fas fa-times"></i>
+                                            הסר קובץ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="mediaError" class="error-message"></div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane" style="margin-left: 0.5rem;"></i>
+                            שלח דיווח שגיאה
+                        </button>
+                        
+                        <button type="reset" class="reset-btn">
+                            <i class="fas fa-undo" style="margin-left: 0.5rem;"></i>
+                            איפוס טופס
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Success Message -->
+                <div id="successMessage" class="success-message" style="display: none;">
+                    <h3>
+                        <i class="fas fa-check-circle"></i>
+                        הדיווח נשלח בהצלחה!
+                    </h3>
+                    <p>
+                        הצוות הטכני של ISEND כבר עובד על התיקון<br>
+                        נטפל בתקלה במהירות האפשרית 🚀<br>
+                        <small>תקבל עדכון במייל על מצב הטיפול</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('errorMedia');
+    const fileChosen = document.getElementById('file-chosen');
+    const fileName = document.getElementById('fileName');
+    const removeBtn = document.getElementById('removeMedia');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const previewContainer = document.getElementById('mediaPreview');
+
+    // Auto-populate user data if available
+    const reporterName = document.getElementById('reporterName');
+    const reporterEmail = document.getElementById('reporterEmail');
+    
+    // You can populate these from Django context if user is logged in
+    // reporterName.value = "{{ user.get_full_name|default:'' }}";
+    // reporterEmail.value = "{{ user.email|default:'' }}";
+
+    // Drag and drop functionality
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadContainer.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight() {
+        uploadContainer.classList.add('dragover');
+    }
+
+    function unhighlight() {
+        uploadContainer.classList.remove('dragover');
+    }
+
+    uploadContainer.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFileSelection(files[0]);
+        }
+    }
+
+    // File selection handler
+    fileInput.addEventListener('change', function(e) {
+        if (this.files && this.files.length > 0) {
+            handleFileSelection(this.files[0]);
+        } else {
+            resetFileSelection();
+        }
+    });
+
+    function handleFileSelection(file) {
+        fileName.textContent = file.name;
+        fileChosen.style.display = 'block';
+        
+        // Clear previous preview
+        previewContainer.innerHTML = '';
+        
+        // Show preview based on file type
+        if (file.type.startsWith('image/')) {
+            const preview = document.createElement('img');
+            preview.src = URL.createObjectURL(file);
+            preview.classList.add('file-preview');
+            previewContainer.appendChild(preview);
+        } else if (file.type.startsWith('video/')) {
+            const preview = document.createElement('video');
+            preview.src = URL.createObjectURL(file);
+            preview.controls = true;
+            preview.classList.add('file-preview');
+            previewContainer.appendChild(preview);
+        } else {
+            // For other file types, show file icon
+            const fileIcon = document.createElement('div');
+            fileIcon.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--gray-500);">
+                    <i class="fas fa-file" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <div>${file.name}</div>
+                    <div style="font-size: 0.875rem; margin-top: 0.5rem;">
+                        ${(file.size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                </div>
+            `;
+            previewContainer.appendChild(fileIcon);
+        }
+    }
+
+    function resetFileSelection() {
+        fileName.textContent = '';
+        fileChosen.style.display = 'none';
+        previewContainer.innerHTML = '';
+    }
+
+    // Remove media handler
+    removeBtn.addEventListener('click', function() {
+        fileInput.value = '';
+        resetFileSelection();
+        document.getElementById('mediaError').textContent = '';
+    });
+
+    // Form validation
+    function validateForm() {
+        let isValid = true;
+        
+        // Reset error messages
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        
+        const name = document.getElementById('reporterName').value.trim();
+        const email = document.getElementById('reporterEmail').value.trim();
+        const errorType = document.getElementById('errorType').value;
+        const priority = document.getElementById('priority').value;
+        const description = document.getElementById('errorDescription').value.trim();
+        const errorMedia = document.getElementById('errorMedia').files[0];
+        
+        // Validate name
+        if (!name) {
+            document.getElementById('nameError').textContent = 'נא להזין את שמך המלא';
+            isValid = false;
+        }
+        
+        // Validate email
+        if (!email) {
+            document.getElementById('emailError').textContent = 'נא להזין כתובת אימייל';
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('emailError').textContent = 'נא להזין אימייל תקין';
+            isValid = false;
+        }
+        
+        // Validate error type
+        if (!errorType) {
+            document.getElementById('typeError').textContent = 'נא לבחור סוג שגיאה';
+            isValid = false;
+        }
+        
+        // Validate priority
+        if (!priority) {
+            document.getElementById('priorityError').textContent = 'נא לבחור עדיפות';
+            isValid = false;
+        }
+        
+        // Validate description
+        if (!description) {
+            document.getElementById('descriptionError').textContent = 'נא לתאר את השגיאה';
+            isValid = false;
+        } else if (description.length < 20) {
+            document.getElementById('descriptionError').textContent = 'התיאור קצר מדי - נא לכתוב לפחות 20 תווים';
+            isValid = false;
+        }
+        
+        // Validate file size
+        if (errorMedia && errorMedia.size > 20 * 1024 * 1024) {
+            document.getElementById('mediaError').textContent = 'גודל הקובץ המקסימלי המותר הוא 20MB';
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+
+    // Form submission
+    document.getElementById('errorReportForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+        
+        // Add loading state
+        const submitBtn = this.querySelector('.submit-btn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<div class="loading-spinner"></div> שולח...';
+        submitBtn.disabled = true;
+        
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        formData.append('reporter_name', document.getElementById('reporterName').value);
+        formData.append('reporter_email', document.getElementById('reporterEmail').value);
+        formData.append('error_type', document.getElementById('errorType').value);
+        formData.append('priority', document.getElementById('priority').value);
+        formData.append('description', document.getElementById('errorDescription').value);
+        
+        if (document.getElementById('errorMedia').files[0]) {
+            formData.append('attachment', document.getElementById('errorMedia').files[0]);
+        }
+        
+        try {
+            const response = await fetch('/submit-error-report/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                // Show success message
+                document.getElementById('successMessage').style.display = 'block';
+                this.reset();
+                resetFileSelection();
+                
+                // Scroll to success message
+                document.getElementById('successMessage').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Hide success message after 8 seconds
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 8000);
+            } else {
+                throw new Error(result.message || 'שגיאה בשליחת הדיווח');
+            }
+            
+        } catch (error) {
+            console.error('Error submitting report:', error);
+            alert('הייתה שגיאה בשליחת הדיווח. אנא נסה שוב.');
+        } finally {
+            // Restore button state
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Reset form handler
+    document.querySelector('.reset-btn').addEventListener('click', function() {
+        resetFileSelection();
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    });
+
+    // Auto-resize textarea
+    const textarea = document.getElementById('errorDescription');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Add character counter for description
+    const descriptionGroup = textarea.closest('.form-group');
+    const counter = document.createElement('div');
+    counter.style.cssText = 'text-align: left; font-size: 0.875rem; color: var(--gray-500); margin-top: 0.5rem;';
+    counter.innerHTML = '<span id="charCount">0</span> תווים';
+    descriptionGroup.appendChild(counter);
+
+    textarea.addEventListener('input', function() {
+        document.getElementById('charCount').textContent = this.value.length;
+    });
+});
+</script>
+{% endblock %}
