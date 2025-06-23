@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User, Profile 
 from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.core.exceptions import ValidationError
 
 # forms.py
 class UserRegisterForm(UserCreationForm):
