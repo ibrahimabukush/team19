@@ -1121,7 +1121,7 @@ def secretary_user_management(request):
         'total_count': users.count(),
     }
     
-    return render(request, 'blog/secretary_user_management.html', context)
+    return render(request, 'users/secretary_user_list.html', context)
 
 @login_required
 def secretary_delete_user(request, user_id):
