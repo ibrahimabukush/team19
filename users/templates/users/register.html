@@ -69,7 +69,10 @@
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label for="id_email" class="form-label">דואר אלקטרוני</label>
+                    {{ form.full_name|as_crispy_field }}
+                </div>
+                
+                <div class="form-group mb-3">
                     {{ form.email|as_crispy_field }}
                     <small class="form-text text-muted domain-hint student-hint" style="display:none;">
                         סטודנטים חייבים להשתמש בכתובת דוא"ל המסתיימת ב-@ac.sce.ac.il
@@ -80,24 +83,22 @@
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label for="id_password1" class="form-label">סיסמה</label>
                     {{ form.password1|as_crispy_field }}
                 </div>
                 
                 <div class="form-group mb-3">
-                    <label for="id_password2" class="form-label">אימות סיסמה</label>
                     {{ form.password2|as_crispy_field }}
                 </div>
                 
                 <!-- Department and Year Fields (Initially Hidden) -->
                 <div class="role-specific-fields" style="display: none;">
                     <div class="form-group mb-3">
-                        <label for="id_department" class="form-label">מחלקה</label>
+                        <label for="id_department" class="form-label"></label>
                         {{ form.department|as_crispy_field }}
                     </div>
                     
                     <div class="form-group mb-3 year-field" style="display: none;">
-                        <label for="id_year" class="form-label">שנה</label>
+                        <label for="id_year" class="form-label"></label>
                         {{ form.year|as_crispy_field }}
                     </div>
                     
@@ -689,6 +690,14 @@
                     // Scroll to the alert
                     roleAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
+                return;
+            }
+            
+            // Full name validation
+            const fullNameInput = document.getElementById('id_full_name');
+            if (!fullNameInput.value.trim()) {
+                e.preventDefault();
+                fullNameInput.focus();
                 return;
             }
             

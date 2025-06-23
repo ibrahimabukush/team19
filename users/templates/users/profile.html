@@ -4,14 +4,14 @@
 
 {% block additional_css %}
 <style>
-    /* Modern Profile Page Styling with Navbar Gradient Colors */
+    /* Enhanced Wide Profile Page Styling */
     :root {
-        --purple-dark: #6a11cb;        /* Navbar purple */
-        --purple-main: #2575fc;        /* Navbar blue */
-        --purple-light: #4d8cff;       /* Lighter blue */
-        --purple-pale: #b3d4ff;        /* Very light blue */
+        --purple-dark: #6a11cb;
+        --purple-main: #2575fc;
+        --purple-light: #4d8cff;
+        --purple-pale: #b3d4ff;
         --purple-bg: #F3F4F6;
-        --purple-accent: #e6f2ff;      /* Very light blue accent */
+        --purple-accent: #e6f2ff;
         --white: #ffffff;
         --gray-50: #F9FAFB;
         --gray-100: #F3F4F6;
@@ -23,39 +23,53 @@
         --gray-700: #374151;
         --gray-800: #1F2937;
         --gray-900: #111827;
+        --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
     body {
-        background: linear-gradient(135deg, var(--purple-pale) 0%, var(--gray-100) 100%);
+        background: linear-gradient(135deg, var(--purple-pale) 0%, var(--gray-100) 50%, var(--purple-accent) 100%);
         min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     .profile-container {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 1rem;
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 1rem;
     }
 
-    /* Modern Card Design */
-    .modern-card {
+    /* Main Profile Layout */
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 2rem;
+        min-height: 80vh;
+    }
+
+    /* Left Sidebar - Profile Info */
+    .profile-sidebar {
         background: var(--white);
         border-radius: 24px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        box-shadow: var(--shadow-lg);
         border: 1px solid var(--gray-200);
         overflow: hidden;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        height: fit-content;
+        position: sticky;
+        top: 2rem;
     }
 
-    .modern-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    .profile-sidebar:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
     }
 
     /* Profile Header */
     .profile-header {
         position: relative;
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        padding: 2rem 1.5rem 4rem;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        padding: 2rem 1.5rem;
         text-align: center;
         overflow: hidden;
     }
@@ -79,24 +93,24 @@
     .profile-avatar-container {
         position: relative;
         z-index: 10;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .profile-avatar {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
         border-radius: 50%;
         margin: 0 auto;
         position: relative;
         background: var(--white);
-        padding: 6px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        padding: 4px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         transition: all 0.3s ease;
     }
 
     .profile-avatar:hover {
-        transform: scale(1.05);
-        box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.25);
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 20px 40px rgba(106, 17, 203, 0.3);
     }
 
     .profile-avatar img {
@@ -114,13 +128,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 4rem;
+        font-size: 2.5rem;
         color: var(--white);
     }
 
     .profile-name {
         color: var(--white);
-        font-size: 2rem;
+        font-size: 1.5rem;
         font-weight: 800;
         margin-bottom: 0.5rem;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -130,74 +144,179 @@
 
     .profile-email {
         color: rgba(255, 255, 255, 0.9);
-        font-size: 1rem;
+        font-size: 0.9rem;
         font-weight: 500;
         position: relative;
         z-index: 10;
     }
 
+    /* Profile Stats */
+    .profile-stats {
+        padding: 1.5rem;
+        background: var(--gray-50);
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 117, 252, 0.1);
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--purple-main);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Profile Actions */
+    .profile-actions {
+        padding: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .action-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: var(--white);
+        box-shadow: 0 4px 14px rgba(106, 17, 203, 0.3);
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(106, 17, 203, 0.4);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .action-btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 1px solid var(--gray-200);
+    }
+
+    .action-btn-secondary:hover {
+        background: var(--gray-200);
+        transform: translateY(-1px);
+        color: var(--gray-700);
+        text-decoration: none;
+    }
+
+    /* Main Content Area */
+    .profile-main {
+        background: var(--white);
+        border-radius: 24px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .profile-main:hover {
+        box-shadow: var(--shadow-xl);
+    }
+
     /* Navigation Tabs */
-    .profile-navigation {
-        position: relative;
-        top: -2rem;
-        z-index: 20;
-        margin: 0 1.5rem;
+    .main-header {
+        background: linear-gradient(135deg, var(--gray-50) 0%, var(--purple-accent) 100%);
+        padding: 2rem 2rem 1rem;
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .main-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .main-title::before {
+        content: '';
+        width: 4px;
+        height: 32px;
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        border-radius: 2px;
     }
 
     .nav-tabs {
-        background: var(--white);
-        border-radius: 16px;
-        padding: 8px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         display: flex;
-        gap: 4px;
+        gap: 1rem;
+        margin-top: 1rem;
     }
 
     .nav-tab {
-        flex: 1;
-        padding: 1rem 1.5rem;
-        text-align: center;
+        padding: 0.75rem 1.5rem;
         border-radius: 12px;
         font-weight: 600;
         color: var(--gray-600);
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s ease;
         position: relative;
-        overflow: hidden;
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
-    .nav-tab::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: -1;
+    .nav-tab:hover {
+        color: var(--purple-main);
+        background: var(--purple-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 117, 252, 0.1);
     }
 
     .nav-tab.active {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
         color: var(--white);
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(106, 17, 203, 0.4);
-    }
-
-    .nav-tab.active::before {
-        opacity: 1;
-    }
-
-    .nav-tab:hover:not(.active) {
-        color: var(--purple-main);
-        background-color: var(--purple-accent);
+        box-shadow: 0 6px 20px rgba(106, 17, 203, 0.3);
+        border-color: transparent;
     }
 
     /* Tab Content */
     .tab-content {
         display: none;
-        padding: 2rem 1.5rem 1.5rem;
+        padding: 2rem;
     }
 
     .tab-content.active {
@@ -217,12 +336,29 @@
     }
 
     /* Form Styling */
-    .form-section {
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
         margin-bottom: 2rem;
     }
 
+    .form-section {
+        background: var(--gray-50);
+        border-radius: 16px;
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        background: var(--white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+    }
+
     .section-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
         font-weight: 700;
         color: var(--gray-800);
         margin-bottom: 1.5rem;
@@ -231,12 +367,9 @@
         gap: 0.75rem;
     }
 
-    .section-title::before {
-        content: '';
-        width: 4px;
-        height: 24px;
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        border-radius: 2px;
+    .section-title i {
+        color: var(--purple-main);
+        font-size: 1.1rem;
     }
 
     .form-group {
@@ -250,14 +383,14 @@
         border-radius: 12px;
         font-size: 1rem;
         transition: all 0.3s ease;
-        background-color: var(--gray-50);
+        background-color: var(--white);
     }
 
     .form-control:focus {
         outline: none;
         border-color: var(--purple-main);
-        background-color: var(--white);
-        box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        box-shadow: 0 0 0 4px rgba(37, 117, 252, 0.1);
+        transform: translateY(-1px);
     }
 
     .form-label {
@@ -268,88 +401,58 @@
         font-size: 0.95rem;
     }
 
-    /* Modern Buttons */
-    .btn-modern {
-        padding: 1rem 2rem;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-primary {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        color: var(--white);
-        box-shadow: 0 4px 14px 0 rgba(106, 17, 203, 0.4);
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px 0 rgba(106, 17, 203, 0.5);
-    }
-
-    .btn-secondary {
-        background: var(--gray-100);
-        color: var(--gray-700);
-        border: 2px solid var(--gray-200);
-    }
-
-    .btn-secondary:hover {
-        background: var(--gray-200);
-        transform: translateY(-1px);
-    }
-
     /* Chat History Styling */
     .chat-history-container {
-        max-height: 400px;
+        max-height: 600px;
         overflow-y: auto;
         padding-right: 1rem;
     }
 
     .chat-message {
         background: var(--gray-50);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
         position: relative;
         transition: all 0.3s ease;
+        border: 1px solid var(--gray-200);
     }
 
     .chat-message:hover {
-        background: var(--purple-bg);
-        transform: translateX(4px);
+        background: var(--white);
+        transform: translateX(8px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
 
     .chat-timestamp {
         font-size: 0.875rem;
         color: var(--gray-500);
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-weight: 600;
     }
 
     .message-bubble {
         background: var(--white);
-        border-radius: 12px;
-        padding: 1rem 1.25rem;
-        margin-bottom: 0.75rem;
-        border-left: 4px solid #2575fc;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--purple-main);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .message-bubble:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(37, 117, 252, 0.1);
     }
 
     .message-label {
-        font-weight: 600;
-        color: #2575fc;
-        margin-bottom: 0.5rem;
+        font-weight: 700;
+        color: var(--purple-main);
+        margin-bottom: 0.75rem;
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -357,8 +460,9 @@
 
     .message-text {
         color: var(--gray-700);
-        line-height: 1.6;
+        line-height: 1.7;
         margin: 0;
+        font-size: 1rem;
     }
 
     .ai-response {
@@ -376,49 +480,336 @@
     }
 
     .no-history-icon {
-        font-size: 4rem;
+        font-size: 5rem;
         color: var(--gray-300);
-        margin-bottom: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-start;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .btn-modern {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #6a11cb, #2575fc);
+        color: var(--white);
+        box-shadow: 0 4px 14px rgba(106, 17, 203, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(106, 17, 203, 0.5);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    .btn-secondary {
+        background: var(--gray-100);
+        color: var(--gray-700);
+        border: 2px solid var(--gray-200);
+    }
+
+    .btn-secondary:hover {
+        background: var(--gray-200);
+        transform: translateY(-2px);
+        color: var(--gray-700);
+        text-decoration: none;
     }
 
     /* Responsive Design */
+    @media (max-width: 1200px) {
+        .profile-layout {
+            grid-template-columns: 300px 1fr;
+            gap: 1.5rem;
+        }
+    }
+
     @media (max-width: 768px) {
-        .profile-container {
-            padding: 1rem 0.5rem;
+        .profile-layout {
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
-        .profile-header {
-            padding: 3rem 1rem 6rem;
+        .profile-sidebar {
+            position: static;
         }
 
-        .profile-name {
-            font-size: 2rem;
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
+        .main-header {
+            padding: 1.5rem 1rem 0.5rem;
+        }
+
+        .tab-content {
+            padding: 1.5rem 1rem;
         }
 
         .nav-tabs {
             flex-direction: column;
-            gap: 2px;
+            gap: 0.5rem;
         }
 
-        .nav-tab {
-            padding: 0.75rem 1rem;
-        }
-
-        .tab-content {
-            padding: 2rem 1rem;
-        }
-
-        .profile-navigation {
-            margin: 0 1rem;
+        .form-actions {
+            flex-direction: column;
         }
     }
 
-    /* Custom Scrollbar */
+    /* Customization Notice */
+    .customization-notice {
+        background: linear-gradient(135deg, var(--purple-accent), rgba(37, 117, 252, 0.1));
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(37, 117, 252, 0.2);
+        color: var(--purple-main);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        line-height: 1.6;
+    }
+
+    .customization-notice i {
+        color: var(--purple-main);
+        margin-top: 0.1rem;
+        flex-shrink: 0;
+    }
+
+    .customization-notice strong {
+        color: var(--purple-dark);
+    }
+
+    /* Read-only Field Styling */
+    .readonly-field-container {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .readonly-field-container:hover {
+        background: var(--white);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .readonly-field-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        font-size: 0.95rem;
+    }
+
+    .readonly-field-value {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        padding: 0.5rem 0;
+    }
+
+    .readonly-field-value i {
+        color: var(--purple-main);
+        font-size: 1rem;
+    }
+
+    .readonly-field-note {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        font-style: italic;
+    }
+
+    .readonly-field-note i {
+        color: var(--gray-400);
+        font-size: 0.75rem;
+    }
+
+    /* Academic Information Styling */
+    .academic-info {
+        margin-top: 1.5rem;
+        padding: 1.5rem;
+        background: var(--white);
+        border-radius: 16px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .academic-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-100);
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .info-label i {
+        color: var(--purple-main);
+        font-size: 0.875rem;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 0.875rem;
+    }
+
+    .role-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .role-badge.student {
+        background: linear-gradient(45deg, #10B981, #059669);
+        color: var(--white);
+    }
+
+    .role-badge.lecturer {
+        background: linear-gradient(45deg, #8B5CF6, #7C3AED);
+        color: var(--white);
+    }
+
+    .role-badge.secretary {
+        background: linear-gradient(45deg, #F59E0B, #D97706);
+        color: var(--white);
+    }
+
+    .role-badge {
+        background: var(--gray-200);
+        color: var(--gray-700);
+    }
+
+    /* Read-only Academic Information in Form */
+    .academic-info-display {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: 12px;
+        border: 1px solid var(--gray-200);
+    }
+
+    .info-section-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-section-title i {
+        color: var(--purple-main);
+    }
+
+    .readonly-info-grid {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .readonly-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--white);
+        border-radius: 8px;
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+
+    .readonly-info-item:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .readonly-label {
+        font-weight: 600;
+        color: var(--gray-600);
+        font-size: 0.875rem;
+    }
+
+    .readonly-value {
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 0.875rem;
+    }
+
+    .readonly-notice {
+        background: var(--purple-accent);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid rgba(37, 117, 252, 0.2);
+        color: var(--purple-main);
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .readonly-notice i {
+        color: var(--purple-main);
+    }
     .chat-history-container::-webkit-scrollbar {
         width: 8px;
     }
@@ -429,12 +820,12 @@
     }
 
     .chat-history-container::-webkit-scrollbar-thumb {
-        background: #2575fc;
+        background: var(--purple-main);
         border-radius: 4px;
     }
 
     .chat-history-container::-webkit-scrollbar-thumb:hover {
-        background: #6a11cb;
+        background: var(--purple-dark);
     }
 
     /* Loading Animation */
@@ -451,85 +842,238 @@
     @keyframes spin {
         to { transform: rotate(360deg); }
     }
+
+    /* Enhanced Hover Effects */
+    .form-section {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(37, 117, 252, 0.05), transparent);
+        transition: left 0.5s;
+    }
+
+    .form-section:hover::before {
+        left: 100%;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="profile-container">
-    <div class="modern-card">
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-avatar-container">
-                <div class="profile-avatar">
-                    {% if user.profile.image %}
-                        <img src="{{ user.profile.image.url }}" alt="{{ user.username }}'s profile picture">
-                    {% else %}
-                        <div class="profile-avatar-placeholder">
-                            <i class="fas fa-user"></i>
+    <div class="profile-layout">
+        <!-- Left Sidebar -->
+        <div class="profile-sidebar">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar">
+                        {% if user.profile.image %}
+                            <img src="{{ user.profile.image.url }}" alt="{{ user.username }}'s profile picture">
+                        {% else %}
+                            <div class="profile-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+                <p class="profile-email">{{ user.email }}</p>
+            </div>
+
+            <!-- Profile Stats -->
+            <div class="profile-stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ history|length }}</div>
+                        <div class="stat-label">Chat Sessions</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number"> 1</div>
+                        <div class="stat-label">Years Active</div>
+                    </div>
+                </div>
+                
+                <!-- Academic Info Section -->
+                <div class="academic-info">
+                    <h4 class="academic-title">Academic Information</h4>
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-building"></i>
+                            Department
                         </div>
+                        <div class="info-value">
+                            {% if user.department %}
+                                {{ user.department }}
+                            {% else %}
+                                <span style="color: var(--gray-400); font-style: italic;">Not assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if user.is_student %}
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-graduation-cap"></i>
+                            Year
+                        </div>
+                        <div class="info-value">
+                            {% if user.year %}
+                                {{ user.get_year_display }}
+                            {% else %}
+                                <span style="color: var(--gray-400); font-style: italic;">Not assigned</span>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
+                    <div class="info-item">
+                        <div class="info-label">
+                            <i class="fas fa-user-tag"></i>
+                            Role
+                        </div>
+                        <div class="info-value">
+                            {% if user.is_student %}
+                                <span class="role-badge student">Student</span>
+                            {% elif user.is_lecturer %}
+                                <span class="role-badge lecturer">Lecturer</span>
+                            {% elif user.is_secretary %}
+                                <span class="role-badge secretary">Secretary</span>
+                            {% else %}
+                                <span class="role-badge">User</span>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
-            <p class="profile-email">{{ user.email }}</p>
-        </div>
 
-        <!-- Navigation -->
-        <div class="profile-navigation">
-            <div class="nav-tabs">
-                <div class="nav-tab active" data-tab="profile-info">
-                    <i class="fas fa-user-edit"></i>
-                    <span>Profile Info</span>
-                </div>
-                <div class="nav-tab" data-tab="chat-history">
-                    <i class="fas fa-comments"></i>
-                    <span>Chat History</span>
-                </div>
+            <!-- Profile Actions -->
+            <div class="profile-actions">
+                <a href="{% url 'change_password_direct' %}" class="action-btn action-btn-primary">
+                    <i class="fas fa-key"></i>
+                    Change Password
+                </a>
+                <button class="action-btn action-btn-secondary" onclick="downloadProfile()">
+                    <i class="fas fa-download"></i>
+                    Export Data
+                </button>
             </div>
         </div>
 
-        <!-- Tab Contents -->
-        
-        <!-- Profile Info Tab -->
-        <div class="tab-content active" id="profile-info">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
+        <!-- Main Content -->
+        <div class="profile-main">
+            <!-- Main Header -->
+            <div class="main-header">
+                <h2 class="main-title">
+                    Profile Management
+                </h2>
                 
-                <div class="form-section">
-                    <h3 class="section-title">
-                        <i class="fas fa-user-cog"></i>
-                        Personal Information
-                    </h3>
-                    {{ u_form|crispy }}
+                <!-- Navigation Tabs -->
+                <div class="nav-tabs">
+                    <div class="nav-tab active" data-tab="profile-info">
+                        <i class="fas fa-user-edit"></i>
+                        Profile Information
+                    </div>
+                    <div class="nav-tab" data-tab="chat-history">
+                        <i class="fas fa-comments"></i>
+                        Chat History
+                    </div>
+                    <div class="nav-tab" data-tab="settings">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </div>
                 </div>
+            </div>
 
-                <div class="form-section">
+            <!-- Tab Contents -->
+            
+            <!-- Profile Info Tab -->
+            <div class="tab-content active" id="profile-info">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
                     
-                    {{ p_form|crispy }}
-                </div>
+                    <div class="form-grid">
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user-cog"></i>
+                                Account Information
+                            </h3>
+                            
+                            <!-- Read-only Username -->
+                            <div class="readonly-field-container">
+                                <label class="readonly-field-label">Username:</label>
+                                <div class="readonly-field-value">
+                                    <i class="fas fa-user-circle"></i>
+                                    {{ user.username }}
+                                </div>
+                                <small class="readonly-field-note">
+                                    <i class="fas fa-lock"></i>
+                                    Username is assigned by the institution
+                                </small>
+                            </div>
+                            
+                            <!-- Read-only Full Name -->
+                            <div class="readonly-field-container">
+                                <label class="readonly-field-label">Full Name:</label>
+                                <div class="readonly-field-value">
+                                    <i class="fas fa-user"></i>
+                                    {{ user.get_full_name|default:user.username }}
+                                </div>
+                                <small class="readonly-field-note">
+                                    <i class="fas fa-lock"></i>
+                                    Contact administration to update your full name
+                                </small>
+                            </div>
 
-                <div class="form-group">
-                    <button type="submit" class="btn-modern btn-primary">
-                        <i class="fas fa-save"></i>
-                        Update Profile
-                    </button>
-                    
-                    <a href="{% url 'change_password_direct' %}" class="btn-modern btn-secondary">
-                        <i class="fas fa-key"></i>
-                        Change Password
-                    </a>
-                </div>
-            </form>
-        </div>
+                            <!-- Read-only Email -->
+                            <div class="readonly-field-container">
+                                <label class="readonly-field-label">Email Address:</label>
+                                <div class="readonly-field-value">
+                                    <i class="fas fa-envelope"></i>
+                                    {{ user.email }}
+                                </div>
+                                <small class="readonly-field-note">
+                                    <i class="fas fa-lock"></i>
+                                    Institutional email managed by administration
+                                </small>
+                            </div>
+                        </div>
 
-        <!-- Chat History Tab -->
-        <div class="tab-content" id="chat-history">
-            <div class="form-section">
-                <h3 class="section-title">
-                    <i class="fas fa-history"></i>
-                    Your Chat History
-                </h3>
-                
+                        <div class="form-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-image"></i>
+                                Profile Customization
+                            </h3>
+                            {{ p_form|crispy }}
+                            
+                            <div class="customization-notice">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Profile Picture:</strong> This is the only setting you can customize. All other account information is managed by the institution for security and consistency.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-modern btn-primary">
+                            <i class="fas fa-image"></i>
+                            Update Profile Picture
+                        </button>
+                        
+                        <button type="reset" class="btn-modern btn-secondary">
+                            <i class="fas fa-undo"></i>
+                            Reset Picture
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Chat History Tab -->
+            <div class="tab-content" id="chat-history">
                 <div class="chat-history-container">
                     {% if history %}
                         {% for chat in history %}
@@ -545,7 +1089,7 @@
                                 </div>
                                 
                                 <div class="message-bubble ai-response">
-                                    <div class="message-label">Response</div>
+                                    <div class="message-label">AI Response</div>
                                     <p class="message-text">{{ chat.reply }}</p>
                                 </div>
                             </div>
@@ -557,8 +1101,68 @@
                             </div>
                             <h4>No Chat History Yet</h4>
                             <p>You don't have any chat history yet. Try asking the ISEND Assistant a question!</p>
+                            <a href="#" class="btn-modern btn-primary" style="margin-top: 2rem;">
+                                <i class="fas fa-comments"></i>
+                                Start Chatting
+                            </a>
                         </div>
                     {% endif %}
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings">
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-bell"></i>
+                            Notification Preferences
+                        </h3>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" checked> Email notifications
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" checked> SMS notifications
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox"> Marketing emails
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-shield-alt"></i>
+                            Privacy Settings
+                        </h3>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" checked> Public profile
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox"> Show online status
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <input type="checkbox" checked> Allow search engines
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-modern btn-primary">
+                        <i class="fas fa-save"></i>
+                        Save Settings
+                    </button>
                 </div>
             </div>
         </div>
@@ -586,15 +1190,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (targetContent) {
                 targetContent.classList.add('active');
             }
-            
-            // Special handling for chat history tab
-            if (tabId === 'chat-history') {
-                // Scroll to top of chat history
-                const chatContainer = document.querySelector('.chat-history-container');
-                if (chatContainer) {
-                    chatContainer.scrollTop = 0;
-                }
-            }
         });
     });
 
@@ -608,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.innerHTML = '<div class="loading-spinner"></div> Updating...';
                 submitBtn.disabled = true;
                 
-                // Re-enable after 3 seconds (in case of errors)
+                // Re-enable after 3 seconds
                 setTimeout(() => {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
@@ -617,47 +1212,183 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Smooth scroll for chat history
-    const chatContainer = document.querySelector('.chat-history-container');
-    if (chatContainer) {
-        // Add smooth scrolling behavior
-        chatContainer.style.scrollBehavior = 'smooth';
-        
-        // Auto-scroll to bottom when new messages are added
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }
-            });
-        });
-        
-        observer.observe(chatContainer, { childList: true, subtree: true });
-    }
-
-    // Add hover effects for better interactivity
+    // Enhanced hover effects
     const messageElements = document.querySelectorAll('.chat-message');
     messageElements.forEach(message => {
         message.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(8px)';
+            this.style.transform = 'translateX(12px) scale(1.02)';
         });
         
         message.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
+            this.style.transform = 'translateX(0) scale(1)';
         });
     });
 
-    // Profile avatar hover effect
+    // Profile avatar enhanced hover effect
     const avatar = document.querySelector('.profile-avatar');
     if (avatar) {
         avatar.addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1) rotate(5deg)';
+            this.style.transform = 'scale(1.15) rotate(8deg)';
         });
         
         avatar.addEventListener('mouseleave', function() {
             this.style.transform = 'scale(1) rotate(0deg)';
         });
     }
+
+    // Smooth scroll for chat history
+    const chatContainer = document.querySelector('.chat-history-container');
+    if (chatContainer) {
+        chatContainer.style.scrollBehavior = 'smooth';
+    }
+
+    // Stats animation on page load
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+        const finalValue = parseInt(stat.textContent) || 0;
+        stat.textContent = '0';
+        
+        let current = 0;
+        const increment = finalValue / 30;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= finalValue) {
+                stat.textContent = finalValue;
+                clearInterval(timer);
+            } else {
+                stat.textContent = Math.ceil(current);
+            }
+        }, 50);
+    });
 });
+
+// Global functions
+function downloadProfile() {
+    // Create a simple profile export
+    const profileData = {
+        name: document.querySelector('.profile-name').textContent,
+        email: document.querySelector('.profile-email').textContent,
+        joinDate: new Date().toISOString(),
+        chatCount: document.querySelectorAll('.chat-message').length
+    };
+    
+    const dataStr = JSON.stringify(profileData, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = 'profile_data.json';
+    link.click();
+    
+    // Show success message
+    showNotification('Profile data exported successfully!', 'success');
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        transform: translateX(400px);
+        transition: all 0.3s ease;
+        background: ${type === 'success' ? 'linear-gradient(45deg, #10B981, #059669)' : 'linear-gradient(45deg, #6366F1, #4F46E5)'};
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}" style="margin-right: 0.5rem;"></i>
+        ${message}
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.style.transform = 'translateX(400px)';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Form validation enhancement
+function validateForm() {
+    const form = document.querySelector('form[method="POST"]');
+    if (!form) return;
+    
+    const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    
+    inputs.forEach(input => {
+        if (!input.value.trim()) {
+            input.style.borderColor = '#EF4444';
+            isValid = false;
+        } else {
+            input.style.borderColor = '#10B981';
+        }
+    });
+    
+    return isValid;
+}
+
+// Auto-save functionality (optional)
+let autoSaveTimeout;
+function setupAutoSave() {
+    const formInputs = document.querySelectorAll('input, select, textarea');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Save to localStorage as backup
+                const formData = new FormData(document.querySelector('form[method="POST"]'));
+                const data = Object.fromEntries(formData);
+                localStorage.setItem('profile_backup', JSON.stringify(data));
+                
+                // Show subtle save indicator
+                const indicator = document.createElement('div');
+                indicator.textContent = 'Auto-saved';
+                indicator.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: #10B981;
+                    color: white;
+                    padding: 0.5rem 1rem;
+                    border-radius: 8px;
+                    font-size: 0.875rem;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 9999;
+                `;
+                
+                document.body.appendChild(indicator);
+                
+                setTimeout(() => indicator.style.opacity = '1', 100);
+                setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    setTimeout(() => indicator.remove(), 300);
+                }, 2000);
+                
+            }, 2000); // Auto-save after 2 seconds of inactivity
+        });
+    });
+}
+
+// Initialize auto-save
+setupAutoSave();
 </script>
 {% endblock %}

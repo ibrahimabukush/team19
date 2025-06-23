@@ -5,19 +5,60 @@ from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
 from django.core.exceptions import ValidationError
 
 # forms.py
+def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Add Hebrew labels and placeholders to password fields
+        self.fields['username'].label = 'שם משתמש'
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'הזן שם משתמש'
+        })
+        
+        self.fields['password1'].label = 'סיסמה'
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'הזן סיסמה'
+        })
+        self.fields['password1'].help_text = 'הסיסמה חייבת להכיל לפחות 8 תווים.'
+        
+        self.fields['password2'].label = 'אימות סיסמה'
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'הזן סיסמה שוב לאימות'
+        })
+        self.fields['password2'].help_text = 'הזן את אותה סיסמה שוב לאימות.'
+
+# forms.py
 class UserRegisterForm(UserCreationForm):
-    email = forms.EmailField()
+    email = forms.EmailField(
+        label='דואר אלקטרוני',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'הזן כתובת דוא"ל'
+        })
+    )
+    full_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'הזן שם מלא'
+        }),
+        label='שם מלא'
+    )
     is_student = forms.BooleanField(required=False)
     is_lecturer = forms.BooleanField(required=False)
     is_secretary = forms.BooleanField(required=False)
 
     department = forms.ChoiceField(
-        choices=[('', '--- Select Department ---')] + User.DEPARTMENT_CHOICES, 
-        required=False
+        choices=[('', '--- בחר מחלקה ---')] + User.DEPARTMENT_CHOICES, 
+        required=False,
+        label='מחלקה'
     )
     year = forms.ChoiceField(
-        choices=[('', '--- Select Year ---')] + User.YEAR_CHOICES, 
-        required=False
+        choices=[('', '--- בחר שנה ---')] + User.YEAR_CHOICES, 
+        required=False,
+        label='שנה'
     )
     
     # Add courses field
@@ -28,34 +69,39 @@ class UserRegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2', 'is_student', 'is_lecturer', 'department', 'year']
+        fields = ['username', 'full_name', 'email', 'password1', 'password2', 'is_student', 'is_lecturer', 'department', 'year']
 
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get('email')
+        full_name = cleaned_data.get('full_name')
         is_student = cleaned_data.get('is_student')
         is_lecturer = cleaned_data.get('is_lecturer')
         department = cleaned_data.get('department')
         year = cleaned_data.get('year')
         courses = cleaned_data.get('courses')
         
+        # Validate full name
+        if not full_name or not full_name.strip():
+            raise forms.ValidationError("שם מלא הוא שדה חובה.")
+        
         if not (is_student or is_lecturer):
-            raise forms.ValidationError("Please choose one role.")
+            raise forms.ValidationError("אנא בחר תפקיד אחד.")
         
         if is_student and is_lecturer:
-            raise forms.ValidationError("You can't choose both roles.")
+            raise forms.ValidationError("לא ניתן לבחור בשני תפקידים.")
         
         if is_lecturer and email and not email.endswith('@sce.ac.il'):
-            raise forms.ValidationError("Lecturers must register with an email ending in @sce.ac.il")
+            raise forms.ValidationError("מרצים חייבים להירשם עם כתובת דוא\"ל המסתיימת ב-@sce.ac.il")
         
         if is_student and email and not email.endswith('@ac.sce.ac.il'):
-            raise forms.ValidationError("Students must register with an email ending in @ac.sce.ac.il")
+            raise forms.ValidationError("סטודנטים חייבים להירשם עם כתובת דוא\"ל המסתיימת ב-@ac.sce.ac.il")
         
         if (is_student or is_lecturer) and not department:
-            raise forms.ValidationError("Please select a department.")
+            raise forms.ValidationError("אנא בחר מחלקה.")
         
         if is_student and not year:
-            raise forms.ValidationError("Students must select their year.")
+            raise forms.ValidationError("סטודנטים חייבים לבחור שנה.")
         
         if is_lecturer and year:
             cleaned_data['year'] = ''
@@ -75,38 +121,70 @@ class UserRegisterForm(UserCreationForm):
                 raise forms.ValidationError("שגיאה בעיבוד רשימת הקורסים.")
                 
         return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        # Set the full_name field directly since it exists in the model now
+        user.full_name = self.cleaned_data['full_name']
+        
+        if commit:
+            user.save()
+        return user
     
 class UserUpdateForm(forms.ModelForm):
-    email = forms.EmailField()
+    email = forms.EmailField(
+        label='דואר אלקטרוני',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'הזן כתובת דוא"ל'
+        })
+    )
+    full_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'הזן שם מלא'
+        }),
+        label='שם מלא'
+    )
 
     class Meta:
         model = User  
-        fields = ['username', 'email', 'department', 'year']  
+        fields = ['username', 'full_name', 'email', 'department', 'year']
+        labels = {
+            'username': 'שם משתמש',
+            'department': 'מחלקה',
+            'year': 'שנה'
+        }  
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
         user = self.instance
 
         if user.is_student and not email.endswith('@ac.sce.ac.il'):
-            raise forms.ValidationError("Students must use an email ending with @ac.sce.ac.il")
+            raise forms.ValidationError("סטודנטים חייבים להשתמש בכתובת דוא\"ל המסתיימת ב-@ac.sce.ac.il")
 
         if user.is_lecturer and not email.endswith('@sce.ac.il'):
-            raise forms.ValidationError("Lecturers must use an email ending with @sce.ac.il")
+            raise forms.ValidationError("מרצים חייבים להשתמש בכתובת דוא\"ל המסתיימת ב-@sce.ac.il")
 
         return email
+    
+    def clean_full_name(self):
+        full_name = self.cleaned_data.get('full_name')
+        if not full_name or not full_name.strip():
+            raise forms.ValidationError("שם מלא הוא שדה חובה.")
+        return full_name.strip()
     
     def clean(self):
         cleaned_data = super().clean()
         user = self.instance
         year = cleaned_data.get('year')
         
-     
         if user.is_lecturer and year:
             cleaned_data['year'] = ''
             
-       
         if user.is_student and not year:
-            raise forms.ValidationError("Students must have a year selected.")
+            raise forms.ValidationError("סטודנטים חייבים לבחור שנה.")
             
         return cleaned_data
 
@@ -114,8 +192,6 @@ class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = []  
-
-
 
 #password :
 
@@ -127,29 +203,29 @@ class PasswordManagementForm(forms.Form):
         
         if stage == 'change' and user is not None:
             self.fields['old_password'] = forms.CharField(
-                label='Current Password',
+                label='סיסמה נוכחית',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter current password',
+                    'placeholder': 'הזן סיסמה נוכחית',
                     'autocomplete': 'current-password'
                 }),
                 required=True
             )
             self.fields['new_password1'] = forms.CharField(
-                label='New Password',
+                label='סיסמה חדשה',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter new password',
+                    'placeholder': 'הזן סיסמה חדשה',
                     'autocomplete': 'new-password'
                 }),
                 required=True,
-                help_text="Your password must contain at least 8 characters."
+                help_text="הסיסמה חייבת להכיל לפחות 8 תווים."
             )
             self.fields['new_password2'] = forms.CharField(
-                label='Confirm Password',
+                label='אימות סיסמה',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Confirm new password',
+                    'placeholder': 'אמת סיסמה חדשה',
                     'autocomplete': 'new-password'
                 }),
                 required=True
@@ -157,10 +233,10 @@ class PasswordManagementForm(forms.Form):
         
         elif stage == 'request_code':
             self.fields['email'] = forms.EmailField(
-                label='Email Address',
+                label='כתובת דוא"ל',
                 widget=forms.EmailInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter your registered email',
+                    'placeholder': 'הזן את כתובת הדוא"ל הרשומה שלך',
                     'autocomplete': 'email'
                 }),
                 required=True
@@ -168,30 +244,30 @@ class PasswordManagementForm(forms.Form):
         
         elif stage == 'reset':
             self.fields['code'] = forms.CharField(
-                label='Verification Code',
+                label='קוד אימות',
                 max_length=6,
                 min_length=6,
                 widget=forms.TextInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter 6-digit code',
+                    'placeholder': 'הזן קוד 6 ספרות',
                     'autocomplete': 'off'
                 }),
                 required=True
             )
             self.fields['new_password1'] = forms.CharField(
-                label='New Password',
+                label='סיסמה חדשה',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Enter new password',
+                    'placeholder': 'הזן סיסמה חדשה',
                     'autocomplete': 'new-password'
                 }),
                 required=True
             )
             self.fields['new_password2'] = forms.CharField(
-                label='Confirm Password',
+                label='אימות סיסמה',
                 widget=forms.PasswordInput(attrs={
                     'class': 'form-control',
-                    'placeholder': 'Confirm new password',
+                    'placeholder': 'אמת סיסמה חדשה',
                     'autocomplete': 'new-password'
                 }),
                 required=True
@@ -200,13 +276,13 @@ class PasswordManagementForm(forms.Form):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if not User.objects.filter(email=email).exists():
-            raise ValidationError("No account found with this email address.")
+            raise ValidationError("לא נמצא חשבון עם כתובת דוא\"ל זו.")
         
         user = User.objects.get(email=email)
         if hasattr(user, 'is_student') and user.is_student and not email.endswith('@ac.sce.ac.il'):
-            raise ValidationError("Student accounts must use @ac.sce.ac.il email")
+            raise ValidationError("חשבונות סטודנטים חייבים להשתמש בדוא\"ל @ac.sce.ac.il")
         if hasattr(user, 'is_lecturer') and user.is_lecturer and not email.endswith('@sce.ac.il'):
-            raise ValidationError("Lecturer accounts must use @sce.ac.il email")
+            raise ValidationError("חשבונות מרצים חייבים להשתמש בדוא\"ל @sce.ac.il")
         
         return email
 
@@ -216,7 +292,7 @@ class PasswordManagementForm(forms.Form):
             
         code = self.cleaned_data.get('code')
         if not code or len(code) != 6:
-            raise ValidationError("Invalid verification code format")
+            raise ValidationError("פורמט קוד אימות לא תקין")
         
         return code
 
@@ -228,12 +304,12 @@ class PasswordManagementForm(forms.Form):
             new_password2 = cleaned_data.get('new_password2')
             
             if new_password1 and new_password2 and new_password1 != new_password2:
-                raise ValidationError("The two password fields didn't match.")
+                raise ValidationError("שני שדות הסיסמה לא תואמים.")
             
             if self.stage == 'change':
                 old_password = cleaned_data.get('old_password')
                 if old_password and self.user and not self.user.check_password(old_password):
-                    raise ValidationError("Your current password was entered incorrectly.")
+                    raise ValidationError("הסיסמה הנוכחית שהוזנה שגויה.")
         
         return cleaned_data
 

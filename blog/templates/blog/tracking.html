@@ -543,6 +543,8 @@
 
     {% if requests %}
     <!-- Individual Request Cards - Loop through each request -->
+{{ requests_json|json_script:"requests-json" }}
+
     {% for request in requests %}
     <div class="tracking-card animate-scale-in tracking-card-{{ forloop.counter }}">
         <div class="tracking-order-info">
@@ -562,7 +564,10 @@
                 {% endif %}
             </div>
             <div class="tracking-order-description">
-                <strong>קורס:</strong> {{ request.subject }} | <strong>סוג בקשה:</strong> {{ request.request_type }}
+                {% if request.subject %}
+<strong>קורס:</strong> {{ request.subject }} | 
+{% endif %}
+<strong>סוג בקשה:</strong> {{ request.get_request_type_display }}
             </div>
         </div>
 
@@ -611,102 +616,189 @@
                 <div class="tracking-step-name">הושלם</div>
             </div>
         </div>
+<!-- Replace the problematic sections in your tracking template -->
 
-        <!-- Detailed tracking information -->
-        <div class="tracking-details">
-            <!-- Submission detail -->
-            <div class="tracking-detail-item">
-                <div class="tracking-detail-radio active"></div>
-                <div class="tracking-detail-content">
-                    <div class="tracking-detail-title">הבקשה הוגשה</div>
-                    <div class="tracking-detail-date">{{ request.created_at|date:"d/m/Y H:i" }}</div>
-                    <div class="tracking-detail-description">הבקשה נשלחה למערכת ונקלטה בהצלחה.</div>
-                </div>
-            </div>
-            
-            <!-- Under review detail -->
-            {% if request.status != 'pending' %}
-            <div class="tracking-detail-item">
-                <div class="tracking-detail-radio active"></div>
-                <div class="tracking-detail-content">
-                    <div class="tracking-detail-title">הבקשה בבדיקה</div>
-                    <div class="tracking-detail-date">{{ request.review_started_at|date:"d/m/Y H:i" }}</div>
-                    <div class="tracking-detail-description">הבקשה נבדקת על-ידי הגורם האחראי.</div>
-                </div>
-            </div>
-            {% endif %}
-            
-            <!-- Update required detail -->
-            {% if request.status == 'need_update' %}
-            <div class="tracking-detail-item">
-                <div class="tracking-detail-radio active"></div>
-                <div class="tracking-detail-content">
-                    <div class="tracking-detail-title">נדרש עדכון לבקשה</div>
-                    <div class="tracking-detail-date">{{ request.update_requested_at|date:"d/m/Y H:i" }}</div>
-                    <div class="tracking-detail-description">
-                        {% if request.lecturer_note %}
-                        <strong>הערת מרצה:</strong> {{ request.lecturer_note }}
-                        {% endif %}
-                        {% if request.update_deadline %}
-                        <div {% if request.is_past_deadline %}class="deadline-warning"{% endif %}>
-                            <strong>דדליין לעדכון:</strong> {{ request.update_deadline|date:"d/m/Y H:i" }}
-                            {% if request.is_past_deadline %}
-                            <i class="fas fa-exclamation-triangle" style="color: var(--status-rejected);"></i>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            
-            <!-- Decision detail -->
-            {% if request.status == 'approved' or request.status == 'rejected' %}
-            <div class="tracking-detail-item">
-                <div class="tracking-detail-radio active"></div>
-                <div class="tracking-detail-content">
-                    <div class="tracking-detail-title">
-                        {% if request.status == 'approved' %}
-                        הבקשה אושרה
-                        {% else %}
-                        הבקשה נדחתה
-                        {% endif %}
-                    </div>
-                    <div class="tracking-detail-date">{{ request.decision_date|date:"d/m/Y H:i" }}</div>
-                    <div class="tracking-detail-description">
-                        {% if request.lecturer_note %}
-                        <strong>הערת מרצה:</strong> {{ request.lecturer_note }}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            
-            <!-- Completion detail -->
-            {% if request.status == 'approved' %}
-            <div class="tracking-detail-item">
-                <div class="tracking-detail-radio active"></div>
-                <div class="tracking-detail-content">
-                    <div class="tracking-detail-title">התהליך הושלם</div>
-                    <div class="tracking-detail-date">{{ request.completed_at|date:"d/m/Y H:i" }}</div>
-                    <div class="tracking-detail-description">הבקשה אושרה והתהליך הושלם בהצלחה.</div>
-                </div>
-            </div>
-            {% endif %}
+<!-- Method 1: Using CSS classes (Recommended) -->
+<style>
+.note-approved {
+    background: #d4edda;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    border-right: 3px solid #28a745;
+}
+
+.note-rejected {
+    background: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    border-right: 3px solid #dc3545;
+}
+
+.note-general {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    border-right: 3px solid #007bff;
+}
+
+.note-warning {
+    background: #fff3cd;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    border-right: 3px solid #ffc107;
+}
+</style>
+
+
+<div class="tracking-details">
+    <!-- Submission detail -->
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">הבקשה הוגשה</div>
+            <div class="tracking-detail-date">{{ request.created_at|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">הבקשה נשלחה למערכת ונקלטה בהצלחה.</div>
         </div>
-        
-        <!-- Action buttons based on status
-        <div class="text-center mt-4">
-            {% if request.status == 'need_update' %}
-            <a href="/request/update/{{ request.id }}/" class="btn btn-isend">
-                <i class="fas fa-edit"></i> עדכון הבקשה
-            </a>
-            {% elif request.status == 'pending' or request.status == 'in_progress' %}
-            <a href="/request/view/{{ request.id }}/" class="btn btn-isend">
-                <i class="fas fa-eye"></i> צפה בפרטי הבקשה
-            </a>
-            {% endif %}
-        </div> -->
+    </div>
+    
+    <!-- Under review detail -->
+    {% if request.status != 'pending' %}
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">הבקשה בבדיקה</div>
+            <div class="tracking-detail-date">{{ request.review_started_at|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">
+                הבקשה נבדקת על-ידי 
+                {% if request.handler_type == 'lecturer' %}
+                    המרצה האחראי
+                {% elif request.handler_type == 'secretary' %}
+                    המזכירות
+                {% else %}
+                    הגורם האחראי
+                {% endif %}.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Update required detail -->
+    {% if request.status == 'need_update' %}
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">נדרש עדכון לבקשה</div>
+            <div class="tracking-detail-date">{{ request.update_requested_at|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">
+                <!-- Check for lecturer note first, then secretary note -->
+                {% if request.lecturer_note %}
+                <div class="note-general">
+                    <strong>הערת מרצה:</strong><br>
+                    <span style="color: #495057;">{{ request.lecturer_note }}</span>
+                </div>
+                {% elif request.secretary_note %}
+                <div class="note-general">
+                    <strong>הערת מזכירות:</strong><br>
+                    <span style="color: #495057;">{{ request.secretary_note }}</span>
+                </div>
+                {% endif %}
+                
+                {% if request.update_deadline %}
+                <div {% if request.is_past_deadline %}class="deadline-warning"{% endif %} style="margin-top: 10px;">
+                    <strong>דדליין לעדכון:</strong> {{ request.update_deadline|date:"d/m/Y H:i" }}
+                    {% if request.is_past_deadline %}
+                    <i class="fas fa-exclamation-triangle" style="color: var(--status-rejected); margin-right: 5px;"></i>
+                    <span style="color: var(--status-rejected); font-weight: bold;">פג תוקף!</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Decision detail -->
+    {% if request.status == 'approved' or request.status == 'rejected' %}
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">
+                {% if request.status == 'approved' %}
+                הבקשה אושרה
+                {% else %}
+                הבקשה נדחתה
+                {% endif %}
+            </div>
+            <div class="tracking-detail-date">{{ request.decision_date|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">
+                <!-- Check for lecturer note first, then secretary note -->
+                {% if request.lecturer_note %}
+                <div class="{% if request.status == 'approved' %}note-approved{% else %}note-rejected{% endif %}">
+                    <strong>הערת מרצה:</strong><br>
+                    <span style="color: #495057;">{{ request.lecturer_note }}</span>
+                </div>
+                {% elif request.secretary_note %}
+                <div class="{% if request.status == 'approved' %}note-approved{% else %}note-rejected{% endif %}">
+                    <strong>הערת מזכירות:</strong><br>
+                    <span style="color: #495057;">{{ request.secretary_note }}</span>
+                </div>
+                {% else %}
+                    {% if request.status == 'approved' %}
+                        הבקשה אושרה ללא הערות נוספות.
+                    {% else %}
+                        הבקשה נדחתה ללא הערות נוספות.
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- In progress status note -->
+    {% if request.status == 'in_progress' %}
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">עדכון מצב</div>
+            <div class="tracking-detail-date">{{ request.review_started_at|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">
+                <!-- Check for lecturer note first, then secretary note -->
+                {% if request.lecturer_note %}
+                <div class="note-warning">
+                    <strong>הערת מרצה:</strong><br>
+                    <span style="color: #495057;">{{ request.lecturer_note }}</span>
+                </div>
+                {% elif request.secretary_note %}
+                <div class="note-warning">
+                    <strong>הערת מזכירות:</strong><br>
+                    <span style="color: #495057;">{{ request.secretary_note }}</span>
+                </div>
+                {% else %}
+                הבקשה נמצאת כעת בטיפול.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Completion detail -->
+    {% if request.status == 'approved' %}
+    <div class="tracking-detail-item">
+        <div class="tracking-detail-radio active"></div>
+        <div class="tracking-detail-content">
+            <div class="tracking-detail-title">התהליך הושלם</div>
+            <div class="tracking-detail-date">{{ request.completed_at|date:"d/m/Y H:i" }}</div>
+            <div class="tracking-detail-description">הבקשה אושרה והתהליך הושלם בהצלחה.</div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+       
     </div>
     {% endfor %}
     
@@ -735,7 +827,7 @@
     // This approach avoids mixing Django template tags inside JavaScript logic
     document.addEventListener('DOMContentLoaded', function() {
         // Get request data from the hidden div
-        const requestsDataElement = document.getElementById('requestsData');
+const requestsData = JSON.parse(document.getElementById('requests-json').textContent);
         
         // If there's no data element or no requests, exit early
         if (!requestsDataElement) return;

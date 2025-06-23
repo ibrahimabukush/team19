@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from .models import ChatHistory, StudentRequest, AcademicRequest
+from .models import ChatHistory, AcademicRequest
 from django.utils import timezone
 from datetime import timedelta
 

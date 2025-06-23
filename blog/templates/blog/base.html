@@ -402,65 +402,68 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarToggle">
-                    <!-- Primary Navigation - changes based on user role -->
-                    <div class="navbar-nav ms-auto">
-                        {% if user.is_authenticated and user.lecturerprofile %}
-                            <!-- Lecturer Navigation -->
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'lecturer_dashboard' %}active{% endif %}" href="{% url 'lecturer_dashboard' %}">
-                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
-                            </a>
-                            <a class="nav-item nav-link" href="{% url 'profile' %}">
-                                <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
-                            </a>
-                           
-                         
-                      
-                          
-                            <!-- In blog/base.html navbar -->
-{% if user.is_authenticated and user.is_secretary %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'secretary-dashboard' %}">לוח בקרה</a>
-</li>
-{% endif %}
-                        {% elif user.is_authenticated %}
-                            <!-- Student Navigation -->
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
-                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
-                            </a>
-                            <a class="nav-item nav-link" href="{% url 'profile' %}">
-                                <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
-                            </a>
-
-                          {% if user.is_secretary %}
-    <a class="nav-item nav-link" href="{% url 'secretary_user_list' %}">
-        <i class="fas fa-users fa-sm me-1"></i> ניהול משתמשים
-    </a>
+<!-- Primary Navigation - changes based on user role -->
+<div class="navbar-nav ms-auto">
+    {% if user.is_authenticated and user.is_lecturer %}
+        <!-- Lecturer Navigation -->
+         
+        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'lecturer_dashboard' %}active{% endif %}" href="{% url 'lecturer_dashboard' %}">
+            <i class="fas fa-home fa-sm me-1"></i> דף הבית
+        </a>
+         <a class="nav-item nav-link" href="{% url 'profile' %}">
+            <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
+        </a>
+        <!-- Technical management available for all users -->
+        <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+            <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+        </a>
+        
+        
+    {% elif user.is_authenticated and user.is_secretary %}
+        <!-- Secretary Navigation -->
+         
+        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+            <i class="fas fa-home fa-sm me-1"></i> דף הבית
+        </a>
+        <a class="nav-item nav-link" href="{% url 'profile' %}">
+            <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
+        </a>
+        <a class="nav-item nav-link" href="{% url 'secretary_user_list' %}">
+            <i class="fas fa-users fa-sm me-1"></i> ניהול משתמשים
+        </a>
+        <!-- Technical management available for all users -->
+        <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+            <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+        </a>
+     
+        
+    {% elif user.is_authenticated %}
+        <!-- Student Navigation - ONLY students get profile and tracking -->
+        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+            <i class="fas fa-home fa-sm me-1"></i> דף הבית
+        </a>
+        <a class="nav-item nav-link" href="{% url 'profile' %}">
+            <i class="fas fa-user-circle fa-sm me-1"></i> פרופיל
+        </a>
+        <a class="nav-item nav-link" href="{% url 'student_tracking' %}">
+            <i class="fas fa-eye fa-sm me-1"></i> מעקב בקשות
+        </a>
+        <!-- Technical management available for all users -->
+        <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+            <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+        </a>
+        
+    {% else %}
+        <!-- Guest Navigation -->
+        <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
+            <i class="fas fa-home fa-sm me-1"></i> דף הבית
+        </a>
+        <!-- Technical management available even for guests -->
+        <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
+            <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
+        </a>
     {% endif %}
-                          
-                          
-
-
-
-                            
-                            <a class="nav-item nav-link" href="{% url 'student_tracking' %}">
-                                <i class="fas fa-eye fa-sm me-1"></i> מעקב בקשות
-                            </a>
-                         
-                          
-                           
-                            <a class="nav-item nav-link" href="{% url 'technicalmanagement' %}">
-                                <i class="fas fa-headset fa-sm me-1"></i> הנהלה טכנית
-                            </a>
-                           
-                        {% else %}
-                            <!-- Guest Navigation -->
-                            <a class="nav-item nav-link {% if request.resolver_match.url_name == 'blog-home' %}active{% endif %}" href="{% url 'blog-home' %}">
-                                <i class="fas fa-home fa-sm me-1"></i> דף הבית
-                            </a>
-                          
-                            
-                        {% endif %}
-                    </div>
+</div>
                     
                     <!-- Authentication Section - Right Side (me-auto in RTL makes it appear on left) -->
                     <div class="navbar-nav me-auto">
